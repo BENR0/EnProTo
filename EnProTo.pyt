@@ -10,6 +10,7 @@ from tools.polylinetopolygon import PolylineToPolygon
 from tools.group_annos_by_pf import GroupAnnosByPF
 from tools.legen_waitforit_dary import Legen_WaitForIt_Dary
 from tools.kartenserie_to_png import KartenserieToPng
+from tools.openpathforselectedlayer import OpenPathForSelectedLayer
 
 #groupannosbypf not found
 
@@ -20,5 +21,5 @@ class Toolbox(object):
 
         # List of tool classes associated with this toolbox
         #self.tools = [AddDescriptionToFeatures,MultiBufferSpeciesExport,PlankopfWizard,GroupAnnosByPF,Legen_WaitForIt_Dary,PolylineToPolygon,KartenserieToPng]
-        self.tools = [PlankopfWizard,KartenserieToPng]
+        self.tools = [PlankopfWizard,KartenserieToPng,OpenPathForSelectedLayer]
 
