@@ -7,6 +7,10 @@ class OpenPathForSelectedLayer(object):
         self.label = "OpenPathForSelectedLayer"
         self.description = "Select a layer in the TOC and open an new explorer window where it resides in the directory tree"
         self.canRunInBackground = False
+    
+    def getParametersInfo(self):
+
+        return
 
     def isLicensed(self):
         """Set whether tool is licensed to execute."""
@@ -20,18 +24,16 @@ class OpenPathForSelectedLayer(object):
         
         return
 
-    def execute(self, messages):
-		mxd = arcpy.mapping.MapDocument("current")
-		toclayer = pythonaddins.GetSelectedTOCLayerOrDataFrame()
-		print toclayer
-		desc = arcpy.Describe(toclayer)
-		print desc
-		path = desc.path
-		print str(path)
+    def execute(self):
+        mxd = arcpy.mapping.MapDocument("current")
+        toclayer = pythonaddins.GetSelectedTOCLayerOrDataFrame()
+        desc = arcpy.Describe(toclayer)
+        path = desc.path
+        print str(path)
 
-		subprocess.Popen('explorer "{0}"'.format(path))	
+        subprocess.Popen('explorer "{0}"'.format(path))	
 
-		return
+        return
 
 
 

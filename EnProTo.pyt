@@ -1,6 +1,8 @@
 ﻿import arcpy
 import os
 import csv
+import subprocess
+import pythonaddins
 
 #import each tool from subdir
 from tools.adddescriptiontofeatures import AddDescriptionToFeatures
@@ -21,5 +23,5 @@ class Toolbox(object):
 
         # List of tool classes associated with this toolbox
         #self.tools = [AddDescriptionToFeatures,MultiBufferSpeciesExport,PlankopfWizard,GroupAnnosByPF,Legen_WaitForIt_Dary,PolylineToPolygon,KartenserieToPng]
-        self.tools = [PlankopfWizard,KartenserieToPng,OpenPathForSelectedLayer]
+        self.tools = [AddDescriptionToFeatures,PlankopfWizard,KartenserieToPng,OpenPathForSelectedLayer]
 

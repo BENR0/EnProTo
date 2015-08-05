@@ -72,15 +72,15 @@ class AddDescriptionToFeatures(object):
 			return sorted({(row[0],row[1]) for row in cursor})
 		
 		
-        wiss_name = unique_values(lyr,s_field,d_field)
-    	wiss_name = map(list,wiss_name)
-    	wiss_name = list(chain.from_iterable(wiss_name))
+        desc_list = unique_values(lyr,s_field,d_field)
+    	desc_list = map(list,desc_list)
+    	desc_list = list(chain.from_iterable(desc_list))
 
-        print wiss_name 
+        #print desc_list 
 
     	if lyr.symbologyType == "UNIQUE_VALUES":
 			#lyr.symbology.valueField = s_field
-			lyr.symbology.classDescriptions = wiss_name[1::2]
+			lyr.symbology.classDescriptions = desc_list[1::2]
 			lyr.symbology.showOtherValues = False
 
         return
