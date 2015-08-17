@@ -9,40 +9,39 @@ class AddDescriptionToFeatures(object):
         self.canRunInBackground = False
 
     def getParameterInfo(self):
-    
-	#Input feature layer
-	in_features = arcpy.Parameter(
-		displayName="Input Feature Layer",
-		name="in_features",
-		datatype="GPFeatureLayer",
-		parameterType="Required",
-		direction="Input")
+    #Input feature layer
+		in_features = arcpy.Parameter(
+			displayName="Input Feature Layer",
+			datatype="GPFeatureLayer",
+			name="in_features",
+			parameterType="Required",
+			direction="Input")
+			
+		in_features.filter.list = ["Point","Line","Polygon"]
 		
-	in_features.filter.list = ["Point"]
-	
-	#Field to use for description
-	description_field = arcpy.Parameter(
-		displayName="Attribute Table Field to be used as Description",
-		name="description_field",
-		datatype="Field",
-		parameterType="Required",
-		direction="Input")
+		#Field to use for description
+		description_field = arcpy.Parameter(
+			displayName="Attribute Table Field to be used as Description",
+			name="description_field",
+			datatype="Field",
+			parameterType="Required",
+			direction="Input")
+			
+		description_field.parameterDependencies = [in_features.name]
+			
+		#Field to use for sorting to unique values
+		sorting_field = arcpy.Parameter(
+			displayName="Attribute Table Field to be used for sorting",
+			name="sorting_field",
+			datatype="Field",
+			parameterType="Required",
+			direction="Input")
 		
-        description_field.parameterDependencies = [in_features.name]
-		
-	#Field to use for sorting to unique values
-	sorting_field = arcpy.Parameter(
-		displayName="Attribute Table Field to be used for sorting",
-		name="sorting_field",
-		datatype="Field",
-		parameterType="Required",
-		direction="Input")
+		sorting_field.parameterDependencies = [in_features.name]
 	
-        sorting_field.parameterDependencies = [in_features.name]
-	
-	parameters = [in_features,description_field,sorting_field]
+		parameters = [in_features,description_field,sorting_field]
         
-	return parameters
+		return parameters
 
     def isLicensed(self):
         """Set whether tool is licensed to execute."""
