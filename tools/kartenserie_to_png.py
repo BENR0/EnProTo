@@ -27,12 +27,13 @@ class KartenserieToPng(object):
 		#check if field name exists and if so use it, then no input parameter is needed
 		field_name = arcpy.Parameter(
 			displayName="Use information of  \"f_suffix\" field in file name",
-			name="field_in_name",
+			name="field_name",
 			datatype="GPBoolean",
 			parameterType="Optional",
 			direction="Input")
 		
-		field_name = 'false'
+		field_name = False
+		
 		#add option to export to JPEG default to PNG
 		
 		parameters = [out_path, resolution, field_name]
@@ -55,14 +56,12 @@ class KartenserieToPng(object):
         out = parameters[0].valueAsText
         res = parameters[1].valueAsText
         file_suffix = parameters[2].valueAsText
-        
-		print out
-		
+
         attrtable_field = "f_suffix"
         mxd = arcpy.mapping.MapDocument("CURRENT")
 				
         for pageNum in range(1, mxd.dataDrivenPages.pageCount + 1):
-            if str(file_suffix) == 'false':
+            if str(file_suffix) == 'False':
                 mxd.dataDrivenPages.currentPageID = pageNum
                 final_path = out + "_" + str(pageNum) + ".png"
             else:
