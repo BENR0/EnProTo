@@ -21,7 +21,7 @@ class ChangeBrowsePath(object):
 
 		#create different path for last export/ save/ browse directory
 		lastexport = rootpath + "\\av_daten"
-		lastsave = rootpath + "\\av_projekte"
+		lastsave = rootpath + "\\av_projektes"
 		#last browse is same path as last path
 
 		#write registry
