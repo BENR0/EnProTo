@@ -1,0 +1,13 @@
+<ESRI.Configuration xmlns="http://schemas.esri.com/Desktop/AddIns" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"><Name>EnProTo Addin</Name><AddInID>{de2881e9-b5ef-4dd1-bd2b-8c2cbe8b49a7}</AddInID><Description>EnProTo Addin</Description><Version>0.1</Version><Image /><Author>Ro</Author><Company /><Date>08/21/2015</Date><Targets><Target name="Desktop" version="10.1" /></Targets><AddIn language="PYTHON" library="EnProTo_addin_addin.py" namespace="EnProTo_addin_addin"><ArcMap>
+    <Commands>
+        <Button caption="OpenPathForSelectedLayer" category="EnProTo Addin" class="OpenPathForSelectedLayer" id="OpenPathForSelectedLayer.button" image="" message="" tip=""><Help heading="" /></Button>
+        </Commands>
+    <Extensions>
+        <Extension autoLoad="true" category="EnProTo Addin" class="ChangeBrowsePath" description="Change path of Export/ Browse/ Save in registry at startup" id="ChangeBrowsePath.extension2" name="ChangeBrowsePath" productName="ChangeBrowsePath" showInExtensionDialog="true" />
+        </Extensions>
+    <Toolbars>
+        <Toolbar caption="EnProTo Toolbar" category="EnProTo Addin" id="EnProTo.toolbar" showInitially="true"><Items><Button refID="OpenPathForSelectedLayer.button" /></Items></Toolbar>
+        </Toolbars>
+    <Menus>
+        </Menus>
+    </ArcMap></AddIn></ESRI.Configuration>
