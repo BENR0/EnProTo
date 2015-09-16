@@ -18,7 +18,7 @@ class KartenserieToPng(object):
 
 		#set default resolution
 		resolution = arcpy.Parameter(
-			displayName="Resolution",
+			displayName="Resolution (defaults to 96 dpi)",
 			name="resolution",
 			datatype="GPString",
 			parameterType="Optional",
@@ -59,13 +59,14 @@ class KartenserieToPng(object):
         mxd = arcpy.mapping.MapDocument("CURRENT")
 				
         for pageNum in range(1, mxd.dataDrivenPages.pageCount + 1):
-            if file_suffix and file_suffix != "#":
-                mxd.dataDrivenPages.currentPageID = pageNum
-                final_path = out + "_" + str(pageNum) + ".png"
-            else:            
+            arcpy.AddMessage("Exporting PDF Map " + str(pageNum) + " of " + str(mxd.dataDrivenPages.pageCount))
+            if file_suffix and file_suffix != "":
                 mxd.dataDrivenPages.currentPageID = pageNum
                 cur = str(mxd.dataDrivenPages.pageRow.getValue(file_suffix))
                 final_path = out + "_" + cur + ".png"
+            else:
+                mxd.dataDrivenPages.currentPageID = pageNum
+                final_path = out + "_" + str(pageNum) + ".png"
             
             arcpy.mapping.ExportToPNG(mxd, final_path, resolution = res)
 
