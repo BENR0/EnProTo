@@ -10,54 +10,52 @@ class MultiBufferSpeciesExport(object):
         self.canRunInBackground = False
 
     def getParameterInfo(self):
-    
-	#Input feature layer
-	vorhaben = arcpy.Parameter(
-		displayName="Vorhaben Feature Layer",
-		name="in_features",
-		datatype="GPFeatureLayer",
-		parameterType="Required",
-		direction="Input")
-		
-	buffer = arcpy.Parameter(
-		displayName="Buffer Output Feature",
-		name="buffer_out",
-		datatype="GPFeatureLayer",
-		parameterType="Required",
-		direction="Output")
-		
-	vorhaben.filter.list = ["Polygon"]
-	
-	species = arcpy.Parameter(
-		displayName="Arten Feature Layer",
-		name="in_features",
-		datatype="GPFeatureLayer",
-		parameterType="Required",
-		direction="Input")
-		
-	species.filter.list = ["Point"]
+        #Input feature layer
+        vorhaben = arcpy.Parameter(
+            displayName="Vorhaben Feature Layer",
+            name="in_features",
+            datatype="GPFeatureLayer",
+            parameterType="Required",
+            direction="Input")
+            
+        species = arcpy.Parameter(
+            displayName="Arten Feature Layer",
+            name="in_features",
+            datatype="GPFeatureLayer",
+            parameterType="Optional",
+            direction="Input")
+            
+        species.filter.list = ["Point"]
 
-    #buffer ranges list
-	buffer_ranges = arcpy.Parameter(
-		displayName="Puffer Radien",
-		name="buffer_ranges",
-		datatype="GPTable",
-		parametertype="Required",
-		direction="Input")
-		
-	buffer_ranges.fiter.type = "ValueList"
-	buffer_ranges.filter.list = [100,200,250,300,500,1000,1500,2000,2500,3000,4000,5000,6000,7000,8000,9000,10000]
-	
-	species_table = arcpy.Parameter(
-		displayName="Arten Tabelle Ausgabe",
-		name="species_table",
-		datatype="DETable",
-		parameterType="Required",
-		direction="Output")
-
-	parameters = [vorhaben,buffer,species,buffer_ranges,species_table]
+        buffer = arcpy.Parameter(
+            displayName="Buffer Output Feature",
+            name="buffer_out",
+            datatype="GPFeatureLayer",
+            parameterType="Required",
+            direction="Output")
         
-	return parameters
+        #buffer ranges list
+        buffer_ranges = arcpy.Parameter(
+            name="buffer_ranges",
+            displayName="Puffer Radien",
+            datatype="GPString",
+            parameterType="Required",
+            direction="Input",
+            multiValue=True)
+            
+        buffer_ranges.filter.type = "ValueList"
+        buffer_ranges.filter.list = [100,200,250,300,500,1000,1500,2000,2500,3000,4000,5000,6000,7000,8000,9000,10000]
+        
+        species_table = arcpy.Parameter(
+            displayName="Arten Tabelle Ausgabe",
+            name="species_table",
+            datatype="DETable",
+            parameterType="Optional",
+            direction="Output")
+
+        parameters = [vorhaben,buffer,species,buffer_ranges,species_table]
+            
+        return parameters
 
     def isLicensed(self):
         """Set whether tool is licensed to execute."""
@@ -81,7 +79,7 @@ class MultiBufferSpeciesExport(object):
 		species_table = parameters[4].valueAsText
 		
 		#calculate buffers
-		arcpy.MultipleRingBuffer_analysis(vorhaben,buffer,buffer_ranges,"meters", "","ALL")
+		arcpy.MultipleRingBuffer_analysis(vorhaben,buffer,buffer_ranges,"meters", "","NONE")
 		#apply distances layer style 
 		#arcpy.ApplySymbologyFromLayer_management(buffer, "style source layer.lyr")
 		
@@ -109,20 +107,20 @@ class MultiBufferSpeciesExport(object):
         #new_text = ""
 
         #add field to species attribute table
-		arcpy.AddField_management(lyr,"Annotation","TEXT")
+		#arcpy.AddField_management(lyr,"Annotation","TEXT")
 
-		with arcpy.da.UpdateCursor(lyr,("Abk","Annotation")) as cursor:
-			for row in cursor:
-				print(row[0])
-				SQL = "Abk == %s"%str(row[0])
-				arcpy.MakeFeatureLayer_management(lyr,"tmp_lyr",SQL)
-				arcpy.SelectLayerByLocation_management(point_lyr,"intersect",tmp_lyr)
-				with arcpy.da.SearchCursor(point_lyr,[field1,field2]) as cursor2:
-					for row2 in cursor2:
-						new_text = new_text + str(row2[0]) + " (" + "<ITA>" + str(row2[1]) + "</ITA>" + ")\n"
-						row[1] = new_text
-						cursor.updateRow(row)
-					del tmp_lyr
+		#with arcpy.da.UpdateCursor(lyr,("Abk","Annotation")) as cursor:
+		#	for row in cursor:
+		#		print(row[0])
+		#		SQL = "Abk == %s"%str(row[0])
+		#		arcpy.MakeFeatureLayer_management(lyr,"tmp_lyr",SQL)
+		#		arcpy.SelectLayerByLocation_management(point_lyr,"intersect",tmp_lyr)
+		#		with arcpy.da.SearchCursor(point_lyr,[field1,field2]) as cursor2:
+		#			for row2 in cursor2:
+		#				new_text = new_text + str(row2[0]) + " (" + "<ITA>" + str(row2[1]) + "</ITA>" + ")\n"
+		#				row[1] = new_text
+		#				cursor.updateRow(row)
+		#			del tmp_lyr
 
 		return
 
