@@ -12,6 +12,7 @@ from tools.polylinetopolygon import PolylineToPolygon
 from tools.group_annos_by_pf import GroupAnnosByPF
 from tools.legen_waitforit_dary import Legen_WaitForIt_Dary
 from tools.kartenserie_to_png import KartenserieToPng
+from tools.batchconvertpdftotif import BatchConvertPDFToTif
 
 #groupannosbypf not found
 
@@ -20,7 +21,7 @@ class Toolbox(object):
         self.label = "EnProTo"
         self.alias = "EnProTo"
 
-        # List of tool classes associated with this toolbox
+        #List of tool classes associated with this toolbox
         #self.tools = [AddDescriptionToFeatures,MultiBufferSpeciesExport,PlankopfWizard,GroupAnnosByPF,Legen_WaitForIt_Dary,PolylineToPolygon,KartenserieToPng]
-        self.tools = [AddDescriptionToFeatures,MultiBufferSpeciesExport,KartenserieToPng,PlankopfWizard]
+        self.tools = [AddDescriptionToFeatures,MultiBufferSpeciesExport,KartenserieToPng,BatchConvertPDFToTif,PlankopfWizard]
 
