@@ -20,8 +20,8 @@ class ChangeBrowsePath(object):
 		#rootpath = rootpath + r'05_GIS\'
 
 		#create different path for last export/ save/ browse directory
-		lastexport = rootpath + "\\plotfiles"
-		lastsave = rootpath + "\\av_daten"
+		lastexport = rootpath + "\\av_daten"
+		lastsave = rootpath + "\\av_projekte"
 		#last browse is same path as last path
 
 		#write registry
@@ -35,36 +35,3 @@ class ChangeBrowsePath(object):
 		#write LastSave
 		_winreg.SetValueEx(registrykey,"LastSaveToLocation",0,_winreg.REG_SZ,lastsave)
 		_winreg.CloseKey(registrykey)
-        
-        
-class FindDefinitionQuerys(object):
-    """Implementation for FindDefinitionQuerys.button (Button)"""
-    def __init__(self):
-        self.enabled = True
-        self.checked = False
-    def onClick(self):
-        mxd = arcpy.mapping.MapDocument("CURRENT")
-
-        lyrs = arcpy.mapping.ListLayers(mxd)
-
-        for lyr in lyrs:
-            if lyr.supports("DEFINITIONQUERY") and lyr.definitionQuery != "":
-                out_msg = str(lyr) + ": " + lyr.definitionQuery
-
-        pythonaddins.MessageBox(out_msg)
-        pass
-        
-        
-class OpenPathForSelectedLayer(object):
-    """Implementation for OpenPathForSelectedLayer.button (Button)"""
-    def __init__(self):
-        self.enabled = True
-        self.checked = False
-    def onClick(self):
-        mxd = arcpy.mapping.MapDocument("current")
-        toclayer = pythonaddins.GetSelectedTOCLayerOrDataFrame()
-        desc = arcpy.Describe(toclayer)
-        path = desc.path
-       
-        subprocess.Popen('explorer "{0}"'.format(path))
-        pass
