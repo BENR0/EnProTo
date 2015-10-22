@@ -78,8 +78,14 @@ class AddDescriptionToFeatures(object):
         #print desc_list 
 
     	if lyr.symbologyType == "UNIQUE_VALUES":
-			#lyr.symbology.valueField = s_field
-			lyr.symbology.classDescriptions = desc_list[1::2]
-			lyr.symbology.showOtherValues = False
+            nvalues = len(lyr.symbology.classValues)
+            if len(desc_list[1::2]) != nvalues:
+                arcpy.AddMessage("Anzahl der Beschreibungen " + str(nvalues) + " entspricht nicht der Anzahl der Klassen " + str(len(desc_list[1::2])))
+                #arcpy.AddMessage(print("\n".join([str(element) for element in desc_list[1::2]])))
+                arcpy.AddMessage(str(desc_list[1::2]))
+            else:
+                #lyr.symbology.valueField = s_field
+                lyr.symbology.classDescriptions = desc_list[1::2]
+                lyr.symbology.showOtherValues = False
 
         return
