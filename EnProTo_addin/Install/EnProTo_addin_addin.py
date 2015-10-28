@@ -66,7 +66,10 @@ class FindDefinitionQuerys(object):
         for lyr in lyrs:
             if lyr.supports("DEFINITIONQUERY") and lyr.definitionQuery != "":
                 out_msg += ">>" + str(lyr) + ": " + str(lyr.definitionQuery) + "\n"
-
+        
+        if out_msg == "":
+            out_msg = "No definition querys set in project."
+        
         result = pythonaddins.MessageBox(out_msg, "Ergebnis", 1)
         print(result)
         pass
