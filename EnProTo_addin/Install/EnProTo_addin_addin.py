@@ -48,7 +48,7 @@ class OpenPathForSelectedLayer(object):
         desc = arcpy.Describe(toclayer)
         path = desc.path
        
-        subprocess.Popen('explorer "{0}"'.format(path))
+        subprocess.Popen('explorer /select, "{0}"'.format(path))
         pass
         
         
@@ -72,4 +72,25 @@ class FindDefinitionQuerys(object):
         
         result = pythonaddins.MessageBox(out_msg, "Ergebnis", 1)
         print(result)
+        pass
+        
+class WritePathOfLayersToFile(object):
+    """Implementation for WritePathOfLayersToFile.button (Button)"""
+    def __init__(self):
+        self.enabled = True
+        self.checked = False
+    def onClick(self):
+        mxd = arcpy.mapping.MapDocument("CURRENT")
+
+        lyrs = arcpy.mapping.ListLayers(mxd)
+        
+        tfile = open('L:\Ablage_Mitarbeiter\Benjamin\dokumente\layers.txt', 'w')
+        #outfile = csv.writer(tfile)
+        
+        for lyr in lyrs:
+            if lyr.isFeatureLayer:
+                path = lyr.dataSource.encode("utf-8") + "\n"
+                tfile.write(path)
+
+        tfile.close()
         pass

@@ -79,9 +79,9 @@ class MultiBufferSpeciesExport(object):
 		species_table = parameters[4].valueAsText
 		
         
-        for dist in buffer_ranges:
+       # for dist in buffer_ranges:
             #Buffer_analysis (in_features, out_feature_class, buffer_distance_or_field, {line_side}, {line_end_type}, {dissolve_option}, {dissolve_field})
-            arcpy.Buffer_analysis("roads", "C:/output/majorrdsBuffered", dist, "FULL", "ROUND", dissolve, dissolve_field}
+        #    arcpy.Buffer_analysis("roads", "C:/output/majorrdsBuffered", dist, "FULL", "ROUND", dissolve, dissolve_field}
         
         
 		#calculate buffers
