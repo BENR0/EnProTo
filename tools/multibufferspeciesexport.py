@@ -13,14 +13,14 @@ class MultiBufferSpeciesExport(object):
         #Input feature layer
         vorhaben = arcpy.Parameter(
             displayName="Vorhaben Feature Layer",
-            name="in_features",
+            name="vor_features",
             datatype="GPFeatureLayer",
             parameterType="Required",
             direction="Input")
             
         species = arcpy.Parameter(
             displayName="Arten Feature Layer",
-            name="in_features",
+            name="art_features",
             datatype="GPFeatureLayer",
             parameterType="Optional",
             direction="Input")
@@ -78,14 +78,20 @@ class MultiBufferSpeciesExport(object):
 		buffer_ranges = parameters[3].valueAsText
 		species_table = parameters[4].valueAsText
 		
+        
+       # for dist in buffer_ranges:
+            #Buffer_analysis (in_features, out_feature_class, buffer_distance_or_field, {line_side}, {line_end_type}, {dissolve_option}, {dissolve_field})
+        #    arcpy.Buffer_analysis("roads", "C:/output/majorrdsBuffered", dist, "FULL", "ROUND", dissolve, dissolve_field}
+        
+        
 		#calculate buffers
 		arcpy.MultipleRingBuffer_analysis(vorhaben,buffer,buffer_ranges,"meters", "","NONE")
 		#apply distances layer style 
 		#arcpy.ApplySymbologyFromLayer_management(buffer, "style source layer.lyr")
 		
 		#calculate field geometry (area)
-		arcpy.AddField_management(buffer,"area_sm","DOUBLE") #add field with name "area_sm" to attribute table
-		CursorFieldNames = ["SHAPE@AREA","area_sm"] #read are token from shape
+		arcpy.AddField_management(buffer,"AREA_QM","DOUBLE") #add field with name "area_sm" to attribute table
+		CursorFieldNames = ["SHAPE@AREA","AREA_QM"] #read are token from shape
 		cursor = arcpy.da.UpdateCursor(buffer,CursorFieldNames)
 		for row in cursor:
 			AreaValue = row[0].area #read area value as double

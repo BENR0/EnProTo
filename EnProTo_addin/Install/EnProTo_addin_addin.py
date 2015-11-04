@@ -37,6 +37,21 @@ class ChangeBrowsePath(object):
 		_winreg.CloseKey(registrykey)
         
         
+class OpenPathForSelectedLayer(object):
+    """Implementation for OpenPathForSelectedLayer.button (Button)"""
+    def __init__(self):
+        self.enabled = True
+        self.checked = False
+    def onClick(self):
+        mxd = arcpy.mapping.MapDocument("CURRENT")
+        toclayer = pythonaddins.GetSelectedTOCLayerOrDataFrame()
+        desc = arcpy.Describe(toclayer)
+        path = desc.path
+       
+        subprocess.Popen('explorer /select, "{0}"'.format(path))
+        pass
+        
+        
 class FindDefinitionQuerys(object):
     """Implementation for FindDefinitionQuerys.button (Button)"""
     def __init__(self):
@@ -51,7 +66,31 @@ class FindDefinitionQuerys(object):
         for lyr in lyrs:
             if lyr.supports("DEFINITIONQUERY") and lyr.definitionQuery != "":
                 out_msg += ">>" + str(lyr) + ": " + str(lyr.definitionQuery) + "\n"
-
+        
+        if out_msg == "":
+            out_msg = "No definition querys set in project."
+        
         result = pythonaddins.MessageBox(out_msg, "Ergebnis", 1)
         print(result)
+        pass
+        
+class WritePathOfLayersToFile(object):
+    """Implementation for WritePathOfLayersToFile.button (Button)"""
+    def __init__(self):
+        self.enabled = True
+        self.checked = False
+    def onClick(self):
+        mxd = arcpy.mapping.MapDocument("CURRENT")
+
+        lyrs = arcpy.mapping.ListLayers(mxd)
+        
+        tfile = open('L:\Ablage_Mitarbeiter\Benjamin\dokumente\layers.txt', 'w')
+        #outfile = csv.writer(tfile)
+        
+        for lyr in lyrs:
+            if lyr.isFeatureLayer:
+                path = lyr.dataSource.encode("utf-8") + "\n"
+                tfile.write(path)
+
+        tfile.close()
         pass
