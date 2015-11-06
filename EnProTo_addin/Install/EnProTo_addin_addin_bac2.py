@@ -73,65 +73,6 @@ class FindDefinitionQuerys(object):
         result = pythonaddins.MessageBox(out_msg, "Ergebnis", 1)
         print(result)
         pass
-        
-
-class NewShapeFromStandardShape(object):
-    """Implementation for NewShapeFromStandardShape.combobox (ComboBox)"""
-    def __init__(self):
-        self.items = ["BTT_poly", "BTT_point", "bird"]
-        self.editable = False
-        self.enabled = True
-        self.dropdownWidth = 'WWWWWW'
-        self.width = 'WWWWWW'
-    def onSelChange(self, selection):
-        #standard shapefile path
-        templatedir = ""
-        #file names of template shapes
-        name_btt_poly = ""
-        name_btt_point = ""
-        name_bird = ""
-
-        #get properties of map document
-        mxd = arcpy.mapping.MapDocument("CURRENT")
-        #get first data frame of map document
-        df = arcpy.mapping.ListDataFrames(mxd)[0]
-        #get coordinate system of data frame
-        df_coord = df.spatialReference
-
-        #get directory of map document
-        mxdpath = mxd.filePath
-        #split path by GIS directory, keep first part and add GIS folder again
-        startpath = re.split('05_GIS',mxdpath)[0] + "05_GIS/av_daten"
-
-        #get path where to save shp from user
-        savepath = pythonaddins.SaveDialog("Speichern unter", "name dataset", startpath)
-        
-        if selection == "BTT_poly":
-            #create full path of template shape
-            templatepath = os.path.join(templatedir,name_btt_poly)
-        elif selection == "BTT_point":
-            templatepath = os.path.join(templatedir,name_btt_point)
-        elif selection == "bird":
-            templatepath = os.path.join(templatedir,name_bird)
-        else:
-            templatepath = ""            #present option to create new shape with specified fields?
-
-        #copy shape to user specified path
-        arcpy.CopyFeatures_management(templatepath, savepath)
-        #define projection for copied shape
-        arcpy.DefineProjection_management(savepath, df_coord)
-        #add layer to document
-        newlayer = arcpy.mapping.Layer(savepath)
-        arcpy.mapping.AddLayer(df, newlayer)
-        pass
-    def onEditChange(self, text):
-        pass
-    def onFocus(self, focused):
-        pass
-    def onEnter(self):
-        pass
-    def refresh(self):
-        pass
 
 
 class WritePathOfLayersToFile(object):
