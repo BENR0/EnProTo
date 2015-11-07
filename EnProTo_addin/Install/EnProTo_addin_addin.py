@@ -75,6 +75,40 @@ class FindDefinitionQuerys(object):
         pass
         
 
+class CalculateArea(object):
+    """Implementation for CalculateArea.button (Button)"""
+    def __init__(self):
+        self.enabled = True
+        self.checked = False
+    def onClick(self):
+        try:
+            #local vars
+            fieldName1 = "AREA_HA"
+            fieldName2 = "AREA_QM"
+            fieldPrecision = 15 #length of field over all
+            fieldScale = 2      #number of decimal places
+
+            mxd = arcpy.mapping.MapDocument("CURRENT")
+            toclayer = pythonaddins.GetSelectedTOCLayerOrDataFrame()
+
+            #add fields to table of shapefile
+            arcpy.AddField_management(toclayer, fieldName1, "FLOAT", fieldPrecision, fieldScale)
+            arcpy.AddField_management(toclayer, fieldName2, "FLOAT", fieldPrecision, fieldScale)
+
+            #calculate geometry
+            arcpy.CalculateField_management(toclayer, fieldName1, "!SHAPE.AREA@HECTARES!", "PYTHON")
+            arcpy.CalculateField_management(toclayer, fieldName2, "round(!SHAPE.AREA@SQUAREMETERS!, 0)", "PYTHON")
+
+        except Exception, e:
+            #if error occurs, print line number and error message
+            import traceback, sys
+            tb = sys.exc_info()[2]
+            print("Line %i" % tb.tb_lineno)
+            print(e.message)
+
+        pass
+
+
 class NewShapeFromStandardShape(object):
     """Implementation for NewShapeFromStandardShape.combobox (ComboBox)"""
     def __init__(self):

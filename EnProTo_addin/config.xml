@@ -2,6 +2,7 @@
     <Commands>
         <Button caption="OpenPathForSelectedLayer" category="EnProTo Addin" class="OpenPathForSelectedLayer" id="OpenPathForSelectedLayer.button" image="" message="" tip="Open Explorer at Path where Shapefile ist stored"><Help heading="" /></Button>
         <Button caption="FindDefinitionQuerys" category="EnProTo Addin" class="FindDefinitionQuerys" id="FindDefinitionQuerys.button" image="" message="" tip="Find all layers with definition querys"><Help heading="" /></Button>
+        <Button caption="CalculateArea" category="EnProTo Addin" class="CalculateArea" id="CalculateArea.button" image="" message="" tip="Adds two fields to selected layer and calculates area in squaremeters (rounded to full sm) and hectars."><Help heading="" /></Button>
         <ComboBox caption="NewShapeFromStandardShape" category="EnProTo Addin" class="NewShapeFromStandardShape" id="NewShapeFromStandardShape.combobox" itemSizeString="WWWWWW" message="" rows="4" sizeString="WWWWWW" tip="Copies standard shape to user selected path."><Help heading="" /></ComboBox>
         <Button caption="WritePathOfLayersToFile" category="EnProTo Addin" class="WritePathOfLayersToFile" id="WritePathOfLayersToFile.button" image="" message="" tip="Write path of all shapefile layers to text file"><Help heading="" /></Button>
         </Commands>
