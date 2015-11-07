@@ -90,10 +90,16 @@ class CalculateArea(object):
 
             mxd = arcpy.mapping.MapDocument("CURRENT")
             toclayer = pythonaddins.GetSelectedTOCLayerOrDataFrame()
+            #get list with fields of selected layer
+            existfield1 = arcpy.ListFields(toclayer, "AREA_HA")
+            existfield2 = arcpy.ListFields(toclayer, "AREA_QM")
 
-            #add fields to table of shapefile
-            arcpy.AddField_management(toclayer, fieldName1, "FLOAT", fieldPrecision, fieldScale)
-            arcpy.AddField_management(toclayer, fieldName2, "FLOAT", fieldPrecision, fieldScale)
+            #add fields to table of shapefile if not already existant
+            if len(existfield1) != 1:
+                arcpy.AddField_management(toclayer, fieldName1, "FLOAT", fieldPrecision, fieldScale)
+
+            if len(existfield2) != 1:
+                arcpy.AddField_management(toclayer, fieldName2, "FLOAT", fieldPrecision, fieldScale)
 
             #calculate geometry
             arcpy.CalculateField_management(toclayer, fieldName1, "!SHAPE.AREA@HECTARES!", "PYTHON")
