@@ -118,18 +118,21 @@ class CalculateArea(object):
 class NewShapeFromStandardShape(object):
     """Implementation for NewShapeFromStandardShape.combobox (ComboBox)"""
     def __init__(self):
-        self.items = ["BTT_poly", "BTT_point", "bird"]
+        self.items = ["BTT_poly", "BTT_point", "RNA_Voegel", "Rastvoegel", "Horste"]
         self.editable = False
         self.enabled = True
         self.dropdownWidth = 'WWWWWW'
-        self.width = 'WWWWWW'
+        self.width = ''
     def onSelChange(self, selection):
         #standard shapefile path
-        templatedir = ""
+        templatedir = "V:\Vorlagen_CAD_GIS\GIS\Shape_Standard"
         #file names of template shapes
-        name_btt_poly = ""
-        name_btt_point = ""
-        name_bird = ""
+        name_btt_poly = "Biotoptyp_PNL_Projektnummer.shp"
+        name_btt_point = "Biotoptyp_Punkte_Projektnummer_PNL.shp"
+        name_rna_bird = "RNA_Vogelart_Projektname_Datum.shp"
+        name_rast = "Rastvoegel_Projektname_Datum.shp"
+        name_horste = "Horste_Projektname_Datum.shp"
+        
 
         #get properties of map document
         mxd = arcpy.mapping.MapDocument("CURRENT")
@@ -151,8 +154,12 @@ class NewShapeFromStandardShape(object):
             templatepath = os.path.join(templatedir,name_btt_poly)
         elif selection == "BTT_point":
             templatepath = os.path.join(templatedir,name_btt_point)
-        elif selection == "bird":
-            templatepath = os.path.join(templatedir,name_bird)
+        elif selection == "RNA_Voegel":
+            templatepath = os.path.join(templatedir,name_rna_bird)
+        elif selection == "Rastvoegel":
+            templatepath = os.path.join(templatedir,name_rast)
+        elif selection == "Horste":
+            templatepath = os.path.join(templatedir,name_horste)
         else:
             templatepath = ""            #present option to create new shape with specified fields?
 
@@ -184,7 +191,10 @@ class WritePathOfLayersToFile(object):
 
         lyrs = arcpy.mapping.ListLayers(mxd)
         
-        tfile = open('L:\Ablage_Mitarbeiter\Benjamin\dokumente\layers.txt', 'w')
+        startpath = "L:\Ablage_Mitarbeiter\"
+        outfile = pythonaddins.SaveDialog("Speichern unter", "layers.txt", startpath)
+        
+        tfile = open(outfile, 'w') #open('L:\Ablage_Mitarbeiter\Benjamin\dokumente\layers.txt', 'w')
         #outfile = csv.writer(tfile)
         
         for lyr in lyrs:
