@@ -38,8 +38,18 @@ class AddDescriptionToFeatures(object):
 			direction="Input")
 		
 		sorting_field.parameterDependencies = [in_features.name]
+        
+        #Field to use for sorting to unique values
+		selected_fields = arcpy.Parameter(
+			displayName="Selected fields",
+			name="selected_fields",
+			datatype="GPValueTable",
+			parameterType="Optional",
+			direction="Input")
+            
+        selected_fields.columns = (["GPString", "Field"])
 	
-		parameters = [in_features,description_field,sorting_field]
+		parameters = [in_features,description_field,sorting_field, selected_fields]
         
 		return parameters
 
