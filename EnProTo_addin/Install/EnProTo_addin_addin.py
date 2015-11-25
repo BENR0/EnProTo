@@ -119,10 +119,9 @@ class CalculateArea(object):
 class NewShapeFromStandardShape(object):
     """Implementation for NewShapeFromStandardShape.combobox (ComboBox)"""
     def __init__(self):
-        self.items = ["BTT_poly", "BTT_point", "RNA_Voegel", "Rastvoegel", "Horste"]
-        self.editable = False
+        self.editable = True
         self.enabled = True
-        self.dropdownWidth = 'WWWWWW'
+        self.dropdownWidth = 'WWWWWWW'
         self.width = ''
     def onSelChange(self, selection):
         #standard shapefile path
@@ -176,6 +175,7 @@ class NewShapeFromStandardShape(object):
     def onEditChange(self, text):
         pass
     def onFocus(self, focused):
+        self.items = ["BTT_poly", "BTT_point", "RNA_Voegel", "Rastvoegel", "Horste"]
         pass
     def onEnter(self):
         pass
@@ -188,8 +188,8 @@ class ChangePlankopf(object):
     def __init__(self):
         self.editable = True
         self.enabled = True
-        self.dropdownWidth = 'WWWWWW'
-        self.width = 'WWWWWWW'
+        self.dropdownWidth = 'WWWWWWWWWWWWWWWWWW'
+        self.width = ''
     def onSelChange(self, selection):
         mxd = arcpy.mapping.MapDocument("CURRENT")
         #get text and image boxes of mxd
