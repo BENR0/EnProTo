@@ -4,13 +4,14 @@
         <Button caption="FindDefinitionQuerys" category="EnProTo Addin" class="FindDefinitionQuerys" id="FindDefinitionQuerys.button" image="Images/finddefinitionquerys.png" message="" tip="Find all layers with definition querys"><Help heading="" /></Button>
         <Button caption="CalculateArea" category="EnProTo Addin" class="CalculateArea" id="CalculateArea.button" image="Images/calculatearea.png" message="" tip="Adds two fields to selected layer and calculates area in squaremeters (rounded to full sm) and hectars."><Help heading="" /></Button>
         <ComboBox caption="NewShapeFromStandardShape" category="EnProTo Addin" class="NewShapeFromStandardShape" id="NewShapeFromStandardShape.combobox" itemSizeString="WWWWWW" message="" rows="4" sizeString="WWWWWW" tip="Copies standard shape to user selected path."><Help heading="" /></ComboBox>
+        <ComboBox caption="ChangePlankopf" category="EnProTo Addin" class="ChangePlankopf" id="ChangePlankopf.combobox" itemSizeString="WWWWWW" message="" rows="4" sizeString="WWWWWW" tip="Change Plankopf Logo and company address."><Help heading="" /></ComboBox>
         <Button caption="WritePathOfLayersToFile" category="EnProTo Addin" class="WritePathOfLayersToFile" id="WritePathOfLayersToFile.button" image="" message="" tip="Write path of all shapefile layers to text file"><Help heading="" /></Button>
         </Commands>
     <Extensions>
         <Extension autoLoad="true" category="EnProTo Addin" class="ChangeBrowsePath" description="Change path of Export/ Browse/ Save in registry at startup" id="ChangeBrowsePath.extension2" name="ChangeBrowsePath" productName="ChangeBrowsePath" showInExtensionDialog="true" />
         </Extensions>
     <Toolbars>
-        <Toolbar caption="EnProTo Toolbar" category="EnProTo Addin" id="EnProTo.toolbar" showInitially="true"><Items><Button refID="OpenPathForSelectedLayer.button" /><Button refID="FindDefinitionQuerys.button" /><Button refID="CalculateArea.button" /><ComboBox refID="NewShapeFromStandardShape.combobox" /><Button refID="WritePathOfLayersToFile.button" /></Items></Toolbar>
+        <Toolbar caption="EnProTo Toolbar" category="EnProTo Addin" id="EnProTo.toolbar" showInitially="true"><Items><Button refID="OpenPathForSelectedLayer.button" /><Button refID="FindDefinitionQuerys.button" /><Button refID="CalculateArea.button" /><ComboBox refID="NewShapeFromStandardShape.combobox" /><ComboBox refID="ChangePlankopf.combobox" /><Button refID="WritePathOfLayersToFile.button" /></Items></Toolbar>
         </Toolbars>
     <Menus>
         </Menus>
