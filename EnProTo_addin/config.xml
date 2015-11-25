@@ -10,7 +10,7 @@
         <Extension autoLoad="true" category="EnProTo Addin" class="ChangeBrowsePath" description="Change path of Export/ Browse/ Save in registry at startup" id="ChangeBrowsePath.extension2" name="ChangeBrowsePath" productName="ChangeBrowsePath" showInExtensionDialog="true" />
         </Extensions>
     <Toolbars>
-        <Toolbar caption="EnProTo Toolbar" category="EnProTo Addin" id="EnProTo.toolbar" showInitially="true"><Items><Button refID="OpenPathForSelectedLayer.button" /><Button refID="FindDefinitionQuerys.button" /><ComboBox refID="NewShapeFromStandardShape.combobox" /><Button refID="WritePathOfLayersToFile.button" /></Items></Toolbar>
+        <Toolbar caption="EnProTo Toolbar" category="EnProTo Addin" id="EnProTo.toolbar" showInitially="true"><Items><Button refID="OpenPathForSelectedLayer.button" /><Button refID="FindDefinitionQuerys.button" /><Button refID="CalculateArea.button" /><ComboBox refID="NewShapeFromStandardShape.combobox" /><Button refID="WritePathOfLayersToFile.button" /></Items></Toolbar>
         </Toolbars>
     <Menus>
         </Menus>

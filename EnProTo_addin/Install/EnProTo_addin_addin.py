@@ -182,6 +182,76 @@ class NewShapeFromStandardShape(object):
         pass
 
 
+#class ChangePlankopf(object):
+    #"""Implementation for ChangePlankopf.combobox (ComboBox)"""
+    #def __init__(self):
+        #self.editable = True
+        #self.enabled = True
+        #self.dropdownWidth = 'WWWWWW'
+        #self.width = 'WWWWWWW'
+    #def onSelChange(self, selection):
+        #mxd = arcpy.mapping.MapDocument("CURRENT")
+        ##get text and image boxes of mxd
+         #txt_comp_name = arcpy.mapping.ListLayoutElements(mxd,"TEXT_ELEMENT","comp_name")[0]
+         #txt_comp_address = arcpy.mapping.ListLayoutElements(mxd,"TEXT_ELEMENT","comp_adress")[0]
+         #txt_zeichner = arcpy.mapping.ListLayoutElements(mxd,"TEXT_ELEMENT","zeichner")[0]
+         #img_logo = arcpy.mapping.ListLayoutElements(mxd,"PICTURE_ELEMENT","comp_logo")[0]
+        
+         #auftr_csv = csv.DictReader(open(r"V:\Vorlagen_CAD_GIS\GIS\Toolboxes\auftraggeber.csv","r"))
+
+        ##populate variable with appropiate auftraggeber data from dictionary
+         #for row in auftr_csv:
+             #if selection == row["name"]:
+                 #comp_name = row["name"]
+                 #comp_address = row["adresse"] + "\r\n" + row["plz"] + " " + row["ort"]
+                 #img_src = "V:\\Vorlagen_Logo\\extern\\" + row["src"]
+        
+         #zeichnerl = ["Dipl. Geo. Julia Krimkowski","M.Sc. Geoökol. Isgard Rudloff","M.Sc. Landsch.-Ökol. Andreas Menzel","B.Sc. Geo. Benjamin Rösner","Dipl. Geo. Thorsten Knies","Dipl. Geo. Sandra Kießling"]
+        
+        ##get username from system and set zeichner variable acordingly
+         #user = os.environ.get("USERNAME")
+         #if user == "Julia.Krimkowski":
+             #zeichner = zeichnerl[0]
+         #elif user == "Isgard.Rudloff":
+             #zeichner = zeichnerl[1]
+         #elif user == "Andreas.Menzel":
+             #zeichner == zeichnerl[2]
+         #elif user == "Benjamin.Roesner":
+             #zeichner = zeichnerl[3]
+         #elif user == "Thorsten.Knies":
+             #zeichner = zeichnerl[4]
+         #elif user == "Sandra.Kiessling":
+             #zeichner = zeichnerl[5]
+         #else:
+             #zeichner
+            
+         #img_logo.sourceImage = img_src
+        
+         #txt_comp_name.text = comp_name
+         #txt_comp_address.text = comp_address
+         #txt_zeichner.text = zeichner
+        #pass
+    #def onFocus(self, focused):
+        #if focused:
+            ##read auftraggeber liste as dictionary
+            #auftr_csv = csv.DictReader(open(r"V:\Vorlagen_CAD_GIS\GIS\Toolboxes\auftraggeber.csv","r"))
+        
+            ##init item list
+            #self.items = []
+            ##populate variable with appropiate auftraggeber data from dictionary
+            #for row in auftr_csv:
+                #self.items.append = row["name"]
+                    #parameters[1].value = row["adresse"] + "\r\n" + row["plz"] + " " + row["ort"]
+                    #parameters[2].value = "V:\\Vorlagen_Logo\\extern\\" + row["src"]
+        #pass
+    #def onEditChange(self, text):
+        #pass
+    #def onEnter(self):
+        #pass
+    #def refresh(self):
+        #pass
+
+
 class WritePathOfLayersToFile(object):
     """Implementation for WritePathOfLayersToFile.button (Button)"""
     def __init__(self):
