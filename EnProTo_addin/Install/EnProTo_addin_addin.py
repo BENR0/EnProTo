@@ -132,7 +132,6 @@ class NewShapeFromStandardShape(object):
         name_rna_bird = "RNA_Vogelart_Projektname_Datum.shp"
         name_rast = "Rastvoegel_Projektname_Datum.shp"
         name_horste = "Horste_Projektname_Datum.shp"
-        
 
         #get properties of map document
         mxd = arcpy.mapping.MapDocument("CURRENT")
@@ -161,7 +160,9 @@ class NewShapeFromStandardShape(object):
         elif selection == "Horste":
             templatepath = os.path.join(templatedir,name_horste)
         else:
-            templatepath = ""            #present option to create new shape with specified fields?
+            notemplate = pythonaddins.MessageBox("No template file found!")
+            print(notemplate)
+            #templatepath = ""            #present option to create new shape with specified fields?
 
         #copy shape to user specified path
         arcpy.CopyFeatures_management(templatepath, savepath)
@@ -191,9 +192,8 @@ class WritePathOfLayersToFile(object):
 
         lyrs = arcpy.mapping.ListLayers(mxd)
         
-        startpath = "L:\Ablage_Mitarbeiter\"
+        startpath = "L:\Ablage_Mitarbeiter"
         outfile = pythonaddins.SaveDialog("Speichern unter", "layers.txt", startpath)
-        
         tfile = open(outfile, 'w') #open('L:\Ablage_Mitarbeiter\Benjamin\dokumente\layers.txt', 'w')
         #outfile = csv.writer(tfile)
         
