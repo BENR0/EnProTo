@@ -4,6 +4,7 @@ import subprocess
 import os
 import _winreg
 import re
+import csv
 
 class ChangeBrowsePath(object):
     """Implementation for ChangeBrowsePath.extension2 (Extension)"""
@@ -160,7 +161,7 @@ class NewShapeFromStandardShape(object):
         elif selection == "Horste":
             templatepath = os.path.join(templatedir,name_horste)
         else:
-            notemplate = pythonaddins.MessageBox("No template file found!")
+            notemplate = pythonaddins.MessageBox("No template file found!", "Error", 1)
             print(notemplate)
             #templatepath = ""            #present option to create new shape with specified fields?
 
@@ -185,19 +186,24 @@ class NewShapeFromStandardShape(object):
 class ChangePlankopf(object):
     """Implementation for ChangePlankopf.combobox (ComboBox)"""
     def __init__(self):
-        self.editable = False
+        self.editable = True
         self.enabled = True
         self.dropdownWidth = 'WWWWWW'
         self.width = 'WWWWWWW'
     def onSelChange(self, selection):
         mxd = arcpy.mapping.MapDocument("CURRENT")
         #get text and image boxes of mxd
-        txt_comp_name = arcpy.mapping.ListLayoutElements(mxd,"TEXT_ELEMENT","comp_name")[0]
-        txt_comp_address = arcpy.mapping.ListLayoutElements(mxd,"TEXT_ELEMENT","comp_adress")[0]
-        txt_zeichner = arcpy.mapping.ListLayoutElements(mxd,"TEXT_ELEMENT","zeichner")[0]
-        img_logo = arcpy.mapping.ListLayoutElements(mxd,"PICTURE_ELEMENT","comp_logo")[0]
+        try:
+            txt_comp_name = arcpy.mapping.ListLayoutElements(mxd,"TEXT_ELEMENT","comp_name")[0]
+            txt_comp_address = arcpy.mapping.ListLayoutElements(mxd,"TEXT_ELEMENT","comp_adress")[0]
+            txt_zeichner = arcpy.mapping.ListLayoutElements(mxd,"TEXT_ELEMENT","zeichner")[0]
+            img_logo = arcpy.mapping.ListLayoutElements(mxd,"PICTURE_ELEMENT","comp_logo")[0]
+        except:
+            element.error = pythonaddins.MessageBox("Check if text and graphic elements exist.",
+                    "Error", 1)
+            print(element.error)
         
-        auftr_csv = csv.DictReader(open(r"V:\Vorlagen_CAD_GIS\GIS\Toolboxes\auftraggeber.csv","r"))
+        auftr_csv = csv.DictReader(open(r"C:\Users\ro\Desktop\auftraggeber.csv","r"))
 
         #populate variable with appropiate auftraggeber data from dictionary
         for row in auftr_csv:
@@ -234,13 +240,13 @@ class ChangePlankopf(object):
     def onFocus(self, focused):
         if focused:
             #read auftraggeber liste as dictionary
-            auftr_csv = csv.DictReader(open(r"V:\Vorlagen_CAD_GIS\GIS\Toolboxes\auftraggeber.csv","r"))
+            auftr_csv = csv.DictReader(open(r"C:\Users\ro\Desktop\auftraggeber.csv","r"))
         
             #init item list
             self.items = []
             #populate variable with appropiate auftraggeber data from dictionary
             for row in auftr_csv:
-                self.items.append = row["name"]
+                self.items.append(row["name"])
                     #parameters[1].value = row["adresse"] + "\r\n" + row["plz"] + " " + row["ort"]
                     #parameters[2].value = "V:\\Vorlagen_Logo\\extern\\" + row["src"]
         pass
