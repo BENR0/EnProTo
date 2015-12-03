@@ -138,7 +138,7 @@ class NewShapeFromStandardShape(object):
         #get first data frame of map document
         df = arcpy.mapping.ListDataFrames(mxd)[0]
         #get coordinate system of data frame
-        df_coord = df.spatialReference
+        df_coord = df.spatialReference.PCSName
 
         #get directory of map document
         mxdpath = mxd.filePath
