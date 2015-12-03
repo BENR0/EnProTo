@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 import arcpy
 import pythonaddins
 import subprocess
@@ -138,7 +139,7 @@ class NewShapeFromStandardShape(object):
         #get first data frame of map document
         df = arcpy.mapping.ListDataFrames(mxd)[0]
         #get coordinate system of data frame
-        df_coord = df.spatialReference.PCSName
+        df_coord = df.spatialReference.PCSCode
 
         #get directory of map document
         mxdpath = mxd.filePath
@@ -146,7 +147,7 @@ class NewShapeFromStandardShape(object):
         startpath = re.split('05_GIS',mxdpath)[0] + "05_GIS/av_daten"
 
         #get path where to save shp from user
-        savepath = pythonaddins.SaveDialog("Speichern unter", "name dataset", startpath)
+        savepath = pythonaddins.SaveDialog("Speichern unter", "name dataset", startpath, "Shapefile (*.shp)")
         
         if selection == "BTT_poly":
             #create full path of template shape
@@ -167,10 +168,12 @@ class NewShapeFromStandardShape(object):
         #copy shape to user specified path
         arcpy.CopyFeatures_management(templatepath, savepath)
         #define projection for copied shape
-        arcpy.DefineProjection_management(savepath, df_coord)
-        #add layer to document
-        newlayer = arcpy.mapping.Layer(savepath)
-        arcpy.mapping.AddLayer(df, newlayer)
+        #create full path with extension first
+        filepath = savepath + ".shp"
+        arcpy.DefineProjection_management(filepath, df_coord)
+        #add layer to document => not needed since define projection already adds shape to project
+        #newlayer = arcpy.mapping.Layer(filepath)
+        #arcpy.mapping.AddLayer(df, newlayer)
         pass
     def onEditChange(self, text):
         pass
@@ -214,8 +217,8 @@ class ChangePlankopf(object):
                 comp_address = row["adresse"] + "\r\n" + row["plz"] + " " + row["ort"]
                 img_src = os.path.join(logodir,row["src"])
         
-        
-        zeichnerl = ["zeichner1", "zeichner2", "zeichner3", "zeichner4"]
+        #zeichnerl = ["zeichner1", "zeichner1", "zeichner13", u"B. Sc. Benjamin Rösner"]
+        zeichnerl = [u"Dipl. Geo. Julia Krimkowski",u"M.Sc. Geoökol. Isgard Rudloff",u"M.Sc. Landsch.-Ökol. Andreas Menzel",u"B.Sc. Geo. Benjamin Rösner",u"Dipl. Geo. Thorsten Knies",u"Dipl. Geo. Sandra Kiessling"]
         #get username from system and set zeichner variable acordingly
         user = os.environ.get("USERNAME")
         if user == "Julia.Krimkowski":
