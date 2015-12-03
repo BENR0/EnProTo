@@ -68,11 +68,11 @@ class BatchAddFieldMerge(object):
         return True
 
     def updateParameters(self, parameters):
-        if parameters[3].valueAsText:
-            if parameters[3].value == True:
-                parameters[4].enabled = False
-            else:
-                parameters[4].enabled = True
+        # if parameters[3].valueAsText:
+            # if parameters[3].value == True:
+                # parameters[4].enabled = False
+            # else:
+                # parameters[4].enabled = True
 
         return
 
@@ -105,16 +105,17 @@ class BatchAddFieldMerge(object):
             #get list with fields of selected layer
             existfield = arcpy.ListFields(lyr, field_name)
             #existfield2 = arcpy.ListFields(toclayer, "AREA_QM")
+            print(str(lyr))
 
             #add fields to table of shapefile if not already existant
             if len(existfield) != 1:
                 arcpy.AddMessage("Adding field to layer: " + str(lyr))
                 arcpy.AddField_management(lyr, field_name, fieldtype, fieldPrecision) #for floats
                 #use layer name as default value?
-                if default_val_bool == "True":
-                    arcpy.CalculateField_management(lyr, field_name, '"{0}"'.format(lyr), "PYTHON")
-                else:
-                    arcpy.CalculateField_management(lyr, field_name, '"{0}"'.format(default_val_txt), "PYTHON")
+                #if default_val_bool == "True":
+                arcpy.CalculateField_management(lyr, field_name, '"{0}"'.format(lyr), "PYTHON")
+                #else:
+                 #   arcpy.CalculateField_management(lyr, field_name, '"{0}"'.format(default_val_txt), "PYTHON")
                 #add fieldScale
             else:
                 arcpy.AddMessage("A field with the choosen name already exists in layer: " + str(lyr))
@@ -128,9 +129,9 @@ class BatchAddFieldMerge(object):
 
 
         #merge layers if in_features checkbox is set to true
-        if merge_chkbox == "True":
-            arcpy.AddMessage("Merging input layers...")
-            arcpy.Merge_management(in_features, out_features)
+       # if merge_chkbox == "True":
+        arcpy.AddMessage("Merging input layers...")
+        arcpy.Merge_management(in_features, out_features)
 
         arcpy.AddMessage("Done")
 
