@@ -203,17 +203,19 @@ class ChangePlankopf(object):
                     "Error", 1)
             print(element.error)
         
-        auftr_csv = csv.DictReader(open(r"C:\Users\ro\Desktop\auftraggeber.csv","r"))
+        auftr_csv = csv.DictReader(open(r"V:\Vorlagen_CAD_GIS\GIS\Toolboxes\auftraggeber.csv","r"))
+        logodir = "V:\Vorlagen_Logo\extern"
 
         #populate variable with appropiate auftraggeber data from dictionary
         for row in auftr_csv:
+            print(row["name"])
             if selection == row["name"]:
                 comp_name = row["name"]
                 comp_address = row["adresse"] + "\r\n" + row["plz"] + " " + row["ort"]
-                img_src = "V:\\Vorlagen_Logo\\extern\\" + row["src"]
+                img_src = os.path.join(logodir,row["src"])
         
         
-        zeichnerl = ["zeichner1", "zeichner2"]
+        zeichnerl = ["zeichner1", "zeichner2", "zeichner3", "zeichner4"]
         #get username from system and set zeichner variable acordingly
         user = os.environ.get("USERNAME")
         if user == "Julia.Krimkowski":
@@ -240,7 +242,7 @@ class ChangePlankopf(object):
     def onFocus(self, focused):
         if focused:
             #read auftraggeber liste as dictionary
-            auftr_csv = csv.DictReader(open(r"C:\Users\ro\Desktop\auftraggeber.csv","r"))
+            auftr_csv = csv.DictReader(open(r"V:\Vorlagen_CAD_GIS\GIS\Toolboxes\auftraggeber.csv","r"))
         
             #init item list
             self.items = []
