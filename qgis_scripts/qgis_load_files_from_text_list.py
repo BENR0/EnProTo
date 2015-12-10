@@ -1,4 +1,6 @@
 from qgis.core import *
+from glob import glob
+from qgis.gui import *
 import os
 
 #class Loader:
@@ -6,15 +8,19 @@ import os
  #   def __init__(self, iface)
   #      self.iface = iface
 
-def run_script(iface):
+def run_script(iface, **args):
  #def load_shapefiles(self, filelist)
+    layersfile = args['path']
+    print(layersfile)
     with open("L:\Ablage_Mitarbeiter\Benjamin\z_tmp\layers.txt", "r") as f:
         for line in f:
+            line = str.strip(line)
             shpdir, shpfile  = os.path.split(line)
-            print(shpfile)
-            print(str(line))
-            layer = iface.addVectorLayer(r"K:\Arbeiten_Projekte\Energie\Energie_WEA_Lahnau\05_GIS\av_daten\04_Bestandsdaten\BP_Grossvoegel_20150415.shp", "test", "ogr")
-            #layer = QgsVectorLayer("K:\Arbeiten_Projekte\Energie\Energie_WEA_Lahnau\05_GIS\av_daten\04_Bestandsdaten\BP_Grossvoegel_20150415.shp", "test", "ogr")
-            print(str(layer))
+            filepath = os.path.join(shpdir, shpfile)
+            print("Adding File: " + filepath)
+            layer = iface.addVectorLayer(filepath, shpfile, "ogr")
+            #layer = QgsVectorLayer(r"K:\Arbeiten_Projekte\Energie\Energie_WEA_Lahnau\05_GIS\av_daten\04_Bestandsdaten\BP_Grossvoegel_20150415.shp", "test", "ogr")
+            #print(str(layer))
+            #print(type(os.path.join(line,"")))
             QgsMessageLog.logMessage("message", "name")
             QgsMapLayerRegistry.instance().addMapLayer(layer)
