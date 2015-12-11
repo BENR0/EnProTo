@@ -6,6 +6,8 @@ import os
 import _winreg
 import re
 import csv
+import time
+import datetime as dt
 
 class ChangeBrowsePath(object):
     """Implementation for ChangeBrowsePath.extension2 (Extension)"""
@@ -146,25 +148,38 @@ class NewShapeFromStandardShape(object):
         #split path by GIS directory, keep first part and add GIS folder again
         startpath = re.split('05_GIS',mxdpath)[0] + "05_GIS/av_daten"
 
-        #get path where to save shp from user
-        savepath = pythonaddins.SaveDialog("Speichern unter", "name dataset", startpath, "Shapefile (*.shp)")
-        
+        #create filename
+        #construct date
+        today = dt.date.today()
+        strdate = (strtoday.year) + str(today.month) + str(today.day)
+        #get projectname
+        project = mxdpath.split("/")[3]
+        #create content block string and path to template file
         if selection == "BTT_poly":
             #create full path of template shape
             templatepath = os.path.join(templatedir,name_btt_poly)
+            #create content block string
+            contstr = "BTT" + project + strdate + "poly"
         elif selection == "BTT_point":
             templatepath = os.path.join(templatedir,name_btt_point)
+            contstr = "BTT" + project + strdate + "point"
         elif selection == "RNA_Voegel":
             templatepath = os.path.join(templatedir,name_rna_bird)
+            contstr = "RNA" + project + strdate + "line"
         elif selection == "Rastvoegel":
             templatepath = os.path.join(templatedir,name_rast)
+            contstr = "Rastvoegel" + project + strdate + "point"
         elif selection == "Horste":
             templatepath = os.path.join(templatedir,name_horste)
+            contstr = "Horste" + project + strdate + "point"
         else:
             notemplate = pythonaddins.MessageBox("No template file found!", "Error", 1)
             print(notemplate)
             #templatepath = ""            #present option to create new shape with specified fields?
 
+        #get path where to save shp from user
+        savepath = pythonaddins.SaveDialog("Speichern unter", contstr, startpath, "Shapefile (*.shp)")
+        
         #copy shape to user specified path
         arcpy.CopyFeatures_management(templatepath, savepath)
         #define projection for copied shape
