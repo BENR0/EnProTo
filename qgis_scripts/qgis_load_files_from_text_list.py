@@ -10,9 +10,9 @@ import os
 
 def run_script(iface, **args):
  #def load_shapefiles(self, filelist)
-    layersfile = args['path']
+    layersfile = args["path"]
     print(layersfile)
-    with open("L:\Ablage_Mitarbeiter\Benjamin\z_tmp\layers.txt", "r") as f:
+    with open(layersfile, "r") as f:
         for line in f:
             line = str.strip(line)
             shpdir, shpfile  = os.path.split(line)
