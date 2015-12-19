@@ -98,12 +98,24 @@ class CalculateArea(object):
             existfield1 = arcpy.ListFields(toclayer, "AREA_HA")
             existfield2 = arcpy.ListFields(toclayer, "AREA_QM")
 
+            isnotlockedbool = arcpy.TextSchemaLock(toclayer)
+            islockedmessage = "Could not add field. Shapefile possibly is in use by another user."
+
             #add fields to table of shapefile if not already existant
             if len(existfield1) != 1:
-                arcpy.AddField_management(toclayer, fieldName1, "FLOAT", fieldPrecision, fieldScale)
+                if isnotlockedbool:
+                    arcpy.AddField_management(toclayer, fieldName1, "FLOAT", fieldPrecision, fieldScale)
+                else:
+                    lockedmessage = pythonaddins.MessageBox(islockedmessage, "Locked", 1)
+                    print(lockedmessage)
+
 
             if len(existfield2) != 1:
-                arcpy.AddField_management(toclayer, fieldName2, "FLOAT", fieldPrecision, fieldScale)
+                if isnotlockedbool:
+                    arcpy.AddField_management(toclayer, fieldName2, "FLOAT", fieldPrecision, fieldScale)
+                else:
+                    lockedmessage = pythonaddins.MessageBox(islockedmessage, "Locked", 1)
+                    print(lockedmessage)
 
             #calculate geometry
             arcpy.CalculateField_management(toclayer, fieldName1, "!SHAPE.AREA@HECTARES!", "PYTHON")
