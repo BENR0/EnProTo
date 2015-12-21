@@ -98,7 +98,7 @@ class CalculateArea(object):
             existfield1 = arcpy.ListFields(toclayer, "AREA_HA")
             existfield2 = arcpy.ListFields(toclayer, "AREA_QM")
 
-            isnotlockedbool = arcpy.TextSchemaLock(toclayer)
+            isnotlockedbool = arcpy.TestSchemaLock(toclayer)
             islockedmessage = "Could not add field. Shapefile possibly is in use by another user."
 
             #add fields to table of shapefile if not already existant
