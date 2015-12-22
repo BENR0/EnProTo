@@ -25,5 +25,5 @@ class Toolbox(object):
 
         #List of tool classes associated with this toolbox
         #self.tools = [AddDescriptionToFeatures,MultiBufferSpeciesExport,PlankopfWizard,GroupAnnosByPF,Legen_WaitForIt_Dary,PolylineToPolygon,KartenserieToPng]
-        self.tools = [AddDescriptionToFeatures,MultiBufferSpeciesExport,KartenserieToPng,BatchConvertPDFToTif,PlankopfWizard,MultiPurposeBufferTool,BatchAddFieldMerge]
+        self.tools = [AddDescriptionToFeatures,KartenserieToPng,BatchConvertPDFToTif,MultiPurposeBufferTool,BatchAddFieldMerge]
 
