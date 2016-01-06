@@ -68,6 +68,9 @@ class MultiPurposeBufferTool(object):
         if len(in_features) > 1:
             arcpy.AddMessage("Merging input layers...")
             mem_merge = arcpy.Merge_management(in_features, "in_memory\merge")
+        else:
+            arcpy.AddMessage("in features")
+            mem_merge = in_features[0]
 
         #init list for storing buffer for each range
         tmp_buffers = []

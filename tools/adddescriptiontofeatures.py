@@ -38,8 +38,8 @@ class AddDescriptionToFeatures(object):
                 direction="Input")
         
         description_fields.parameterDependencies = [in_features.name]
-        description_fields.columns = ([["Field", "Field"], ["GPBoolean", "Bold"], ["GPBoolean",
-            "Italics"], ["GPBoolean", "Underlined"], ["GPBoolean", "Newline"]])
+        #description_fields.columns = ([["Field", "Field"], ["GPBoolean", "Bold"], ["GPBoolean",
+         #   "Italics"], ["GPBoolean", "Underlined"], ["GPBoolean", "Newline"]])
             
         description_fields.columns = ([["Field", "Field"], ["GPBoolean", "Bold"], ["GPBoolean",
             "Italics"], ["GPBoolean", "Underlined"]])
@@ -84,7 +84,8 @@ class AddDescriptionToFeatures(object):
         keyfield = parameters[1].valueAsText
         d_field = parameters[2].value
         #valuetable column names
-        vtcolumns = ["Field", "Bold", "Italics", "Underlined", "Newline"]
+        #vtcolumns = ["Field", "Bold", "Italics", "Underlined", "Newline"]
+        vtcolumns = ["Field", "Bold", "Italics", "Underlined"]
         #init empty dictionary for valuetable
         dict_valuetable = {}
         #read valuetable to dictionary
@@ -94,6 +95,7 @@ class AddDescriptionToFeatures(object):
         arcpy.AddMessage(dict_valuetable)
 
         mxd = arcpy.mapping.MapDocument("current")
+        arcpy.AddMessage(arcpy.mapping.ListLayers(mxd, features))
         lyr = arcpy.mapping.ListLayers(mxd, features)[0]
         
         #function to read attribute table to dictionary based on a key field
@@ -122,15 +124,15 @@ class AddDescriptionToFeatures(object):
             for f in dict_valuetable.keys():
                 otag = ""
                 ctag = ""
-                if dict_valuetable[f]["Newline"]:
-                    otag = otag + chr(13) + chr(10) #"\r\n"
-                elif dict_valuetable[f]["Bold"]:
+                #if dict_valuetable[f]["Newline"]:
+                #   otag = otag + chr(13) + chr(10) #"\r\n"
+                if dict_valuetable[f]["Bold"]:
                     otag = otag + "<BOL>"
                     ctag = "</BOL>" + ctag 
                 elif dict_valuetable[f]["Italics"]:
                     otag = otag + "<ITA>"
                     ctag = "</ITA>" + ctag
-                elif dict_valuetable[f]["Underline"]:
+                elif dict_valuetable[f]["Underlined"]:
                     otag = otag + "<UND>"
                     ctag = "</UND>" + ctag
 

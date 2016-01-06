@@ -8,7 +8,7 @@ df = arcpy.mapping.ListDataFrames(mxd)[0]
 
 #data frame projection
 try:
-    outcs = arcpy.Describe(df).spatialReference
+    outcs = df.spatialReference
 except:
     err_dfcs = pythonaddin.MessageBox("Data frame has no coordinate system assigned.", "Error", 1)
     print(err_dfcs)
