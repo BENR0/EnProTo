@@ -268,6 +268,9 @@ class ChangePlankopf(object):
         txt_comp_name.text = comp_name
         txt_comp_address.text = comp_address
         txt_zeichner.text = zeichner
+
+        #refresh to see changes
+        arcpy.RefreshActiveView()
         pass
     def onFocus(self, focused):
         if focused:
