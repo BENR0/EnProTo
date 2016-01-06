@@ -40,6 +40,9 @@ class AddDescriptionToFeatures(object):
         description_fields.parameterDependencies = [in_features.name]
         description_fields.columns = ([["Field", "Field"], ["GPBoolean", "Bold"], ["GPBoolean",
             "Italics"], ["GPBoolean", "Underlined"], ["GPBoolean", "Newline"]])
+            
+        description_fields.columns = ([["Field", "Field"], ["GPBoolean", "Bold"], ["GPBoolean",
+            "Italics"], ["GPBoolean", "Underlined"]])
                 
         description_fields.filters[1].type = "ValueList"
         description_fields.filters[1].list = ["True", "False"]
@@ -47,8 +50,8 @@ class AddDescriptionToFeatures(object):
         description_fields.filters[2].list = ["True", "False"]
         description_fields.filters[3].type = "ValueList"
         description_fields.filters[3].list = ["True", "False"]
-        description_fields.filters[4].type = "ValueList"
-        description_fields.filters[4].list = ["True", "False"]
+        #description_fields.filters[4].type = "ValueList"
+        #description_fields.filters[4].list = ["True", "False"]
         
 	
         parameters = [in_features,sorting_field, description_fields]
