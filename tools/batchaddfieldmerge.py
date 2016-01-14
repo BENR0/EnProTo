@@ -1,4 +1,5 @@
 import arcpy
+import re
 
 class BatchAddFieldMerge(object):
     def __init__(self):
@@ -84,15 +85,15 @@ class BatchAddFieldMerge(object):
         mxd = arcpy.mapping.MapDocument("current")
         df = arcpy.mapping.ListDataFrames(mxd)[0]
 		
-	in_features = parameters[0].valueAsText
+        in_features = parameters[0].valueAsText
         in_features = in_features.split(";")
         field_name = parameters[1].valueAsText
         #change field name to upper case
-        field_name = field_name.upper()
+        field_name_upper = field_name.upper()
         default_val_bool = parameters[2].valueAsText
         default_val_txt = parameters[3].valueAsText
         merge_chkbox = parameters[4].valueAsText
-	out_features = parameters[5].valueAsText
+        out_features = parameters[5].valueAsText
 
         #local vars
         #fieldName1 = "AREA_HA"
@@ -101,12 +102,17 @@ class BatchAddFieldMerge(object):
         #fieldScale = 2      #number of decimal places
         fieldtype = "TEXT"
 
+        #init list for layers to be merged
+        merge_layers = []
+        
         for lyr in in_features:
+            #split group from input layers and remove "'" from string
+            lyr = re.sub("'", " ", lyr.split("\\")[-1])
+            #append layer name to list of layers to be merged later on
+            merge_layers.append(lyr)
             #get list with fields of selected layer
             existfield = arcpy.ListFields(lyr, field_name)
-            #existfield2 = arcpy.ListFields(toclayer, "AREA_QM")
-            print(str(lyr))
-
+            
             #add fields to table of shapefile if not already existant
             if len(existfield) != 1:
                 arcpy.AddMessage("Adding field to layer: " + str(lyr))
@@ -131,7 +137,7 @@ class BatchAddFieldMerge(object):
         #merge layers if in_features checkbox is set to true
        # if merge_chkbox == "True":
         arcpy.AddMessage("Merging input layers...")
-        arcpy.Merge_management(in_features, out_features)
+        arcpy.Merge_management(merge_layers, out_features)
 
         arcpy.AddMessage("Done")
 

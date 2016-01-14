@@ -51,8 +51,22 @@ class OpenPathForSelectedLayer(object):
         toclayer = pythonaddins.GetSelectedTOCLayerOrDataFrame()
         desc = arcpy.Describe(toclayer)
         path = desc.path
+        mxdpath = mxd.filePath
        
         subprocess.Popen('explorer /select, "{0}"'.format(path))
+        pass
+        
+        
+class OpenPathForCurrentMXD(object):
+    """Implementation for OpenPathForCurrentMXD.button (Button)"""
+    def __init__(self):
+        self.enabled = True
+        self.checked = False
+    def onClick(self):
+        mxd = arcpy.mapping.MapDocument("CURRENT")
+        mxdpath = mxd.filePath
+       
+        subprocess.Popen('explorer /select, "{0}"'.format(mxdpath))
         pass
         
         
@@ -103,19 +117,19 @@ class CalculateArea(object):
 
             #add fields to table of shapefile if not already existant
             if len(existfield1) != 1:
-                if isnotlockedbool:
-                    arcpy.AddField_management(toclayer, fieldName1, "FLOAT", fieldPrecision, fieldScale)
-                else:
-                    lockedmessage = pythonaddins.MessageBox(islockedmessage, "Locked", 1)
-                    print(lockedmessage)
+                #if isnotlockedbool:
+                arcpy.AddField_management(toclayer, fieldName1, "FLOAT", fieldPrecision, fieldScale)
+               # else:
+                   # lockedmessage = pythonaddins.MessageBox(islockedmessage, "Locked", 1)
+                   # print(lockedmessage)
 
 
             if len(existfield2) != 1:
-                if isnotlockedbool:
-                    arcpy.AddField_management(toclayer, fieldName2, "FLOAT", fieldPrecision, fieldScale)
-                else:
-                    lockedmessage = pythonaddins.MessageBox(islockedmessage, "Locked", 1)
-                    print(lockedmessage)
+               # if isnotlockedbool:
+                arcpy.AddField_management(toclayer, fieldName2, "FLOAT", fieldPrecision, fieldScale)
+               # else:
+                   # lockedmessage = pythonaddins.MessageBox(islockedmessage, "Locked", 1)
+                  #  print(lockedmessage)
 
             #calculate geometry
             arcpy.CalculateField_management(toclayer, fieldName1, "!SHAPE.AREA@HECTARES!", "PYTHON")
