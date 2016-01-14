@@ -91,8 +91,8 @@ class AddDescriptionToFeatures(object):
         #read valuetable to dictionary
         for row in d_field:
             dict_valuetable[str(row[0])] = dict(zip(vtcolumns, row))
-
         arcpy.AddMessage(dict_valuetable)
+
 
         mxd = arcpy.mapping.MapDocument("current")
         arcpy.AddMessage(arcpy.mapping.ListLayers(mxd, features))
@@ -136,7 +136,7 @@ class AddDescriptionToFeatures(object):
                     otag = otag + "<UND>"
                     ctag = "</UND>" + ctag
 
-                tmp = tmp + otag + attrdict[i][f] + ctag
+                tmp = tmp + otag + attrdict[i][f] + ctag + " "
             class_descriptions.append(tmp)
 
         lyr.symbology.classDescriptions = class_descriptions
