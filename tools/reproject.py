@@ -15,23 +15,23 @@ except:
 
 try:
     # Use ListFeatureClasses to generate a list of inputs 
-    for infc in arcpy.ListFeatureClasses(mxd):
+    for infc in arcpy.mapping.ListLayers(mxd) #arcpy.ListFeatureClasses(mxd):
     
         # Determine if the input has a defined coordinate system, can't project it if it does not
         indesc = arcpy.Describe(infc)
         insc = indesc.spatialReference
     
-        if dsc.spatialReference.Name == "Unknown":
+        if indesc.spatialReference.Name == "Unknown":
             print ('skipped this fc due to undefined coordinate system: ' + infc)
         else:
             # Determine the new output feature class path and name
             #get path of current feature class and append coord system
-            infcpath = dsc.path 
+            infcpath = infc.dataSource 
             #split path from extension
-            infcpath = os.split.text(infcpath)
+            infcpath = os.path.splitext(infcpath)
             #create coordsystem and extension
             extension = "cooordsystem_EPSG?" + ".shp"
-            outfc = os.path.join(infcpath, extension)
+            outfc = os.path.join(infcpath[0], extension)
 
             #get list of possible transformations
             trafolist = arcpy.listTransformations(insc, outcs)
