@@ -13,8 +13,16 @@ except:
     err_dfcs = pythonaddin.MessageBox("Data frame has no coordinate system assigned.", "Error", 1)
     print(err_dfcs)
 
+#check which coordsystem df uses and create tag for filename
+if "UTM" in outcs.Name:
+    coordtag = "UTM"
+elif "Gauss_Zone" in outcs.Name:
+    coordtag = "GK"
+else:
+    coordtag = outcs.PCSCode
+    
 try:
-    # Use ListFeatureClasses to generate a list of inputs 
+    #iterate over all layers in toc
     for infc in arcpy.mapping.ListLayers(mxd) #arcpy.ListFeatureClasses(mxd):
     
         # Determine if the input has a defined coordinate system, can't project it if it does not
@@ -30,10 +38,10 @@ try:
             #split path from extension
             infcpath = os.path.splitext(infcpath)
             #create coordsystem and extension
-            extension = "cooordsystem_EPSG?" + ".shp"
+            extension = coordtag + ".shp"
             outfc = os.path.join(infcpath[0], extension)
-
             #get list of possible transformations
+
             trafolist = arcpy.listTransformations(insc, outcs)
             
             # run project tool with projection of data frame and apply transformation

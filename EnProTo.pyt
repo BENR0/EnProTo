@@ -15,6 +15,7 @@ from tools.kartenserie_to_png import KartenserieToPng
 from tools.batchconvertpdftotif import BatchConvertPDFToTif
 from tools.buffertool import MultiPurposeBufferTool
 from tools.batchaddfieldmerge import BatchAddFieldMerge
+from tools.WEA_angebot import WEAangebot
 
 #groupannosbypf not found
 
@@ -24,6 +25,5 @@ class Toolbox(object):
         self.alias = "EnProTo"
 
         #List of tool classes associated with this toolbox
-        #self.tools = [AddDescriptionToFeatures,MultiBufferSpeciesExport,PlankopfWizard,GroupAnnosByPF,Legen_WaitForIt_Dary,PolylineToPolygon,KartenserieToPng]
-        self.tools = [AddDescriptionToFeatures,KartenserieToPng,BatchConvertPDFToTif,MultiPurposeBufferTool,BatchAddFieldMerge]
+        self.tools = [AddDescriptionToFeatures,KartenserieToPng,BatchConvertPDFToTif,MultiPurposeBufferTool,BatchAddFieldMerge,WEAangebot]
 
