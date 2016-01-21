@@ -185,11 +185,17 @@ class WEAangebot(object):
        # arcpy.TableToExcel_conversion(Ausgabe-Feature-Class__9_, Ausgabe-Excel-Datei, "NAME", "CODE")
        # arcpy.env.scratchWorkspace = tempEnvironment0
         
+        #extract specified fields to numpy array
+        fnames = ["Distance", "AREA_HA", "AREA_QM", "CODE_06", "HA_Wald", "QM_Wald"]
+        table_as_nparray = arcpy.da.FeatureClassToNumPyArray(newlayer1, fnames)
+        
+        corine_data_frame = pd.DataFrame(table_as_nparray)
+        corine_pivot = pd.pivot_table(corine_data_frame, rows = "Distance", cols = "CODE_06", aggfunc = "sum")
         
         #refresh view and toc
         #arcpy.RefreshActiveView()
         #arcpy.RefreshTOC()
-
+ 
         arcpy.AddMessage("Done")
         
         #clear up in_memory workspace
