@@ -1,6 +1,9 @@
 import arcpy
+import numpy as np
 import pandas as pd
 import os
+import matplotlib.pyplot as plt
+#import openpyxl
 
 class WEAangebot(object):
     def __init__(self):
@@ -44,15 +47,15 @@ class WEAangebot(object):
             parameterType="Required",
             direction="Output")
             
-        # out_table = arcpy.Parameter(
-            # displayName="Pivot table output",
-            # name="pivot_table_out",
-            # datatype="DETable",
-            # parameterType="Required",
-            # direction="Output") 
+         out_table = arcpy.Parameter(
+             displayName="Pivot table output",
+             name="pivot_table_out",
+             datatype="DETable",
+             parameterType="Required",
+             direction="Output") 
         
 
-        parameters = [in_features, out_buffer, buffer_ranges, out_intersected]#, out_table]
+        parameters = [in_features, out_buffer, buffer_ranges, out_intersected, out_table]
             
         return parameters
 
@@ -80,7 +83,7 @@ class WEAangebot(object):
     	buffer_ranges = parameters[2].valueAsText
         buffer_ranges = buffer_ranges.split(";")
         out_intersected = parameters[3].valueAsText
-        #out_table = parameters[4].valueAsText
+        out_table = parameters[4].valueAsText
         
         #Ausgabe-Feature-Class__Alle_Puffer_mit_Flchenberechnung_in_ha_ = arcpy.GetParameterAsText(2)
         #Ausgabe-Feature-Class__Alle_Puffer_mit_Corine-Daten_verschnitten_ = arcpy.GetParameterAsText(3)
@@ -189,9 +192,33 @@ class WEAangebot(object):
         fnames = ["Distance", "AREA_HA", "AREA_QM", "CODE_06", "HA_Wald", "QM_Wald"]
         table_as_nparray = arcpy.da.FeatureClassToNumPyArray(newlayer1, fnames)
         
+        #create pandas data frame
         corine_data_frame = pd.DataFrame(table_as_nparray)
-        corine_pivot = pd.pivot_table(corine_data_frame, rows = "Distance", cols = "CODE_06", aggfunc = "sum")
-        
+
+        #create pivot table with col and row totals (margins = True)
+        pivot = pd.pivot_table(corine_data_frame, values = "HA_WALD", rows = "Distance", cols = "CODE_06", aggfunc = np.sum,
+                margins = True)
+        pivot = pivot.fillna(0)
+
+        #add percentages in new columns
+        pivot["pct_Laub"] = (pivot.Laub / (pivot.All)) * 100
+        pivot["pct_Nadel"] = (pivot.Nadel / (pivot.All)) * 100
+        pivot["pct_Misch"] = (pivot.Misch / (pivot.All)) * 100
+
+        #group data frame by distance and aggregate with sum (total area in each buffer)
+        groupforest = df.groupby("Distance", as_index = False)
+        groupforestagg = grouptest.aggregate(np.sum)
+
+        #add percentages column of forest at total area of buffer
+        groupforestagg["Pct"] = (groupforestagg.HA_WALD / groupforestagg.AREA_HA) * 100
+
+        #write tables to Excel (each table to one sheet)
+        ###### ADD VARIABLE TO WRITE FILE #######
+        writer = pd.ExcelWriter(out_table)
+        pivot.to_excel(writer, sheet_name = "Waldartenanteile")
+        groupforestagg.to_excel(writer, sheet_name = "Pufferwaldanteile")
+        writer.save()
+
         #refresh view and toc
         #arcpy.RefreshActiveView()
         #arcpy.RefreshTOC()
