@@ -3,12 +3,34 @@ import arcpy
 import pythonaddins
 import subprocess
 import os
+import glob
 import _winreg
 import re
 import csv
 import time
 import datetime as dt
 
+############################
+#helper functions
+############################
+
+def ListLocks(shp_path):
+    pattern = shp_path + "*.sr.lock"
+    matches = glob.glob(pattern)
+
+    lockslist = []
+    locks = ""
+    for item in matches:
+        tmp = re.split(shp_path + ".", item)[1]
+        tmp = re.split(".[0-9]+.[0-9]+.sr.lock", tmp)[0]
+        lockslist.append(tmp)
+        locks += tmp + "\n"
+
+    return locks, lockslist
+
+#############################
+#definitions for buttons start
+#############################
 class ChangeBrowsePath(object):
     """Implementation for ChangeBrowsePath.extension2 (Extension)"""
     def __init__(self):
@@ -92,6 +114,34 @@ class FindDefinitionQuerys(object):
         print(result)
         pass
         
+        
+class ListAllLocksForLayers(object):
+    """Implementation for ListAllLocksForLayers.button (Button)"""
+    def __init__(self):
+        self.enabled = True
+        self.checked = False
+    def onClick(self):
+        mxd = arcpy.mapping.MapDocument("CURRENT")
+
+        lyrs = arcpy.mapping.ListLayers(mxd)
+        out_msg = ""
+        
+        for lyr in lyrs:
+            out_msg += lyr + "is locked by user(s):\n"
+            #get lyr path
+            desc = arcpy.Describe(lyr)
+            lyr_path = desc.path
+            #get all locks for this layer and append to msg string
+            strlocks, listlocks = ListLocks(lyr_path)
+            msg += strlocks + "\n"
+        
+        if out_msg == "":
+            out_msg = "No definition querys set in project."
+        
+        result = pythonaddins.MessageBox(out_msg, "Ergebnis", 1)
+        print(result)
+        pass
+
 
 class CalculateArea(object):
     """Implementation for CalculateArea.button (Button)"""
@@ -108,28 +158,35 @@ class CalculateArea(object):
 
             mxd = arcpy.mapping.MapDocument("CURRENT")
             toclayer = pythonaddins.GetSelectedTOCLayerOrDataFrame()
-            #get list with fields of selected layer
+            #get list with kields of selected layer
             existfield1 = arcpy.ListFields(toclayer, "AREA_HA")
             existfield2 = arcpy.ListFields(toclayer, "AREA_QM")
 
-            isnotlockedbool = arcpy.TestSchemaLock(toclayer)
-            islockedmessage = "Could not add field. Shapefile possibly is in use by another user."
+            #get computer name
+            node_name = os.environ["COMPUTERNAME"]
+            #get shape file path
+            desc = arcpy.Describe(toclayer)
+            shp_path = desc.path
+            #check if shape file is locked by other node than the one of the user
+            strlocks, listlocks = ListLocks(shp_path)
+
+            #isnotlockedbool = arcpy.TestSchemaLock(toclayer)
+            islockedmessage = "Could not add field. Layer: " + str(toclayer) + " is locked by the\
+            user(s):\n" + strlocks
 
             #add fields to table of shapefile if not already existant
-            if len(existfield1) != 1:
-                #if isnotlockedbool:
-                arcpy.AddField_management(toclayer, fieldName1, "FLOAT", fieldPrecision, fieldScale)
-               # else:
-                   # lockedmessage = pythonaddins.MessageBox(islockedmessage, "Locked", 1)
-                   # print(lockedmessage)
-
-
-            if len(existfield2) != 1:
-               # if isnotlockedbool:
-                arcpy.AddField_management(toclayer, fieldName2, "FLOAT", fieldPrecision, fieldScale)
-               # else:
-                   # lockedmessage = pythonaddins.MessageBox(islockedmessage, "Locked", 1)
-                  #  print(lockedmessage)
+            if len(listlocks) > 1: i #isnotlockedbool:
+               lockedmessage = pythonaddins.MessageBox(islockedmessage, "Locked", 1)
+               print(lockedmessage)
+            else:
+                if len(existfield1) != 1:
+                    arcpy.AddField_management(toclayer, fieldName1, "FLOAT", fieldPrecision, fieldScale)
+                else:
+                    fieldexistsmsg1 = "Field: " + fieldname1 + " already exists."
+                if len(existfield2) != 1:
+                     arcpy.AddField_management(toclayer, fieldName2, "FLOAT", fieldPrecision, fieldScale)
+                else:
+                    fieldexistsmsg2 = "Field: " + fieldname2 + " already exists."
 
             #calculate geometry
             arcpy.CalculateField_management(toclayer, fieldName1, "!SHAPE.AREA@HECTARES!", "PYTHON")
