@@ -10,27 +10,33 @@ import csv
 import time
 import datetime as dt
 
+############################
+#helper functions
+############################
+
+def ListLocks(shp_path):
+    pattern = shp_path + "*.sr.lock"
+    matches = glob.glob(pattern)
+
+    lockslist = []
+    locks = ""
+    for item in matches:
+        split_pattern = "shp."
+        tmp = re.split(split_pattern, item)[1]
+        tmp = re.split(".[0-9]+.[0-9]+.sr.lock", tmp)[0]
+        
+        node_name = os.environ["COMPUTERNAME"]
+        if tmp == node_name:
+            tmp = tmp + "(Eigener Rechner)"
+
+        lockslist.append(tmp)
+        locks += tmp + "\n"
+
+    return locks, lockslist
+
 #############################
-##helper functions
+#definitions for buttons start
 #############################
-
-#def ListLocks(shp_path):
-    #pattern = shp_path + "*.sr.lock"
-    #matches = glob.glob(pattern)
-
-    #lockslist = []
-    #locks = ""
-    #for item in matches:
-        #tmp = re.split(shp_path + ".", item)[1]
-        #tmp = re.split(".[0-9]+.[0-9]+.sr.lock", tmp)[0]
-        #lockslist.append(tmp)
-        #locks += tmp + "\n"
-
-    #return locks, lockslist
-
-##############################
-##definitions for buttons start
-##############################
 class ChangeBrowsePath(object):
     """Implementation for ChangeBrowsePath.extension2 (Extension)"""
     def __init__(self):
@@ -115,47 +121,33 @@ class FindDefinitionQuerys(object):
         pass
         
         
-#class ListAllLocksForLayers(object):
-    #"""Implementation for ListAllLocksForLayers.button (Button)"""
-    #def __init__(self):
-        #self.enabled = True
-        #self.checked = False
-    #def onClick(self):
-        #def ListLocks(shp_path):
-            #pattern = shp_path + "*.sr.lock"
-            #matches = glob.glob(pattern)
+class ListAllLocksForLayers(object):
+    """Implementation for ListAllLocksForLayers.button (Button)"""
+    def __init__(self):
+        self.enabled = True
+        self.checked = False
+    def onClick(self):
 
-            #lockslist = []
-            #locks = ""
-            #for item in matches:
-                #splt_pattern = shp_path + "."
-                #tmp = re.split(splt_pattern, item)[0]
-                #tmp = re.split(".[0-9]+.[0-9]+.sr.lock", tmp)[0]
-                #lockslist.append(tmp)
-                #locks += tmp + "\n"
+        mxd = arcpy.mapping.MapDocument("CURRENT")
 
-            #return locks, lockslist
-
-        #mxd = arcpy.mapping.MapDocument("CURRENT")
-
-        #lyrs = arcpy.mapping.ListLayers(mxd)
-        #out_msg = ""
+        lyrs = arcpy.mapping.ListLayers(mxd)
+        out_msg = ""
         
-        #for lyr in lyrs:
-            #out_msg += str(lyr) + " is locked by user(s):\n"
-            ##get lyr path
-            #desc = arcpy.Describe(lyr)
-            #lyr_path = desc.path + "\\" + str(lyr) +  ".shp"
-            ##get all locks for this layer and append to msg string
-            #strlocks, listlocks = ListLocks(lyr_path)
-            #out_msg += strlocks + "\n"
+        for lyr in lyrs:
+            out_msg += str(lyr) + " is locked by user(s):\n"
+            #get lyr path
+            desc = arcpy.Describe(lyr)
+            lyr_path = desc.path + "\\" + str(lyr) +  ".shp"
+            #get all locks for this layer and append to msg string
+            strlocks, listlocks = ListLocks(lyr_path)
+            out_msg += strlocks + "\n"
         
-        #if out_msg == "":
-            #out_msg = "No lock on any layer found."
+        if out_msg == "":
+            out_msg = "No lock on any layer found."
         
-        #result = pythonaddins.MessageBox(out_msg, "Ergebnis", 1)
-        #print(result)
-        #pass
+        result = pythonaddins.MessageBox(out_msg, "Ergebnis", 1)
+        print(result)
+        pass
 
 
 class CalculateArea(object):
@@ -235,27 +227,27 @@ class BatchReproject(object):
             print(err_dfcs)
 
         #check which coordsystem df uses and create tag for filename
-        if "UTM" in outcs.Name:
+        if "UTM" in outcs.name:
             coordtag = "UTM"
-        elif "Gauss_Zone" in outcs.Name:
+        elif "Gauss_Zone" in outcs.name:
             coordtag = "GK"
         else:
-            #coordtag = outcs.PCSCode
+            coordtag = outcs.PCSCode
 
-        try:
             #iterate over all layers in toc
+        try:
             for infc in arcpy.mapping.ListLayers(mxd): #arcpy.ListFeatureClasses(mxd):
-            
-                # Determine if the input has a defined coordinate system, can't project it if it does not
+                # Determine if the input has a defined coordinate system,
+                # can't project it if it does not
                 indesc = arcpy.Describe(infc)
                 insc = indesc.spatialReference
-            
+
                 if indesc.spatialReference.Name == "Unknown":
                     print ("skipped this fc due to undefined coordinate system: " + infc)
                 else:
                     # Determine the new output feature class path and name
                     #get path of current feature class and append coord system
-                    infcpath = infc.dataSource 
+                    infcpath = infc.dataSource
                     #split path from extension
                     infcpath = os.path.splitext(infcpath)
                     #create coordsystem and extension
@@ -263,7 +255,8 @@ class BatchReproject(object):
                     outfc = os.path.join(infcpath[0], extension)
                     #get list of possible transformations
 
-                    trafolist = arcpy.listTransformations(insc, outcs)
+                    trafolist = arcpy.ListTransformations(insc, outcs)
+                    print(trafolist)
                     
                     # run project tool with projection of data frame and apply transformation
                     #Project_management (in_dataset, out_dataset, out_coor_system, {transform_method},
@@ -314,7 +307,7 @@ class NewShapeFromStandardShape(object):
         #create filename
         #construct date
         today = dt.date.today()
-        strdate = (strtoday.year) + str(today.month) + str(today.day)
+        strdate = str(today.year) + str(today.month) + str(today.day)
         #get projectname
         project = mxdpath.split("/")[3]
         #create content block string and path to template file
