@@ -10,27 +10,27 @@ import csv
 import time
 import datetime as dt
 
-############################
-#helper functions
-############################
-
-def ListLocks(shp_path):
-    pattern = shp_path + "*.sr.lock"
-    matches = glob.glob(pattern)
-
-    lockslist = []
-    locks = ""
-    for item in matches:
-        tmp = re.split(shp_path + ".", item)[1]
-        tmp = re.split(".[0-9]+.[0-9]+.sr.lock", tmp)[0]
-        lockslist.append(tmp)
-        locks += tmp + "\n"
-
-    return locks, lockslist
-
 #############################
-#definitions for buttons start
+##helper functions
 #############################
+
+#def ListLocks(shp_path):
+    #pattern = shp_path + "*.sr.lock"
+    #matches = glob.glob(pattern)
+
+    #lockslist = []
+    #locks = ""
+    #for item in matches:
+        #tmp = re.split(shp_path + ".", item)[1]
+        #tmp = re.split(".[0-9]+.[0-9]+.sr.lock", tmp)[0]
+        #lockslist.append(tmp)
+        #locks += tmp + "\n"
+
+    #return locks, lockslist
+
+##############################
+##definitions for buttons start
+##############################
 class ChangeBrowsePath(object):
     """Implementation for ChangeBrowsePath.extension2 (Extension)"""
     def __init__(self):
@@ -115,32 +115,47 @@ class FindDefinitionQuerys(object):
         pass
         
         
-class ListAllLocksForLayers(object):
-    """Implementation for ListAllLocksForLayers.button (Button)"""
-    def __init__(self):
-        self.enabled = True
-        self.checked = False
-    def onClick(self):
-        mxd = arcpy.mapping.MapDocument("CURRENT")
+#class ListAllLocksForLayers(object):
+    #"""Implementation for ListAllLocksForLayers.button (Button)"""
+    #def __init__(self):
+        #self.enabled = True
+        #self.checked = False
+    #def onClick(self):
+        #def ListLocks(shp_path):
+            #pattern = shp_path + "*.sr.lock"
+            #matches = glob.glob(pattern)
 
-        lyrs = arcpy.mapping.ListLayers(mxd)
-        out_msg = ""
+            #lockslist = []
+            #locks = ""
+            #for item in matches:
+                #splt_pattern = shp_path + "."
+                #tmp = re.split(splt_pattern, item)[0]
+                #tmp = re.split(".[0-9]+.[0-9]+.sr.lock", tmp)[0]
+                #lockslist.append(tmp)
+                #locks += tmp + "\n"
+
+            #return locks, lockslist
+
+        #mxd = arcpy.mapping.MapDocument("CURRENT")
+
+        #lyrs = arcpy.mapping.ListLayers(mxd)
+        #out_msg = ""
         
-        for lyr in lyrs:
-            out_msg += lyr + "is locked by user(s):\n"
-            #get lyr path
-            desc = arcpy.Describe(lyr)
-            lyr_path = desc.path
-            #get all locks for this layer and append to msg string
-            strlocks, listlocks = ListLocks(lyr_path)
-            msg += strlocks + "\n"
+        #for lyr in lyrs:
+            #out_msg += str(lyr) + " is locked by user(s):\n"
+            ##get lyr path
+            #desc = arcpy.Describe(lyr)
+            #lyr_path = desc.path + "\\" + str(lyr) +  ".shp"
+            ##get all locks for this layer and append to msg string
+            #strlocks, listlocks = ListLocks(lyr_path)
+            #out_msg += strlocks + "\n"
         
-        if out_msg == "":
-            out_msg = "No definition querys set in project."
+        #if out_msg == "":
+            #out_msg = "No lock on any layer found."
         
-        result = pythonaddins.MessageBox(out_msg, "Ergebnis", 1)
-        print(result)
-        pass
+        #result = pythonaddins.MessageBox(out_msg, "Ergebnis", 1)
+        #print(result)
+        #pass
 
 
 class CalculateArea(object):
@@ -175,7 +190,7 @@ class CalculateArea(object):
             user(s):\n" + strlocks
 
             #add fields to table of shapefile if not already existant
-            if len(listlocks) > 1: i #isnotlockedbool:
+            if len(listlocks) > 1:  #isnotlockedbool:
                lockedmessage = pythonaddins.MessageBox(islockedmessage, "Locked", 1)
                print(lockedmessage)
             else:
@@ -225,18 +240,18 @@ class BatchReproject(object):
         elif "Gauss_Zone" in outcs.Name:
             coordtag = "GK"
         else:
-            coordtag = outcs.PCSCode
-            
+            #coordtag = outcs.PCSCode
+
         try:
             #iterate over all layers in toc
-            for infc in arcpy.mapping.ListLayers(mxd) #arcpy.ListFeatureClasses(mxd):
+            for infc in arcpy.mapping.ListLayers(mxd): #arcpy.ListFeatureClasses(mxd):
             
                 # Determine if the input has a defined coordinate system, can't project it if it does not
                 indesc = arcpy.Describe(infc)
                 insc = indesc.spatialReference
             
                 if indesc.spatialReference.Name == "Unknown":
-                    print ('skipped this fc due to undefined coordinate system: ' + infc)
+                    print ("skipped this fc due to undefined coordinate system: " + infc)
                 else:
                     # Determine the new output feature class path and name
                     #get path of current feature class and append coord system

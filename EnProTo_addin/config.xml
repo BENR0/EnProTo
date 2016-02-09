@@ -3,6 +3,7 @@
         <Button caption="OpenPathForSelectedLayer" category="EnProTo Addin" class="OpenPathForSelectedLayer" id="OpenPathForSelectedLayer.button" image="Images/openpathforselectedlayer.png" message="" tip="Open Explorer at path where shapefile ist stored"><Help heading="" /></Button>
         <Button caption="OpenPathForCurrentMXD" category="EnProTo Addin" class="OpenPathForCurrentMXD" id="OpenPathForCurrentMXD.button" image="" message="" tip="Open Explorer at path where project MXD is stored"><Help heading="" /></Button>
         <Button caption="FindDefinitionQuerys" category="EnProTo Addin" class="FindDefinitionQuerys" id="FindDefinitionQuerys.button" image="Images/finddefinitionquerys.png" message="" tip="Find all layers with definition querys"><Help heading="" /></Button>
+        <Button caption="ListAllLocksForLayers" category="EnProTo Addin" class="ListAllLocksForLayers" id="ListAllLocksForLayers.button" image="" message="" tip="List locks for all layers in project."><Help heading="" /></Button>
         <Button caption="CalculateArea" category="EnProTo Addin" class="CalculateArea" id="CalculateArea.button" image="Images/calculatearea.png" message="" tip="Adds two fields to selected layer and calculates area in squaremeters (rounded to full sm) and hectars."><Help heading="" /></Button>
         <Button caption="RP" category="EnProTo Addin" class="BatchReproject" id="BatchReproject.button" image="" message="" tip="Reproject all layers in project to coordinate system of the data frame"><Help heading="" /></Button>
         <ComboBox caption="NewShape" category="EnProTo Addin" class="NewShapeFromStandardShape" id="NewShapeFromStandardShape.combobox" itemSizeString="" message="" rows="4" sizeString="" tip="Copies standard shape to user selected path."><Help heading="" /></ComboBox>
@@ -13,7 +14,7 @@
         <Extension autoLoad="true" category="EnProTo Addin" class="ChangeBrowsePath" description="Change path of Export/ Browse/ Save in registry at startup" id="ChangeBrowsePath.extension2" name="ChangeBrowsePath" productName="ChangeBrowsePath" showInExtensionDialog="true" />
         </Extensions>
     <Toolbars>
-        <Toolbar caption="EnProTo Toolbar" category="EnProTo Addin" id="EnProTo.toolbar" showInitially="true"><Items><Menu refID="OpenExplorer.menu" /><Button refID="FindDefinitionQuerys.button" /><Button refID="CalculateArea.button" /><ComboBox refID="NewShapeFromStandardShape.combobox" /><ComboBox refID="ChangePlankopf.combobox" /><Button refID="WritePathOfLayersToFile.button" /></Items></Toolbar>
+        <Toolbar caption="EnProTo Toolbar" category="EnProTo Addin" id="EnProTo.toolbar" showInitially="true"><Items><Menu refID="OpenExplorer.menu" /><Button refID="FindDefinitionQuerys.button" /><Button refID="CalculateArea.button" /><Button refID="ListAllLocksForLayers.button" /><Button refID="BatchReproject.button" /><ComboBox refID="NewShapeFromStandardShape.combobox" /><ComboBox refID="ChangePlankopf.combobox" /><Button refID="WritePathOfLayersToFile.button" /></Items></Toolbar>
         </Toolbars>
     <Menus>
         <Menu caption="Open Explorer" category="Python Addin" id="OpenExplorer.menu" isRootMenu="true" isShortcutMenu="false" separator="false"><Items><Button refID="OpenPathForSelectedLayer.button" /><Button refID="OpenPathForCurrentMXD.button" /></Items></Menu>

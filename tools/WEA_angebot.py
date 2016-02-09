@@ -47,7 +47,7 @@ class WEAangebot(object):
             parameterType="Required",
             direction="Output")
             
-         out_table = arcpy.Parameter(
+        out_table = arcpy.Parameter(
              displayName="Pivot table output",
              name="pivot_table_out",
              datatype="DETable",
