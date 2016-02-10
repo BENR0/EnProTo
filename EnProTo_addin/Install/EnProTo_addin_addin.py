@@ -256,12 +256,13 @@ class BatchReproject(object):
                     #get list of possible transformations
 
                     trafolist = arcpy.ListTransformations(insc, outcs)
-                    print(trafolist)
-                    
-                    # run project tool with projection of data frame and apply transformation
-                    #Project_management (in_dataset, out_dataset, out_coor_system, {transform_method},
-                            #{in_coor_system}, {preserve_shape}, {max_deviation})
-                    arcpy.Project_management(infc, outfc, outcs, trafolist[0])
+                    if len(trafolist) > 0:
+                        #run project tool with projection of data frame and apply transformation
+                        #Project_management (in_dataset, out_dataset, out_coor_system, {transform_method},
+                        #{in_coor_system}, {preserve_shape}, {max_deviation})
+                        arcpy.Project_management(infc, outfc, outcs, trafolist[0])
+                    else:
+                        arcpy.Project_management(infc, outfc, outcs) 
                     
                     # check messages
                     print(arcpy.GetMessages())
