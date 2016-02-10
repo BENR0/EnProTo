@@ -189,11 +189,11 @@ class CalculateArea(object):
                 if len(existfield1) != 1:
                     arcpy.AddField_management(toclayer, fieldName1, "FLOAT", fieldPrecision, fieldScale)
                 else:
-                    fieldexistsmsg1 = "Field: " + fieldname1 + " already exists."
+                    fieldexistsmsg1 = "Field: " + fieldName1 + " already exists."
                 if len(existfield2) != 1:
                      arcpy.AddField_management(toclayer, fieldName2, "FLOAT", fieldPrecision, fieldScale)
                 else:
-                    fieldexistsmsg2 = "Field: " + fieldname2 + " already exists."
+                    fieldexistsmsg2 = "Field: " + fieldName2 + " already exists."
 
             #calculate geometry
             arcpy.CalculateField_management(toclayer, fieldName1, "!SHAPE.AREA@HECTARES!", "PYTHON")
