@@ -1,9 +1,11 @@
 import arcpy
 import numpy as np
+#import openpyxl
+import xlwt
 import pandas as pd
 import os
 import matplotlib.pyplot as plt
-#import openpyxl
+
 
 class WEAangebot(object):
     def __init__(self):
@@ -27,6 +29,8 @@ class WEAangebot(object):
             datatype="GPFeatureLayer",
             parameterType="Required",
             direction="Output")
+            
+        out_buffer.filter.list = ["shp"]
         
         #buffer ranges list
         buffer_ranges = arcpy.Parameter(
@@ -47,12 +51,16 @@ class WEAangebot(object):
             parameterType="Required",
             direction="Output")
             
+        out_intersected.filter.list = ["shp"]
+            
         out_table = arcpy.Parameter(
              displayName="Pivot table output",
              name="pivot_table_out",
-             datatype="DETable",
+             datatype="DEFile",
              parameterType="Required",
-             direction="Output") 
+             direction="Output")
+             
+        out_table.filter.list = ["xls"]
         
 
         parameters = [in_features, out_buffer, buffer_ranges, out_intersected, out_table]
@@ -90,7 +98,7 @@ class WEAangebot(object):
         #Ausgabe-Excel-Datei = arcpy.GetParameterAsText(4)
         
         #corine data
-        corine_data = "V:\\Vorlagen_CAD_GIS\\Daten_Corine\\clc2006_shapes-zipped\\DE_utm32\\clc2006_DE_utm32\\clc06_de_u32.shp"
+        corine_data = "V:\\Vorlagen_CAD_GIS\\Daten_Corine\\clc2006_shapes-zipped\\DE_utm32\\clc2006_DE_utm32\\clc06_de_wald_u32.shp"
         #lyr styles
         intersect_lyr_style = "V:\\Vorlagen_CAD_GIS\\GIS\\styles_aktuell\\WEA_corine_wald_colors.lyr"
         buffer_lyr_style = "V:\\Vorlagen_CAD_GIS\\GIS\\styles_aktuell\\WEA_puffer_colors.lyr"
@@ -176,8 +184,8 @@ class WEAangebot(object):
         
 
         #newLyr_forest = arcpy.MakeFeatureLayer_management(buffer_intersected, "test1")
-        #newLyr_buffers = arcpy.MakeFeatureLayer_management(merged_buffers, "test2")
 
+        #newLyr_buffers = arcpy.MakeFeatureLayer_management(merged_buffers, "test2")
         #apply style
         arcpy.ApplySymbologyFromLayer_management(corine_layer, intersect_lyr_style)
         arcpy.ApplySymbologyFromLayer_management(buffer_layer, buffer_lyr_style)
@@ -189,28 +197,32 @@ class WEAangebot(object):
        # arcpy.env.scratchWorkspace = tempEnvironment0
         
         #extract specified fields to numpy array
-        fnames = ["Distance", "AREA_HA", "AREA_QM", "CODE_06", "HA_Wald", "QM_Wald"]
+        fnames = ["DISTANCE", "AREA_HA", "AREA_QM", "CODE_06", "WA_ART", "HA_Wald", "QM_Wald"]
         table_as_nparray = arcpy.da.FeatureClassToNumPyArray(newlayer1, fnames)
         
         #create pandas data frame
         corine_data_frame = pd.DataFrame(table_as_nparray)
 
         #create pivot table with col and row totals (margins = True)
-        pivot = pd.pivot_table(corine_data_frame, values = "HA_WALD", rows = "Distance", cols = "CODE_06", aggfunc = np.sum,
-                margins = True)
+        pivot = pd.pivot_table(corine_data_frame, values = "HA_Wald", rows = "DISTANCE", cols = "WA_ART", aggfunc = np.sum, margins = True)
         pivot = pivot.fillna(0)
 
         #add percentages in new columns
-        pivot["pct_Laub"] = (pivot.Laub / (pivot.All)) * 100
-        pivot["pct_Nadel"] = (pivot.Nadel / (pivot.All)) * 100
-        pivot["pct_Misch"] = (pivot.Misch / (pivot.All)) * 100
+        if "Laubwald" in pivot.columns:
+            pivot["pct_Laub"] = (pivot.Laubwald / (pivot.All)) * 100
+        
+        if "Nadelwald" in pivot.columns:
+            pivot["pct_Nadel"] = (pivot.Nadelwald / (pivot.All)) * 100
+            
+        if "Mischwald" in pivot.columns:
+            pivot["pct_Misch"] = (pivot.Mischwald / (pivot.All)) * 100
 
         #group data frame by distance and aggregate with sum (total area in each buffer)
-        groupforest = df.groupby("Distance", as_index = False)
-        groupforestagg = grouptest.aggregate(np.sum)
+        groupforest = corine_data_frame.groupby("DISTANCE", as_index = False)
+        groupforestagg = groupforest.aggregate(np.sum)
 
         #add percentages column of forest at total area of buffer
-        groupforestagg["Pct"] = (groupforestagg.HA_WALD / groupforestagg.AREA_HA) * 100
+        groupforestagg["Pct"] = (groupforestagg.HA_Wald / groupforestagg.AREA_HA) * 100
 
         #write tables to Excel (each table to one sheet)
         ###### ADD VARIABLE TO WRITE FILE #######
