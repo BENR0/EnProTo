@@ -9,12 +9,13 @@
         <ComboBox caption="NewShape" category="EnProTo Addin" class="NewShapeFromStandardShape" id="NewShapeFromStandardShape.combobox" itemSizeString="" message="" rows="4" sizeString="" tip="Copies standard shape to user selected path."><Help heading="" /></ComboBox>
         <ComboBox caption="ChangePlankopf" category="EnProTo Addin" class="ChangePlankopf" id="ChangePlankopf.combobox" itemSizeString="WWWWWW" message="" rows="4" sizeString="WWWWWW" tip="Change Plankopf Logo and company address."><Help heading="" /></ComboBox>
         <Button caption="LayersToFile" category="EnProTo Addin" class="WritePathOfLayersToFile" id="WritePathOfLayersToFile.button" image="Images/layerstotext.png" message="" tip="Write path of all shapefile layers to text file"><Help heading="" /></Button>
+        <Button caption="GetPip" category="EnProTo Addin" class="GetPip" id="GetPip.button" image="" message="" tip="Get Pip"><Help heading="" /></Button>
         </Commands>
     <Extensions>
         <Extension autoLoad="true" category="EnProTo Addin" class="ChangeBrowsePath" description="Change path of Export/ Browse/ Save in registry at startup" id="ChangeBrowsePath.extension2" name="ChangeBrowsePath" productName="ChangeBrowsePath" showInExtensionDialog="true" />
         </Extensions>
     <Toolbars>
-        <Toolbar caption="EnProTo Toolbar" category="EnProTo Addin" id="EnProTo.toolbar" showInitially="true"><Items><Menu refID="OpenExplorer.menu" /><Button refID="FindDefinitionQuerys.button" /><Button refID="ListAllLocksForLayers.button" /><Button refID="CalculateArea.button" /><Button refID="BatchReproject.button" /><ComboBox refID="NewShapeFromStandardShape.combobox" /><ComboBox refID="ChangePlankopf.combobox" /><Button refID="WritePathOfLayersToFile.button" /></Items></Toolbar>
+        <Toolbar caption="EnProTo Toolbar" category="EnProTo Addin" id="EnProTo.toolbar" showInitially="true"><Items><Menu refID="OpenExplorer.menu" /><Button refID="FindDefinitionQuerys.button" /><Button refID="ListAllLocksForLayers.button" /><Button refID="CalculateArea.button" /><Button refID="BatchReproject.button" /><ComboBox refID="NewShapeFromStandardShape.combobox" /><ComboBox refID="ChangePlankopf.combobox" /><Button refID="WritePathOfLayersToFile.button" /><Button refID="GetPip.button" /></Items></Toolbar>
         </Toolbars>
     <Menus>
         <Menu caption="Open Explorer" category="Python Addin" id="OpenExplorer.menu" isRootMenu="true" isShortcutMenu="false" separator="false"><Items><Button refID="OpenPathForSelectedLayer.button" /><Button refID="OpenPathForCurrentMXD.button" /></Items></Menu>
