@@ -35,7 +35,7 @@ class DefinitionQueryPolygons(object):
         scale = arcpy.Parameter(
             displayName="Desired scale for map",
             name="scale",
-            datatype="GPString",
+            datatype="GPLong",
             parameterType="Required",
             direction="Input")
         
@@ -50,15 +50,15 @@ class DefinitionQueryPolygons(object):
 
     def updateParameters(self, parameters):
         mxd = arcpy.mapping.MapDocument("current")
-        df = arcpy.mapping.ListDataframes(mxd)[0]
-        lyrs = arcpy.mapping.ListLayers(mxd)
+        df = arcpy.mapping.ListDataFrames(mxd)[0]
+        #lyrs = arcpy.mapping.ListLayers(mxd)
 
-        vilayers = []
-        for lyr in lyrs:
-            if lyr.visible:
-                vilayers.append(lyr)
+        #vilayers = []
+        #for lyr in lyrs:
+            #if lyr.visible:
+                #vilayers.append(lyr)
 
-        parameters[0].filter.list = vilayers
+        #parameters[0].filter.list = vilayers
 
         parameters[3].value = df.scale
 
@@ -102,27 +102,29 @@ class DefinitionQueryPolygons(object):
         layer = parameters[0].valueAsText
         mapField = parameters[1].valueAsText
         blattschnitt = parameters[2].valueAsText
-        scale = parameters[3].valueAsText
+        scale = parameters[3].value
 
         #beginning of script
         mxd = arcpy.mapping.MapDocument("current")
-        df = arcpy.mapping.ListDataframes(mxd)[0]
+        df = arcpy.mapping.ListDataFrames(mxd)[0]
         df_coord = df.spatialReference.PCSCode
         #get dataframe dimensions
-        dfX, dfY = df.elementWidth, df.elementHeight
+        dfX, dfY = df.elementWidth * 0.01, df.elementHeight * 0.01
+        arcpy.AddMessage(dfX)
 
         #calculate polygon length in map units
-        polyX, polY = dfX * scale, dfY * scale
+        polyX, polyY = dfX * scale, dfY * scale
+        arcpy.AddMessage(polyX)
 
         #create polygon
         centerX, centerY = layerCenter(layer)
-        polygon = createPolygon(polyExtent(dfX, dfY, centerX, centerY))
+        polygon = createPolygon(polyExtent(polyX, polyY, centerX, centerY))
 
         #get values to map from attribute table
         values = uniqueValues(layer, mapField)
         #init list for polys
         polys = []
-        for i in len(values):
+        for i in range(len(values)):
             polys.append(polygon)
 
         blattschnitte = arcpy.CopyFeatures_management(polys, blattschnitt)
@@ -130,13 +132,16 @@ class DefinitionQueryPolygons(object):
         arcpy.DefineProjection_management(blattschnitte, df_coord)
         #add field for ddp page name
         arcpy.AddField_management(blattschnitte, mapField, "TEXT", 100)
+        arcpy.AddField_management(blattschnitte, "SCALE", "TEXT", 20)
 
         i = 0
         #populate field with items from value list
-        with arcpy.da.UpdateCursor(blattschnitte, mapField) as cursor:
+        with arcpy.da.UpdateCursor(blattschnitte, [mapField, "SCALE"]) as cursor:
             for row in cursor:
                 row[0] = values[i]
+                row[1] = str(scale)
                 i += 1
+                cursor.updateRow(row)
 
         return
 
