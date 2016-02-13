@@ -116,7 +116,7 @@ class FindDefinitionQuerys(object):
         if out_msg == "":
             out_msg = "No definition querys set in project."
         
-        result = pythonaddins.MessageBox(out_msg, "Ergebnis", 1)
+        result = pythonaddins.MessageBox(out_msg, "Ergebnis", 0)
         print(result)
         pass
         
@@ -145,7 +145,7 @@ class ListAllLocksForLayers(object):
         if out_msg == "":
             out_msg = "No lock on any layer found."
         
-        result = pythonaddins.MessageBox(out_msg, "Ergebnis", 1)
+        result = pythonaddins.MessageBox(out_msg, "Ergebnis", 0)
         print(result)
         pass
 
@@ -183,7 +183,7 @@ class CalculateArea(object):
 
             #add fields to table of shapefile if not already existant
             if len(listlocks) > 1:  #isnotlockedbool:
-               lockedmessage = pythonaddins.MessageBox(islockedmessage, "Locked", 1)
+               lockedmessage = pythonaddins.MessageBox(islockedmessage, "Locked", 0)
                print(lockedmessage)
             else:
                 if len(existfield1) != 1:
@@ -223,7 +223,7 @@ class BatchReproject(object):
         try:
             outcs = df.spatialReference
         except:
-            err_dfcs = pythonaddin.MessageBox("Data frame has no coordinate system assigned.", "Error", 1)
+            err_dfcs = pythonaddin.MessageBox("Data frame has no coordinate system assigned.", "Error", 0)
             print(err_dfcs)
 
         #check which coordsystem df uses and create tag for filename
@@ -330,7 +330,7 @@ class NewShapeFromStandardShape(object):
             templatepath = os.path.join(templatedir,name_horste)
             contstr = "Horste" + project + strdate + "point"
         else:
-            notemplate = pythonaddins.MessageBox("No template file found!", "Error", 1)
+            notemplate = pythonaddins.MessageBox("No template file found!", "Error", 0)
             print(notemplate)
             #templatepath = ""            #present option to create new shape with specified fields?
 
@@ -375,7 +375,7 @@ class ChangePlankopf(object):
             img_logo = arcpy.mapping.ListLayoutElements(mxd,"PICTURE_ELEMENT","comp_logo")[0]
         except:
             element.error = pythonaddins.MessageBox("Check if text and graphic elements exist.",
-                    "Error", 1)
+                    "Error", 0)
             print(element.error)
         
         auftr_csv = csv.DictReader(open(r"V:\Vorlagen_CAD_GIS\GIS\Toolboxes\auftraggeber.csv","r"))
