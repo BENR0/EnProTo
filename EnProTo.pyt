@@ -17,6 +17,7 @@ from tools.buffertool import MultiPurposeBufferTool
 from tools.batchaddfieldmerge import BatchAddFieldMerge
 from tools.WEA_angebot import WEAangebot
 from tools.definitionquerypolygons import DefinitionQueryPolygons
+from tools.rnaanalyse import RNAanalyse
 
 #groupannosbypf not found
 
@@ -26,5 +27,5 @@ class Toolbox(object):
         self.alias = "EnProTo"
 
         #List of tool classes associated with this toolbox
-        self.tools = [AddDescriptionToFeatures,KartenserieToPng,BatchConvertPDFToTif,MultiPurposeBufferTool,BatchAddFieldMerge,DefinitionQueryPolygons,WEAangebot]
+        self.tools = [AddDescriptionToFeatures,KartenserieToPng,BatchConvertPDFToTif,MultiPurposeBufferTool,BatchAddFieldMerge,DefinitionQueryPolygons,WEAangebot,RNAanalyse]
 
