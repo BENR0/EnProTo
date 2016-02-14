@@ -33,7 +33,7 @@ class RNAanalyse(object):
             parameterType="Required",
             direction="Output")
 
-        parameters = [in_lyr, out_lyr]
+        parameters = [wea_lyr, flug_lyr, out_lyr]
             
         return parameters
 
