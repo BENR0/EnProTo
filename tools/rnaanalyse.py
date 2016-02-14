@@ -8,14 +8,23 @@ class RNAanalyse(object):
         self.canRunInBackground = False
 
     def getParameterInfo(self):
-        in_lyr = arcpy.Parameter(
+        wea_lyr = arcpy.Parameter(
             displayName="Layer with WEA points.",
-            name="in_lyr",
+            name="wea_lyr",
             datatype="GPFeatureLayer",
             parameterType="Required",
             direction="Input")
 
-        #in_lyr.filter.list = ["POINT"]
+        wea_lyr.filter.list = ["POINT"]
+
+        flug_lyr = arcpy.Parameter(
+            displayName="Layer with bird observations.",
+            name="flug_lyr",
+            datatype="GPFeatureLayer",
+            parameterType="Required",
+            direction="Input")
+
+        flug_lyr.filter.list = ["LINE"]
             
         out_lyr = arcpy.Parameter(
             displayName="Output Layer",
@@ -70,38 +79,71 @@ class RNAanalyse(object):
             #with arcpy.da.SearchCursor(table, field) as cursor:
                 #return sorted({row[0] for row in cursor})
 
+        def is_odd(num):
+            return num & 0x1
+
         #clean in memory workspace
         arcpy.Delete_management("in_memory")
         arcpy.env.overwriteOutput = True
         #Input
         layer = parameters[0].valueAsText
-        outputLayer = parameters[1].valueAsText
+        flugLayer = parameters[1].valueAsText
+        outputLayer = parameters[2].valueAsText
         thpercentage = 0.75
+        uraum = 6000
 
         #beginning of script
         mxd = arcpy.mapping.MapDocument("current")
-        df = arcpy.mapping.ListDataFrames(mxd)[0]
-        df_coord = df.spatialReference.PCSCode
-        #get dataframe dimensions
-        dfX, dfY = df.elementWidth * 0.01, df.elementHeight * 0.01
+        #df = arcpy.mapping.ListDataFrames(mxd)[0]
+        #df_coord = df.spatialReference.PCSCode
+        layerPCS = arcpy.Describe(layer).spatialReference.PCSCode
 
-        #calculate polygon length in map units
-        #polyX, polyY = dfX * scale, dfY * scale
-        #arcpy.AddMessage(polyX)
-
-        #create polygon
-        #centerX, centerY = layerCenter(layer)
-        #polygon = createPolygon(polyExtent(polyX, polyY, centerX, centerY))
-
+        #get extent of input layer and calculate coordinates for alignment of fishnet
+        #with dtk5 raster
         templateExtent = arcpy.Describe(layer).extent
-        lowerLeft = str(templateExtent.lowerLeft)
-        ycoord = str(templateExtent.XMin) + " " + str(templateExtent.YMin + 10) 
+        #lowerLeft = str(templateExtent.lowerLeft)
+        #ycoord = str(templateExtent.XMin) + " " + str(templateExtent.YMin + 10) 
+        extentXMin = templateExtent.XMin - uraum
+        extentYMin = templateExtent.YMin - uraum
+        extentXMax = templateExtent.XMax + uraum
+        extentYMax = templateExtent.YMax + uraum
+
+        fishnet_originXMin = np.floor(extentXMin/1000)
+        fishnet_originYMin = np.floor(extentYMin/1000)
+        fishnet_originXMax = np.ceil(extentXMax/1000)
+        fishnet_originYMax = np.ceil(extentYMax/1000)
+        #calculate lower left coordinates
+        if is_odd(int(fishnet_originXMin)):
+            fishnet_originXMin = fishnet_originXMin * 1000
+        else:
+            fishnet_originXMin = (fishnet_originXMin - 1) * 1000
+
+        if is_odd(int(fishnet_originYMin)):
+            fishnet_originYMin = (fishnet_originYMin - 1) * 1000
+        else:
+            fishnet_originYMin = fishnet_originYMin * 1000
+
+        #calculate upper right coordinates
+        if is_odd(int(fishnet_originXMax)):
+            fishnet_originXMax = fishnet_originXMax * 1000
+        else:
+            fishnet_originXMax = (fishnet_originXMax + 1) * 1000
+
+        if is_odd(int(fishnet_originYMax)):
+            fishnet_originYMax = (fishnet_originYMax + 1) * 1000
+        else:
+            fishnet_originYMax = fishnet_originYMax * 1000
+
+        lowerLeft = str(fishnet_originXMin) + " " + str(fishnet_originYMin)
+        ycoord = str(fishnet_originXMin) + " " + str(fishnet_originYMin + 10)
+        upperRight = str(fishnet_originXMax) + " " + str(fishnet_originYMax)
 
         arcpy.AddMessage("Creating fishnet...")
-        fishnet = arcpy.CreateFishnet_management(outputLayer, lowerLeft, ycoord, "250", "250", "0", "0", "", "NO_LABELS", templateExtent, "POLYGON") 
+        fishnet = arcpy.CreateFishnet_management(outputLayer, lowerLeft, ycoord, "250", "250", "0", "0", upperRight, "NO_LABELS", "#", "POLYGON") 
+        arcpy.DefineProjection_management(fishnet, layerPCS)
 
         arcpy.AddMessage("Intersecting fishnet with data...")
-        fishIntersect = arcpy.Intersect_analysis([fishnet, layer], "in_memory\intersect", "ALL", "", "LINE")
+        fishIntersect = arcpy.Intersect_analysis([fishnet, flugLayer], "in_memory\intersect", "ALL", "", "LINE")
         arcpy.AddMessage("Exploding multipart features...")
         fishIntersect2 = arcpy.MultipartToSinglepart_management(fishIntersect, "in_memory\intersect2")
         arcpy.AddMessage("Calculating statistics for fishnet cells...")
