@@ -33,6 +33,7 @@ class RNAanalyse(object):
         return True
 
     def updateParameters(self, parameters):
+
         return
 
     def updateMessages(self, parameters):
@@ -75,6 +76,7 @@ class RNAanalyse(object):
         #Input
         layer = parameters[0].valueAsText
         outputLayer = parameters[1].valueAsText
+        thpercentage = 0.75
 
         #beginning of script
         mxd = arcpy.mapping.MapDocument("current")
@@ -94,22 +96,20 @@ class RNAanalyse(object):
         templateExtent = arcpy.Describe(layer).extent
         lowerLeft = str(templateExtent.lowerLeft)
         ycoord = str(templateExtent.XMin) + " " + str(templateExtent.YMin + 10) 
-        arcpy.AddMessage("Creating fishnet")
+
+        arcpy.AddMessage("Creating fishnet...")
         fishnet = arcpy.CreateFishnet_management(outputLayer, lowerLeft, ycoord, "250", "250", "0", "0", "", "NO_LABELS", templateExtent, "POLYGON") 
 
-        arcpy.AddMessage("Intersecting fishnet with data")
+        arcpy.AddMessage("Intersecting fishnet with data...")
         fishIntersect = arcpy.Intersect_analysis([fishnet, layer], "in_memory\intersect", "ALL", "", "LINE")
-        arcpy.AddMessage("Exploding multipart features")
+        arcpy.AddMessage("Exploding multipart features...")
         fishIntersect2 = arcpy.MultipartToSinglepart_management(fishIntersect, "in_memory\intersect2")
-        arcpy.AddMessage("Calculating statistics for fishnet cells")
+        arcpy.AddMessage("Calculating statistics for fishnet cells...")
         #create field name to be dissolved by (depends on name of output feature class)
         dissField = "FID_" + arcpy.Describe(outputLayer).baseName
         dissolve = arcpy.Dissolve_management(fishIntersect2, "in_memory\dissolve", dissField, [["Exemplare", "SUM"]], "SINGLE_PART", "DISSOLVE_LINES")
 
-        #add field to dissolve table for category
-        arcpy.AddField_management(dissolve, "KATEGORIE", "SHORT")
-
-        arcpy.AddMessage("Calculating threshold for RNA category")
+        arcpy.AddMessage("Calculating threshold for RNA category...")
         table_as_array = arcpy.da.FeatureClassToNumPyArray(dissolve, ["SUM_Exemplare"])
         #percentile1 = np.percentile(table_as_array["SUM_Exempl"], 70)
         
@@ -117,63 +117,50 @@ class RNAanalyse(object):
         exemplare_sorted = np.sort(table_as_array["SUM_Exemplare"])[::-1]
         cumsum = np.cumsum(exemplare_sorted)
         #threshhold value
-        threshold = np.amax(cumsum) * 0.75
+        threshold = np.amax(cumsum) * thpercentage
         #calculate difference between cumsum array and threshold value
         #then get index of minimum value in order to extract kategorie threshold
         #from exemplare array
         diff = np.abs(cumsum - threshold)
         minindex = np.argmin(diff)
         katthreshold = exemplare_sorted[minindex]
+        
+                
+        arcpy.AddMessage("Updating fishnet layer with statistics information...")
+        #add field for ddp page name
+        arcpy.AddField_management(fishnet, "EXEMPLARE", "SHORT")
+        arcpy.AddField_management(fishnet, "KATEGORIE", "TEXT", 50)
+                                          
+        #update new fields  
+        path_dict = {}  
+                  
+        #Create Dictionary  
+        join_values = [dissField, "SUM_Exemplare"]
+        with arcpy.da.SearchCursor(dissolve, join_values) as srows:  
+            for srow in srows:  
+                path_dict[srow[0]] = tuple(srow[i] for i in range(1,len(join_values)))  
 
-        #add category information to dissolve table
-        #expression = "addCategory(!SUM_Exemplare!)"
+        #function to convert number of exemplare to category based on threshold
         def addCategory(exemplare, threshold):
             if exemplare >= threshold:
                 return 1
             else:
                 return 0
 
-        #arcpy.CalculateField_management(dissolve, "KATEGORIE", expression, "PYTHON_9.3", codeblock)
-
-        with arcpy.da.UpdateCursor(dissolve, ["SUM_Exemplare", "KATEGORIE"]) as cursor:
-            for row in cursor:
-                row[1] = addCategory(row[0], katthreshold)
-                cursor.updateRow(row)
-                
-        arcpy.AddMessage("Updating fishnet layer with statistics information")
-        #add field for ddp page name
-        arcpy.AddField_management(fishnet, "EXEMPLARE", "SHORT")
-        arcpy.AddField_management(fishnet, "KATEGORIE", "TEXT", 50)
-
-                                          
-        #update new fields  
-        path_dict = {}  
-                  
-        #Create Dictionary  
-        join_values = [dissField, "SUM_Exemplare", "KATEGORIE"]
-        with arcpy.da.SearchCursor(dissolve, join_values) as srows:  
-            for srow in srows:  
-                path_dict[srow[0]] = tuple(srow[i] for i in range(1,len(join_values)))  
-
         #Update Cursor  
         update_fields = ["EXEMPLARE", "KATEGORIE"]
         in_field = "FID"
 
-        update_index = list(range(len(update_fields)))  
-        row_index = list(x+1 for x in update_index)  
         update_fields.insert(0, in_field)  
         with arcpy.da.UpdateCursor(fishnet, update_fields) as urows:  
             for row in urows:  
                 if row[0] in path_dict:  
-                    try:  
-                        allVals =[path_dict[row[0]][i] for i in update_index]  
-                        for r,v in zip(row_index, allVals):  
-                            row[r] = v  
-                        urows.updateRow(row)  
-                    except: pass  
+                    row[1] = path_dict[row[0]][0]
+                    row[2] = addCategory(row[1], katthreshold)
+                else:
+                    row[1] = 0
+                    row[2] = 0
+                    
+                urows.updateRow(row)  
           
         return
-
-
-
-
