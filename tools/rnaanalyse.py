@@ -79,6 +79,9 @@ class RNAanalyse(object):
             #with arcpy.da.SearchCursor(table, field) as cursor:
                 #return sorted({row[0] for row in cursor})
 
+        #layer style for rna categories
+        rnacategories = r"V:\Vorlagen_CAD_GIS\GIS\styles_aktuell\RNA_raster.lyr"
+                
         def is_odd(num):
             return num & 0x1
 
@@ -185,9 +188,9 @@ class RNAanalyse(object):
         #function to convert number of exemplare to category based on threshold
         def addCategory(exemplare, threshold):
             if exemplare >= threshold:
-                return 1
+                return "Kategorie II"
             else:
-                return 0
+                return "Kategorie I"
 
         #Update Cursor  
         update_fields = ["EXEMPLARE", "KATEGORIE"]
@@ -205,4 +208,6 @@ class RNAanalyse(object):
                     
                 urows.updateRow(row)  
           
+        #apply layer style
+        arcpy.ApplySymbologyFromLayer_management(fishnet, rnacategories)
         return

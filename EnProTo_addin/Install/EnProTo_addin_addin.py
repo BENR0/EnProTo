@@ -341,10 +341,16 @@ class Join(object):
         ########
         #pathes to join tables
         #path for each list which can be used for joins
-        birds = r"C:\Users\ro\Desktop\Index_deutscher_Vogelnamen.xls"
+        birds = r"V:\Vorlagen_Kartierungen\Erfassung_Fauna\Vögel\Artenliste_Vögel\Index_deutscher_Vogelnamen_gis.xlsx"
+        btt_hessen = r"V:\Vorlagen_Kartierungen\Erfassung_Biotoptypen\Biotopschlüssel_Hessen\TNL_Kartierschlüssel\TNL_Biotoptypenschlüssel_Basis_KV_GIS.xlsx"
+        #btt_nrw = r
+        btt_nieder = r"V:\Vorlagen_Kartierungen\Erfassung_Biotoptypen\Biotopschlüssel_Niedersachsen\Schlüssel_Tab_fuer_GIS\Tabelle_GIS_BTT_NI_bearb_benjamin_GIS.xls"
+        btt_bayern = r"V:\Vorlagen_Kartierungen\Erfassung_Biotoptypen\Biotopschlüssel_Bayern\Biotopwertliste_BayKompV\Biotopwertliste_neu_GIS.xlsx"
+        #btt_bawu = r
+        #fleder = r
         #btt
         ########
-        tables = [birds]
+        tables = [birds, btt_hessen, btt_bayern, btt_nieder]
 
         mxd = arcpy.mapping.MapDocument("current")
         toclayer = pythonaddins.GetSelectedTOCLayerOrDataFrame()
