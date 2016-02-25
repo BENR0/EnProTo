@@ -32,6 +32,15 @@ class RNAanalyse(object):
             datatype="GPFeatureLayer",
             parameterType="Required",
             direction="Output")
+            
+        # threshold70_bool = arcpy.Parameter(
+            # displayName="Use 70/20% (three categories) instead of 75/25% (two categories) threshold rule.",
+            # name="threshold70_bool",
+            # datatype="GPBoolean",
+            # parameterType="Optional",
+            # direction="Input")
+
+        #threshold70_bool.value = "False"
 
         parameters = [wea_lyr, flug_lyr, out_lyr]
             
@@ -42,8 +51,8 @@ class RNAanalyse(object):
         return True
 
     def updateParameters(self, parameters):
-
-        return
+       
+       return
 
     def updateMessages(self, parameters):
         
@@ -92,7 +101,12 @@ class RNAanalyse(object):
         layer = parameters[0].valueAsText
         flugLayer = parameters[1].valueAsText
         outputLayer = parameters[2].valueAsText
+        #threshold_scheme = parameters[3].valueAsText
+        
         thpercentage = 0.75
+        thpercentage2upper = 0.70
+        thpercentage2lower = 0.20
+
         uraum = 6000
 
         #beginning of script
@@ -104,6 +118,21 @@ class RNAanalyse(object):
         #get extent of input layer and calculate coordinates for alignment of fishnet
         #with dtk5 raster
         templateExtent = arcpy.Describe(layer).extent
+        #create point for lower left and upper right
+        #transform points to gk coordinates
+        #create boundaries for fishnet
+        #transform points back to initial coordinates
+        # inputSRS = arcpy.SpatialReference(7405)  # British National Grid  
+        # outputSRS = arcpy.SpatialReference(4326) # GCS WGS84  
+        # gt = 'OSGB_1936_To_WGS_1984_Petroleum'      
+        # pt = arcpy.Point()    
+        # pt.X = 210000      
+        # pt.Y = 310000      
+        # print "Input XY: {} {}".format(pt.X, pt.Y)  
+        # ptgeo = arcpy.PointGeometry(pt, inputSRS)  
+        # ptgeo1 = ptgeo.projectAs(outputSRS, gt)  
+        # pt1 = ptgeo1.lastPoint  
+        # print "Output XY: {} {}".format(pt1.X, pt1.Y)
         #lowerLeft = str(templateExtent.lowerLeft)
         #ycoord = str(templateExtent.XMin) + " " + str(templateExtent.YMin + 10) 
         extentXMin = templateExtent.XMin - uraum
@@ -158,23 +187,37 @@ class RNAanalyse(object):
         table_as_array = arcpy.da.FeatureClassToNumPyArray(dissolve, ["SUM_Exemplare"])
         #percentile1 = np.percentile(table_as_array["SUM_Exempl"], 70)
         
-        #sort in descending order and build cumulative sum
-        exemplare_sorted = np.sort(table_as_array["SUM_Exemplare"])[::-1]
+        #sort in ascending/descending order and build cumulative sum
+        #threshold2 for ascending (lower boundary) in three categorie scheme
+        exemplare_sorted_asc = np.sort(table_as_array["SUM_Exemplare"])
+        exemplare_sorted = exemplare_sorted_asc[::-1]
+        
         cumsum = np.cumsum(exemplare_sorted)
+        cumsum_asc = np.cumsum(exemplare_sorted_asc)
         #threshhold value
-        threshold = np.amax(cumsum) * thpercentage
+        cumsum_max = np.amax(cumsum)
+        threshold = cumsum_max * thpercentage
+        threshold2upper = cumsum_max * thpercentage2upper
+        threshold2lower = cumsum_max * thpercentage2lower
         #calculate difference between cumsum array and threshold value
         #then get index of minimum value in order to extract kategorie threshold
         #from exemplare array
         diff = np.abs(cumsum - threshold)
+        diff2upper = np.abs(cumsum - threshold2upper)
+        diff2lower = np.abs(cumsumasc - threshold2lower)
         minindex = np.argmin(diff)
+        minindex2upper = np.argmin(diff2upper)
+        minindex2lower = np.argmin(diff2lower)
         katthreshold = exemplare_sorted[minindex]
+        katthreshold2upper = exemplare_sorted[minindex2upper]
+        katthreshold2lower = exemplare_sorted_asc[minindex2lower]
         
                 
         arcpy.AddMessage("Updating fishnet layer with statistics information...")
         #add field for ddp page name
         arcpy.AddField_management(fishnet, "EXEMPLARE", "SHORT")
-        arcpy.AddField_management(fishnet, "KATEGORIE", "TEXT", 50)
+        arcpy.AddField_management(fishnet, "KAT2", "TEXT", 50)
+        arcpy.AddField_management(fishnet, "KAT3", "TEXT", 50)
                                           
         #update new fields  
         path_dict = {}  
@@ -191,9 +234,20 @@ class RNAanalyse(object):
                 return "Kategorie II"
             else:
                 return "Kategorie I"
+                
+        def addCategory2(exemplare, threshold, threshold2):
+            #ausschlussempfehlung
+            if exemplare >= threshold:
+                return "Kategorie II"
+            #eignungsbereiche
+            elif exemplare <= threshold2:
+                return "Kategorie I"
+            #mit Nebenbestimmung
+            else:
+                return "Kategorie III"
 
         #Update Cursor  
-        update_fields = ["EXEMPLARE", "KATEGORIE"]
+        update_fields = ["EXEMPLARE", "KAT2", "KAT2"]
         in_field = "FID"
 
         update_fields.insert(0, in_field)  
@@ -202,9 +256,11 @@ class RNAanalyse(object):
                 if row[0] in path_dict:  
                     row[1] = path_dict[row[0]][0]
                     row[2] = addCategory(row[1], katthreshold)
+                    row[3] = addCategory2(row[1], katthreshold2upper, katthreshold2lower)
                 else:
                     row[1] = 0
                     row[2] = 0
+                    row[3] = 0
                     
                 urows.updateRow(row)  
           
