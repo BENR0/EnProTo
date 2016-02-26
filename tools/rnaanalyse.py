@@ -94,6 +94,16 @@ class RNAanalyse(object):
         def is_odd(num):
             return num & 0x1
 
+        def createExtent(xmin, ymin, xmax, ymax):
+            tmp = arcpy.Array()
+            tmp.add(arcpy.Point(xmin, ymin))
+            tmp.add(arcpy.Point(xmax, ymin))
+            tmp.add(arcpy.Point(xmax, ymax))
+            tmp.add(arcpy.Point(xmin, ymax))
+            tmp.add(arcpy.Point(xmin, ymin))
+            tmppoly = arcpy.Polygon(tmp)
+            return tmppoly.extent
+
         #clean in memory workspace
         arcpy.Delete_management("in_memory")
         arcpy.env.overwriteOutput = True
@@ -115,26 +125,23 @@ class RNAanalyse(object):
         #df_coord = df.spatialReference.PCSCode
         layerPCS = arcpy.Describe(layer).spatialReference.PCSCode
 
+        arcpy.AddMessage(layerPCS)
         #get extent of input layer and calculate coordinates for alignment of fishnet
         #with dtk5 raster
+        #DHDN_to_ETRS_1989_8_NTv2
+        #GK3 31467
+        #GK4 31468
+        #utmn32 5652
+        #utmn33 5653
+        gt = "DHDN_to_ETRS_1989_8_NTv2"
         templateExtent = arcpy.Describe(layer).extent
-        #create point for lower left and upper right
-        #transform points to gk coordinates
-        #create boundaries for fishnet
-        #transform points back to initial coordinates
-        # inputSRS = arcpy.SpatialReference(7405)  # British National Grid  
-        # outputSRS = arcpy.SpatialReference(4326) # GCS WGS84  
-        # gt = 'OSGB_1936_To_WGS_1984_Petroleum'      
-        # pt = arcpy.Point()    
-        # pt.X = 210000      
-        # pt.Y = 310000      
-        # print "Input XY: {} {}".format(pt.X, pt.Y)  
-        # ptgeo = arcpy.PointGeometry(pt, inputSRS)  
-        # ptgeo1 = ptgeo.projectAs(outputSRS, gt)  
-        # pt1 = ptgeo1.lastPoint  
-        # print "Output XY: {} {}".format(pt1.X, pt1.Y)
-        #lowerLeft = str(templateExtent.lowerLeft)
-        #ycoord = str(templateExtent.XMin) + " " + str(templateExtent.YMin + 10) 
+        if str(layerPCS) == "5652":
+            projection = 31467
+            templateExtent = templateExtent.projectAs("31467", gt)
+        if str(layerPCS) == "5653":
+            projection = 31468
+            templateExtent = templateExtent.projectAs("31468", gt)
+
         extentXMin = templateExtent.XMin - uraum
         extentYMin = templateExtent.YMin - uraum
         extentXMax = templateExtent.XMax + uraum
@@ -166,13 +173,29 @@ class RNAanalyse(object):
         else:
             fishnet_originYMax = fishnet_originYMax * 1000
 
-        lowerLeft = str(fishnet_originXMin) + " " + str(fishnet_originYMin)
-        ycoord = str(fishnet_originXMin) + " " + str(fishnet_originYMin + 10)
-        upperRight = str(fishnet_originXMax) + " " + str(fishnet_originYMax)
+
+        arcpy.AddMessage(fishnet_originXMin)
+        arcpy.AddMessage(fishnet_originXMax)
+        arcpy.AddMessage(fishnet_originYMin)
+        arcpy.AddMessage(fishnet_originYMax)
+        
+        #transform extent back to utm
+        newExtent = createExtent(fishnet_originXMin, fishnet_originYMin, fishnet_originXMax, fishnet_originYMax)
+        #newExtent = newExtent.projectAs(str(layerPCS))
+
+        #arcpy.AddMessage("New Extent")
+        #arcpy.AddMessage(newExtent.lowerLeft)
+        #arcpy.AddMessage(newExtent.upperRight)
+
+        lowerLeft = str(newExtent.XMin) + " " + str(newExtent.YMin)
+        ycoord = str(newExtent.XMin) + " " + str(newExtent.YMin + 10)
+        upperRight = str(newExtent.XMax) + " " + str(newExtent.YMax)
 
         arcpy.AddMessage("Creating fishnet...")
-        fishnet = arcpy.CreateFishnet_management(outputLayer, lowerLeft, ycoord, "250", "250", "0", "0", upperRight, "NO_LABELS", "#", "POLYGON") 
-        arcpy.DefineProjection_management(fishnet, layerPCS)
+        fishnettmp = arcpy.CreateFishnet_management("in_memory/fishnet", lowerLeft, ycoord, "250", "250", "0", "0", upperRight, "NO_LABELS", "#", "POLYGON") 
+        arcpy.DefineProjection_management(fishnettmp, projection)
+        fishnet = arcpy.Project_management(fishnettmp, outputLayer, str(layerPCS))
+        
 
         arcpy.AddMessage("Intersecting fishnet with data...")
         fishIntersect = arcpy.Intersect_analysis([fishnet, flugLayer], "in_memory\intersect", "ALL", "", "LINE")
@@ -204,7 +227,7 @@ class RNAanalyse(object):
         #from exemplare array
         diff = np.abs(cumsum - threshold)
         diff2upper = np.abs(cumsum - threshold2upper)
-        diff2lower = np.abs(cumsumasc - threshold2lower)
+        diff2lower = np.abs(cumsum_asc - threshold2lower)
         minindex = np.argmin(diff)
         minindex2upper = np.argmin(diff2upper)
         minindex2lower = np.argmin(diff2lower)
@@ -247,7 +270,7 @@ class RNAanalyse(object):
                 return "Kategorie III"
 
         #Update Cursor  
-        update_fields = ["EXEMPLARE", "KAT2", "KAT2"]
+        update_fields = ["EXEMPLARE", "KAT2", "KAT3"]
         in_field = "FID"
 
         update_fields.insert(0, in_field)  
