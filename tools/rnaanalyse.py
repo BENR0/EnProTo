@@ -1,5 +1,6 @@
 import arcpy
 import numpy as np
+import os
 
 class RNAanalyse(object):
     def __init__(self):
@@ -59,7 +60,7 @@ class RNAanalyse(object):
         if parameters[1].hasBeenValidated:
             exemplare_field = arcpy.ListFields(parameters[1].value, "Exemplare")
             if len(exemplare_field) < 1:
-                parameters[1].setWarningMessage("No Exemplare field could be found.")
+                parameters[1].setErrorMessage("No Exemplare field could be found.")
             else:
                 parameters[1].clearMessage()
 
@@ -120,6 +121,7 @@ class RNAanalyse(object):
         outputLayer = parameters[2].valueAsText
         #threshold_scheme = parameters[3].valueAsText
         
+        #parameter definitions
         thpercentage = 0.75
         thpercentage2upper = 0.70
         thpercentage2lower = 0.20
@@ -198,7 +200,7 @@ class RNAanalyse(object):
         fishnettmp = arcpy.CreateFishnet_management("in_memory/fishnet", lowerLeft, ycoord, "250", "250", "0", "0", upperRight, "NO_LABELS", "#", "POLYGON") 
         arcpy.DefineProjection_management(fishnettmp, str(projection))
 ###############NEEDS TRANSFORMATION!!!!!###########
-        fishnet = arcpy.Project_management(fishnettmp, outputLayer, str(layerPCS))
+        fishnet = arcpy.Project_management(fishnettmp, outputLayer, str(layerPCS), gt)
         #reset output coordinate system 
         arcpy.env.outputCoordinateSystem = arcpy.SpatialReference(layerPCS)
 
@@ -210,7 +212,7 @@ class RNAanalyse(object):
 
         #create field name to be dissolved by (depends on name of output feature class)
         dissField = "FID_" + arcpy.Describe(outputLayer).baseName
-        arcpy.AddMessage(dissField)
+        #arcpy.AddMessage(dissField)
         dissolve = arcpy.Dissolve_management(fishIntersect, "in_memory\dissolve", dissField, [["Exemplare", "SUM"]], "MULTI_PART", "DISSOLVE_LINES")
 
         arcpy.AddMessage("Calculating threshold for RNA category...")
@@ -293,7 +295,16 @@ class RNAanalyse(object):
                     row[3] = 0
                     
                 urows.updateRow(row)  
-          
+        
+        #add shape with result to mxd
+        shppath = os.path.split(outputLayer)
+        result = arcpy.mapping.Layer(outputLayer)
+        #lyr = result.getOutput(0)
+        arcpy.mapping.AddLayer(df, result, "AUTO_ARRANGE")
+        updatelayer = arcpy.mapping.ListLayers(mxd, result.name)[0]
+        
         #apply layer style
-        arcpy.ApplySymbologyFromLayer_management(fishnet, rnacategories)
+        arcpy.ApplySymbologyFromLayer_management(updatelayer, rnacategories)
+        arcpy.RefreshActiveView()
+        arcpy.RefreshTOC()
         return
