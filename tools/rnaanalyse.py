@@ -51,11 +51,18 @@ class RNAanalyse(object):
         return True
 
     def updateParameters(self, parameters):
+        #check if Exemplare field exists
        
        return
 
     def updateMessages(self, parameters):
-        
+        if parameters[1].hasBeenValidated:
+            exemplare_field = arcpy.ListFields(parameters[1].value, "Exemplare")
+            if len(exemplare_field) < 1:
+                parameters[1].setWarningMessage("No Exemplare field could be found.")
+            else:
+                parameters[1].clearMessage()
+
         return
 
     def execute(self, parameters, messages):
@@ -121,11 +128,10 @@ class RNAanalyse(object):
 
         #beginning of script
         mxd = arcpy.mapping.MapDocument("current")
-        #df = arcpy.mapping.ListDataFrames(mxd)[0]
-        #df_coord = df.spatialReference.PCSCode
-        layerPCS = arcpy.Describe(layer).spatialReference.PCSCode
+        df = arcpy.mapping.ListDataFrames(mxd)[0]
+        df_coord = df.spatialReference.PCSCode
+        layerPCS = arcpy.Describe(flugLayer).spatialReference.PCSCode
 
-        arcpy.AddMessage(layerPCS)
         #get extent of input layer and calculate coordinates for alignment of fishnet
         #with dtk5 raster
         #DHDN_to_ETRS_1989_8_NTv2
@@ -133,12 +139,13 @@ class RNAanalyse(object):
         #GK4 31468
         #utmn32 5652
         #utmn33 5653
-        gt = "DHDN_to_ETRS_1989_8_NTv2"
+        gt = "DHDN_To_ETRS_1989_8_NTv2"
+        #gt = "DHDN_to_WGS_1984_4_NTv2 + ETRS_1989_to_WGS_1984"
         templateExtent = arcpy.Describe(layer).extent
-        if str(layerPCS) == "5652":
+        if str(df_coord) == "5652":
             projection = 31467
             templateExtent = templateExtent.projectAs("31467", gt)
-        if str(layerPCS) == "5653":
+        if str(df_coord) == "5653":
             projection = 31468
             templateExtent = templateExtent.projectAs("31468", gt)
 
@@ -173,11 +180,6 @@ class RNAanalyse(object):
         else:
             fishnet_originYMax = fishnet_originYMax * 1000
 
-
-        arcpy.AddMessage(fishnet_originXMin)
-        arcpy.AddMessage(fishnet_originXMax)
-        arcpy.AddMessage(fishnet_originYMin)
-        arcpy.AddMessage(fishnet_originYMax)
         
         #transform extent back to utm
         newExtent = createExtent(fishnet_originXMin, fishnet_originYMin, fishnet_originXMax, fishnet_originYMax)
@@ -192,19 +194,24 @@ class RNAanalyse(object):
         upperRight = str(newExtent.XMax) + " " + str(newExtent.YMax)
 
         arcpy.AddMessage("Creating fishnet...")
+        arcpy.env.outputCoordinateSystem = arcpy.SpatialReference(projection)
         fishnettmp = arcpy.CreateFishnet_management("in_memory/fishnet", lowerLeft, ycoord, "250", "250", "0", "0", upperRight, "NO_LABELS", "#", "POLYGON") 
-        arcpy.DefineProjection_management(fishnettmp, projection)
+        arcpy.DefineProjection_management(fishnettmp, str(projection))
+###############NEEDS TRANSFORMATION!!!!!###########
         fishnet = arcpy.Project_management(fishnettmp, outputLayer, str(layerPCS))
-        
+        #reset output coordinate system 
+        arcpy.env.outputCoordinateSystem = arcpy.SpatialReference(layerPCS)
 
         arcpy.AddMessage("Intersecting fishnet with data...")
         fishIntersect = arcpy.Intersect_analysis([fishnet, flugLayer], "in_memory\intersect", "ALL", "", "LINE")
-        arcpy.AddMessage("Exploding multipart features...")
-        fishIntersect2 = arcpy.MultipartToSinglepart_management(fishIntersect, "in_memory\intersect2")
+        #arcpy.AddMessage("Exploding multipart features...")
+        #fishIntersect2 = arcpy.MultipartToSinglepart_management(fishIntersect, "in_memory\intersect2")
         arcpy.AddMessage("Calculating statistics for fishnet cells...")
+
         #create field name to be dissolved by (depends on name of output feature class)
         dissField = "FID_" + arcpy.Describe(outputLayer).baseName
-        dissolve = arcpy.Dissolve_management(fishIntersect2, "in_memory\dissolve", dissField, [["Exemplare", "SUM"]], "SINGLE_PART", "DISSOLVE_LINES")
+        arcpy.AddMessage(dissField)
+        dissolve = arcpy.Dissolve_management(fishIntersect, "in_memory\dissolve", dissField, [["Exemplare", "SUM"]], "MULTI_PART", "DISSOLVE_LINES")
 
         arcpy.AddMessage("Calculating threshold for RNA category...")
         table_as_array = arcpy.da.FeatureClassToNumPyArray(dissolve, ["SUM_Exemplare"])
