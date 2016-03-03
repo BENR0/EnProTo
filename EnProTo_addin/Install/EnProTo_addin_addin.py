@@ -341,11 +341,11 @@ class Join(object):
         ########
         #pathes to join tables
         #path for each list which can be used for joins
-        birds = r"V:\Vorlagen_Kartierungen\Erfassung_Fauna\Vögel\Artenliste_Vögel\Index_deutscher_Vogelnamen_gis.xlsx"
-        btt_hessen = r"V:\Vorlagen_Kartierungen\Erfassung_Biotoptypen\Biotopschlüssel_Hessen\TNL_Kartierschlüssel\TNL_Biotoptypenschlüssel_Basis_KV_GIS.xlsx"
+        birds = r"V:\Vorlagen_Kartierungen\Erfassung_Fauna\Voegel\Artenliste_Voegel\Index_deutscher_Vogelnamen_gis.xlsx"
+        btt_hessen = r"V:\Vorlagen_Kartierungen\Erfassung_Biotoptypen\Biotopschluessel_Hessen\TNL_Kartierschlüssel\TNL_Biotoptypenschluessel_Basis_KV_GIS.xlsx"
         #btt_nrw = r
-        btt_nieder = r"V:\Vorlagen_Kartierungen\Erfassung_Biotoptypen\Biotopschlüssel_Niedersachsen\Schlüssel_Tab_fuer_GIS\Tabelle_GIS_BTT_NI_bearb_benjamin_GIS.xls"
-        btt_bayern = r"V:\Vorlagen_Kartierungen\Erfassung_Biotoptypen\Biotopschlüssel_Bayern\Biotopwertliste_BayKompV\Biotopwertliste_neu_GIS.xlsx"
+        btt_nieder = r"V:\Vorlagen_Kartierungen\Erfassung_Biotoptypen\Biotopschluessel_Niedersachsen\Schluessel_Tab_fuer_GIS\Tabelle_GIS_BTT_NI_bearb_benjamin_GIS.xls"
+        btt_bayern = r"V:\Vorlagen_Kartierungen\Erfassung_Biotoptypen\Biotopschluessel_Bayern\Biotopwertliste_BayKompV\Biotopwertliste_neu_GIS.xlsx"
         #btt_bawu = r
         #fleder = r
         #btt
@@ -508,32 +508,33 @@ class NewShapeFromStandardShape(object):
         #get directory of map document
         mxdpath = mxd.filePath
         #split path by GIS directory, keep first part and add GIS folder again
-        startpath = re.split('05_GIS',mxdpath)[0] + "05_GIS/av_daten"
+        base = re.split('05_GIS',mxdpath)[0]
+        startpath = base + "05_GIS/av_daten"
 
         #create filename
         #construct date
         today = dt.date.today()
         strdate = str(today.year) + str(today.month) + str(today.day)
         #get projectname
-        project = mxdpath.split("/")[3]
+        project = base.split("\\")[-2]
         #create content block string and path to template file
         if selection == "BTT_poly":
             #create full path of template shape
             templatepath = os.path.join(templatedir,name_btt_poly)
             #create content block string
-            contstr = "BTT" + project + strdate + "poly"
+            contstr = "BTT" + project + "_" + strdate + "_" + "poly"
         elif selection == "BTT_point":
             templatepath = os.path.join(templatedir,name_btt_point)
-            contstr = "BTT" + project + strdate + "point"
+            contstr = "BTT" + project + "_" + strdate + "_" + "point"
         elif selection == "RNA_Voegel":
             templatepath = os.path.join(templatedir,name_rna_bird)
-            contstr = "RNA" + project + strdate + "line"
+            contstr = "RNA" + project + "_" + strdate + "_" + "line"
         elif selection == "Rastvoegel":
             templatepath = os.path.join(templatedir,name_rast)
-            contstr = "Rastvoegel" + project + strdate + "point"
+            contstr = "Rastvoegel" + project + "_" + strdate + "_" + "point"
         elif selection == "Horste":
             templatepath = os.path.join(templatedir,name_horste)
-            contstr = "Horste" + project + strdate + "point"
+            contstr = "Horste" + project + "_" + strdate + "_" + "point"
         else:
             notemplate = pythonaddins.MessageBox("No template file found!", "Error", 0)
             print(notemplate)
