@@ -143,6 +143,10 @@ class DefinitionQueryPolygons(object):
                 i += 1
                 cursor.updateRow(row)
 
+                
+        result = arcpy.mapping.Layer(blattschnitt)
+        #lyr = result.getOutput(0)
+        arcpy.mapping.AddLayer(df, result, "AUTO_ARRANGE")
         return
 
 

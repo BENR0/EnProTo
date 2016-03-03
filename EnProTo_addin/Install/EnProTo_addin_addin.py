@@ -596,7 +596,7 @@ class ChangePlankopf(object):
                 img_src = os.path.join(logodir,row["src"])
         
         #zeichnerl = ["zeichner1", "zeichner1", "zeichner13", u"B. Sc. Benjamin Rösner"]
-        zeichnerl = [u"Dipl. Geo. Julia Krimkowski",u"M.Sc. Geoökol. Isgard Rudloff",u"M.Sc. Landsch.-Ökol. Andreas Menzel",u"B.Sc. Geo. Benjamin Rösner",u"Dipl. Geo. Thorsten Knies",u"Dipl. Geo. Sandra Kiessling"]
+        zeichnerl = [u"Dipl. Geo. Julia Krimkowski",u"M.Sc. Geoökol. Isgard Rudloff",u"M.Sc. Landsch.-Ökol. Andreas Menzel",u"B.Sc. Geo. Benjamin Rösner",u"Dipl. Geo. Yvonne Dernedde",u"Dipl. Geo. Sandra Kiessling"]
         #get username from system and set zeichner variable acordingly
         user = os.environ.get("USERNAME")
         if user == "Julia.Krimkowski":
@@ -607,7 +607,7 @@ class ChangePlankopf(object):
             zeichner == zeichnerl[2]
         elif user == "Benjamin.Roesner":
             zeichner = zeichnerl[3]
-        elif user == "Thorsten.Knies":
+        elif user == "Yvonne.Dernedde":
             zeichner = zeichnerl[4]
         elif user == "Sandra.Kiessling":
             zeichner = zeichnerl[5]
