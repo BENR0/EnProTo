@@ -172,7 +172,7 @@ def Msg(message="Hello world", title="PythonDemo"):
     return fn(0, message, title, 0)
 
 
-def AddRectangleElement(position = (10.0, 10.0), bgcolor = (255,0,0),
+def AddRectangleElement(position = (10.0, 25.0), bgcolor = (255,0,0),
         sigwidth = 1.0, sigheight = 0.5, tag = "test"):
 
     '''
@@ -191,16 +191,18 @@ def AddRectangleElement(position = (10.0, 10.0), bgcolor = (255,0,0),
     import comtypes.gen.esriDisplay as esriDisplay
     import comtypes.gen.stdole as stdole
 
-    # Get midpoint of focus map
-
+    # Get midpoint of page layout
+    #
     pDoc = pApp.Document
     pMxDoc = CType(pDoc, esriArcMapUI.IMxDocument)
     pMap = pMxDoc.PageLayout
     pAV = CType(pMap, esriCarto.IActiveView)
-    pSD = pAV.ScreenDisplay
-    pEnv = pAV.Extent
-    dX = pEnv.XMax - position[0] #(pEnv.XMin + pEnv.XMax) / 2
-    dY = pEnv.YMax + position[1] #(pEnv.YMin + pEnv.YMax) / 2
+    #pSD = pAV.ScreenDisplay
+    #pEnv = pAV.Extent
+    #dX = pEnv.XMax - position[0] #(pEnv.XMin + pEnv.XMax) / 2
+    #dY = pEnv.YMax + position[1] #(pEnv.YMin + pEnv.YMax) / 2
+    dX = position[0]
+    dY = position[1]
 
     #lower left point of rectangle envelope
     pRecLowerLeft = NewObj(esriGeometry.Point, esriGeometry.IPoint)
@@ -254,10 +256,10 @@ def AddRectangleElement(position = (10.0, 10.0), bgcolor = (255,0,0),
     pAV.PartialRefresh(iOpt, None, None)
 
 
-def AddTextElement(bStandalone = False, position = (10.0, 10.0), txtfont = "Arial",
+def AddTextElement(bStandalone = False, position = (10.0, 25.0), txtfont = "Arial",
      txtsize = 12, txtcolor = (0,0,0),
-     txtbold = False, txtstring = "test", bg = False,
-     bgcolor = (255,255,255), tag = "test"):
+     txtbold = False, txtstring = "txtElemTemplate", bg = False,
+     bgcolor = (255,255,255), tag = "txtElemTemplate"):
 
 
     '''
@@ -391,11 +393,11 @@ def AddTextElement(bStandalone = False, position = (10.0, 10.0), txtfont = "Aria
 
     # Get element width
 
-    iCount = pGCSel.ElementSelectionCount
-    pElement = pGCSel.SelectedElement(iCount - 1)
-    pEnv = NewObj(esriGeometry.Envelope, esriGeometry.IEnvelope)
-    pElement.QueryBounds(pSD, pEnv)
-    print "Width = ", pEnv.Width
+    #iCount = pGCSel.ElementSelectionCount
+    #pElement = pGCSel.SelectedElement(iCount - 1)
+    #pEnv = NewObj(esriGeometry.Envelope, esriGeometry.IEnvelope)
+    #pElement.QueryBounds(pSD, pEnv)
+    #print "Width = ", pEnv.Width
 
 #############################
 #definitions for buttons start
@@ -1053,14 +1055,19 @@ class TB(object):
         self.checked = False
     def onClick(self):
         #positioncounter
-        iPosition = [10.0, 10.0]
-        #distances between elements
+        iPosition = [10.0, 25.0]
+        #distances of and between elements
         sigwidth = 1.0
+        txtElemWidth = 6.0
         sigheight = 0.5
         sig2group = 0.5
-        group2item = 0.8
-        item2item = 0.5
-        group2group = 1.0
+        group2item = 0.6
+        item2item = 0.1
+        group2group = 0.8
+        #font characteristics
+        fontName = "Arial"
+        headingFontSize = 14.0
+        itemFontSize = 12.0
 
         #helper functions
         #function to create signature with heading
@@ -1069,8 +1076,7 @@ class TB(object):
             heading = txtElem.clone("_clone")
             heading.elementPositionX = position[0] + sigwidth + sig2group
             heading.elementPositionY = position[1]
-            heading.text = txtstring
-            heading.textSize = 14.0
+            heading.text = '<FNT name = "' + fontName + '" size = "' + str(headingFontSize) + '">' + txtstring + '</FNT>'
             #increase iPosition
             position[1] = position[1] - group2item
             return position
@@ -1082,6 +1088,8 @@ class TB(object):
                 txtitem = txtElem.clone("_clone")
                 txtitem.elementPositionX = position[0] + sigwidth + sig2group
                 txtitem.elementPositionY = position[1] - nitem * (txtitem.elementHeight + item2item)
+                #txtitem.elementWidth = txtElemWidth
+                #txtitem.text = '<FNT name = "' + fontName + '" size = "' + str(itemFontSize) + '">' + groupitems[nitem] + '</FNT>'
                 txtitem.text = groupitems[nitem]
             position[1] = position[1] - nitem * (txtitem.elementHeight + item2item) - group2group
             return position
