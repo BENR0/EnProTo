@@ -11,6 +11,7 @@ import re
 import csv
 import time
 import datetime as dt
+import colorsys
 import comtypes
 
 ############################
@@ -172,7 +173,7 @@ def Msg(message="Hello world", title="PythonDemo"):
     return fn(0, message, title, 0)
 
 
-def AddRectangleElement(position = (10.0, 25.0), bgcolor = (255,0,0),
+def AddRectangleElement(position = (10.0, 25.0), bgcolor = (255,0,0), bgtransparency = 0,
         sigwidth = 1.0, sigheight = 0.5, tag = "test"):
 
     '''
@@ -216,8 +217,11 @@ def AddRectangleElement(position = (10.0, 25.0), bgcolor = (255,0,0),
     pRecEnv.LowerLeft = pRecLowerLeft
     pRecEnv.UpperRight = pRecUpperRight
 
+    #transform RGB color to HSV colorspace
+    bgcolor = colorsys.rgb_to_hsv(bgcolor[0]/255.0, bgcolor[1]/255.0, bgcolor[2]/255.0)
+    bgcolor[1] = bgcolor[1] * bgtransparency
     #create color object for background
-    pbgColor = NewObj(esriDisplay.RgbColor, esriDisplay.IRgbColor)
+    pbgColor = NewObj(esriDisplay.HsvColor, esriDisplay.IHsvColor)
     pbgColor.Red = int(bgcolor[0])
     pbgColor.Blue = int(bgcolor[1])
     pbgColor.Green = int(bgcolor[2])
@@ -1053,6 +1057,7 @@ class TB(object):
     def __init__(self):
         self.enabled = True
         self.checked = False
+    @property
     def onClick(self):
         #positioncounter
         iPosition = [10.0, 25.0]
@@ -1071,8 +1076,8 @@ class TB(object):
 
         #helper functions
         #function to create signature with heading
-        def createHeader(position, sigcolor, txtstring, txtElem):
-            AddRectangleElement(position = position, bgcolor = sigcolor, tag = "sig")
+        def createHeader(position, sigcolor, transparency, txtstring, txtElem):
+            AddRectangleElement(position = position, bgcolor = sigcolor, bgtransparency = transparency, tag = "sig")
             heading = txtElem.clone("_clone")
             heading.elementPositionX = position[0] + sigwidth + sig2group
             heading.elementPositionY = position[1]
@@ -1102,6 +1107,8 @@ class TB(object):
 
         #get selected toc layer
         toclayer = pythonaddins.GetSelectedTOCLayerOrDataFrame()
+        #get layer transparency
+        toclayertrans = toclayer.transparency
         #get data from attribute table and create dictionary
         fieldlist = ["CODE_NR", "CODE_NAME", "BTGROUP", "SIGCOLOR"]
         #init dict
@@ -1117,7 +1124,7 @@ class TB(object):
 
         #create legend
         for key in legendDict.keys():
-            iPosition = createHeader(iPosition, legendDict[key]["color"], key, txtElemTemplate)
+            iPosition = createHeader(iPosition, legendDict[key]["color"], transparency = toclayertrans, key, txtElemTemplate)
             iPosition = listItems(iPosition, legendDict[key]["items"], txtElemTemplate)
 
         #clean uo
