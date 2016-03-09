@@ -1124,7 +1124,7 @@ class TB(object):
 
         #create legend
         for key in legendDict.keys():
-            iPosition = createHeader(iPosition, legendDict[key]["color"], transparency = toclayertrans, key, txtElemTemplate)
+            iPosition = createHeader(iPosition, legendDict[key]["color"],toclayertrans, key, txtElemTemplate)
             iPosition = listItems(iPosition, legendDict[key]["items"], txtElemTemplate)
 
         #clean uo
