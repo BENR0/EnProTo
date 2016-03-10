@@ -219,12 +219,12 @@ def AddRectangleElement(position = (10.0, 25.0), bgcolor = (255,0,0), bgtranspar
 
     #transform RGB color to HSV colorspace
     bgcolor = colorsys.rgb_to_hsv(bgcolor[0]/255.0, bgcolor[1]/255.0, bgcolor[2]/255.0)
-    bgcolor[1] = bgcolor[1] * bgtransparency
+    bgcolor[1] = bgcolor[1] * (1.0 - bgtransparency)
     #create color object for background
     pbgColor = NewObj(esriDisplay.HsvColor, esriDisplay.IHsvColor)
-    pbgColor.Red = int(bgcolor[0])
-    pbgColor.Blue = int(bgcolor[1])
-    pbgColor.Green = int(bgcolor[2])
+    pbgColor.Red = int(bgcolor[0]*100)
+    pbgColor.Blue = int(bgcolor[1]*100)
+    pbgColor.Green = int(bgcolor[2]*100)
 
     #create simple line symboll
     pLineSymbol = NewObj(esriDisplay.SimpleLineSymbol, esriDisplay.ISimpleLineSymbol)
