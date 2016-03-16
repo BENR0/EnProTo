@@ -191,13 +191,12 @@ class WEAangebot(object):
         arcpy.ApplySymbologyFromLayer_management(buffer_layer, buffer_lyr_style)
 
         # Process: Tabelle in Excel
-       # tempEnvironment0 = arcpy.env.scratchWorkspace
-       # arcpy.env.scratchWorkspace = "C:\\Users\\benjamin.roesner\\Documents\\ArcGIS\\Default.gdb"
-       # arcpy.TableToExcel_conversion(Ausgabe-Feature-Class__9_, Ausgabe-Excel-Datei, "NAME", "CODE")
-       # arcpy.env.scratchWorkspace = tempEnvironment0
+        # arcpy.env.scratchWorkspace = "C:\\Users\\benjamin.roesner\\Documents\\ArcGIS\\Default.gdb"
+        # arcpy.TableToExcel_conversion(Ausgabe-Feature-Class__9_, Ausgabe-Excel-Datei, "NAME", "CODE")
+        # arcpy.env.scratchWorkspace = tempEnvironment0
         
         #extract specified fields to numpy array
-        fnames = ["DISTANCE", "AREA_HA", "AREA_QM", "CODE_06", "WA_ART", "HA_Wald", "QM_Wald"]
+        fnames = ["DISTANCE", "AREA_HA", "CODE_06", "WA_ART", "HA_Wald",]
         table_as_nparray = arcpy.da.FeatureClassToNumPyArray(newlayer1, fnames)
         
         #create pandas data frame
@@ -209,21 +208,26 @@ class WEAangebot(object):
 
         #add percentages in new columns
         if "Laubwald" in pivot.columns:
-            pivot["pct_Laub"] = (pivot.Laubwald / (pivot.All)) * 100
+            pivot["Laubwald [%]"] = (pivot.Laubwald / (pivot.All)) * 100
         
         if "Nadelwald" in pivot.columns:
-            pivot["pct_Nadel"] = (pivot.Nadelwald / (pivot.All)) * 100
+            pivot["Nadelwald [%]"] = (pivot.Nadelwald / (pivot.All)) * 100
             
         if "Mischwald" in pivot.columns:
-            pivot["pct_Misch"] = (pivot.Mischwald / (pivot.All)) * 100
+            pivot["Mischwald [%]"] = (pivot.Mischwald / (pivot.All)) * 100
 
         #group data frame by distance and aggregate with sum (total area in each buffer)
-        groupforest = corine_data_frame.groupby("DISTANCE", as_index = False)
+        groupforest = corine_data_frame.groupby("DISTANCE", as_index = True)
         groupforestagg = groupforest.aggregate(np.sum)
+        groupforestagg2 = groupforest.aggregate(np.max)
+
+        #create new data frame only with needed columns form groupforestagg df's
+        groupforestagg["AREA_HA"].update(groupforestagg2["AREA_HA"])
 
         #add percentages column of forest at total area of buffer
-        groupforestagg["Pct"] = (groupforestagg.HA_Wald / groupforestagg.AREA_HA) * 100
+        groupforestagg["Waldanteil [%]"] = (groupforestagg.HA_Wald / groupforestagg.AREA_HA) * 100
 
+        groupforestagg.columns = ["Puffer", "Fläche [ha]", "Waldanteil [ha]", "Waldanteil [%]"]
         #write tables to Excel (each table to one sheet)
         ###### ADD VARIABLE TO WRITE FILE #######
         writer = pd.ExcelWriter(out_table)
