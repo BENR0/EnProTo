@@ -40,7 +40,7 @@ def ListLocks(shp_path):
 
 # Snippets.py
 # ************************************************
-# Updated for ArcGIS 10.2
+# Updated for ArcGIS 10.3
 # ************************************************
 # Requires installation of the comtypes package
 # Available at: http://sourceforge.net/projects/comtypes/
@@ -218,13 +218,23 @@ def AddRectangleElement(position = (10.0, 25.0), bgcolor = (255,0,0), bgtranspar
     pRecEnv.UpperRight = pRecUpperRight
 
     #transform RGB color to HSV colorspace
-    bgcolor = colorsys.rgb_to_hsv(bgcolor[0]/255.0, bgcolor[1]/255.0, bgcolor[2]/255.0)
-    bgcolor[1] = bgcolor[1] * (1.0 - bgtransparency)
+    print(bgcolor)
+    bgcolor = colorsys.rgb_to_hsv(int(bgcolor[0])/255.0, int(bgcolor[1])/255.0, int(bgcolor[2])/255.0)
+    print(bgcolor)
+    #bgcolor = (bgcolor[0], bgcolor[2] * (1.0 - bgtransparency), bgcolor[1])
     #create color object for background
     pbgColor = NewObj(esriDisplay.HsvColor, esriDisplay.IHsvColor)
-    pbgColor.Red = int(bgcolor[0]*100)
-    pbgColor.Blue = int(bgcolor[1]*100)
-    pbgColor.Green = int(bgcolor[2]*100)
+    #pbgColor = NewObj(esriDisplay.RgbColor, esriDisplay.IRgbColor)
+    pbgColor.Hue = int(bgcolor[0]*100)
+    pbgColor.Saturation = int(bgcolor[1]*100 * (1 - bgtransparency))
+    pbgColor.Value = int(bgcolor[2]*100)
+    print(pbgColor.Hue)
+    print(pbgColor.Saturation)
+    print(pbgColor.Value)
+    #pbgColor.Red = int(bgcolor[0])
+    #pbgColor.Blue = int(bgcolor[2])
+    #pbgColor.Green = int(bgcolor[1])
+    #pbgColor.Transparency = bgtransparency
 
     #create simple line symboll
     pLineSymbol = NewObj(esriDisplay.SimpleLineSymbol, esriDisplay.ISimpleLineSymbol)
@@ -1081,7 +1091,8 @@ class TB(object):
             heading = txtElem.clone("_clone")
             heading.elementPositionX = position[0] + sigwidth + sig2group
             heading.elementPositionY = position[1]
-            heading.text = '<FNT name = "' + fontName + '" size = "' + str(headingFontSize) + '">' + txtstring + '</FNT>'
+            #heading.text = '<FNT name = "' + fontName + '" size = "' + str(headingFontSize) + '">' + txtstring + '</FNT>'
+            heading.text = txtstring
             #increase iPosition
             position[1] = position[1] - group2item
             return position
@@ -1101,16 +1112,20 @@ class TB(object):
 
         #add initial text element
         AddTextElement(position = (0.0, 0.0), txtstring = "txtElemTemplate")
+        AddTextElement(position = (0.0, 0.0), txtstring = "txtElemTemplate2", tag = "txtElemTemplate2", txtsize = headingFontSize)
 #       #get created text element
         mxd = arcpy.mapping.MapDocument("current")
-        txtElemTemplate = arcpy.mapping.ListLayoutElements(mxd, "TEXT_ELEMENT")[0]
+        txtElemTemplate = arcpy.mapping.ListLayoutElements(mxd, "TEXT_ELEMENT")[1]
+        txtElemTemplate2 = arcpy.mapping.ListLayoutElements(mxd, "TEXT_ELEMENT")[0]
 
         #get selected toc layer
         toclayer = pythonaddins.GetSelectedTOCLayerOrDataFrame()
         #get layer transparency
         toclayertrans = toclayer.transparency
+        print(toclayertrans)
+        #toclayertrans = 0.0
         #get data from attribute table and create dictionary
-        fieldlist = ["CODE_NR", "CODE_NAME", "BTGROUP", "SIGCOLOR"]
+        fieldlist = ["CODE_NR", "CODE_NAME", "BTTGROUP", "SIGCOLOR"]
         #init dict
         legendDict = dict()
         with arcpy.da.SearchCursor(toclayer, fieldlist) as cursor:
@@ -1121,10 +1136,10 @@ class TB(object):
                 else:
                     legendDict[row[2]] = {"items" : [item], "color" : tuple(row[3].split(","))}
 
-
         #create legend
         for key in legendDict.keys():
-            iPosition = createHeader(iPosition, legendDict[key]["color"],toclayertrans, key, txtElemTemplate)
+            print("create item")
+            iPosition = createHeader(iPosition, legendDict[key]["color"],toclayertrans, key, txtElemTemplate2)
             iPosition = listItems(iPosition, legendDict[key]["items"], txtElemTemplate)
 
         #clean uo
