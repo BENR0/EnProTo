@@ -342,7 +342,7 @@ class Join(object):
         #pathes to join tables
         #path for each list which can be used for joins
         birds = r"V:\Vorlagen_Kartierungen\Erfassung_Fauna\Voegel\Artenliste_Voegel\Index_deutscher_Vogelnamen_gis.xlsx"
-        btt_hessen = r"V:\Vorlagen_Kartierungen\Erfassung_Biotoptypen\Biotopschluessel_Hessen\TNL_Kartierschlüssel\TNL_Biotoptypenschluessel_Basis_KV_GIS.xlsx"
+        btt_hessen = r"V:\Vorlagen_Kartierungen\Erfassung_Biotoptypen\Biotopschluessel_Hessen\TNL_Kartierschluessel\TNL_Biotoptypenschluessel_Basis_KV_GIS.xlsx"
         #btt_nrw = r
         btt_nieder = r"V:\Vorlagen_Kartierungen\Erfassung_Biotoptypen\Biotopschluessel_Niedersachsen\Schluessel_Tab_fuer_GIS\Tabelle_GIS_BTT_NI_bearb_benjamin_GIS.xls"
         btt_bayern = r"V:\Vorlagen_Kartierungen\Erfassung_Biotoptypen\Biotopschluessel_Bayern\Biotopwertliste_BayKompV\Biotopwertliste_neu_GIS.xlsx"
