@@ -115,18 +115,18 @@ class WEAangebot(object):
 
             #get list with fields of selected layer
             existfield1 = arcpy.ListFields(shp, fieldName1)
-            existfield2 = arcpy.ListFields(shp, fieldName2)
+            #existfield2 = arcpy.ListFields(shp, fieldName2)
 
             #add fields to table of shapefile if not already existant
             if len(existfield1) != 1:
                 arcpy.AddField_management(shp, fieldName1, "FLOAT", fieldPrecision, fieldScale)
 
-            if len(existfield2) != 1:
-                arcpy.AddField_management(shp, fieldName2, "FLOAT", fieldPrecision, fieldScale)
+            #if len(existfield2) != 1:
+               # arcpy.AddField_management(shp, fieldName2, "FLOAT", fieldPrecision, fieldScale)
 
             #calculate geometry
             arcpy.CalculateField_management(shp, fieldName1, "!SHAPE.AREA@HECTARES!", "PYTHON")
-            arcpy.CalculateField_management(shp, fieldName2, "round(!SHAPE.AREA@SQUAREMETERS!, 0)", "PYTHON")
+            #arcpy.CalculateField_management(shp, fieldName2, "round(!SHAPE.AREA@SQUAREMETERS!, 0)", "PYTHON")
             
             return
         
@@ -196,7 +196,7 @@ class WEAangebot(object):
         # arcpy.env.scratchWorkspace = tempEnvironment0
         
         #extract specified fields to numpy array
-        fnames = ["DISTANCE", "AREA_HA", "CODE_06", "WA_ART", "HA_Wald",]
+        fnames = ["DISTANCE", "AREA_HA", "CODE_06", "WA_ART", "HA_Wald"]
         table_as_nparray = arcpy.da.FeatureClassToNumPyArray(newlayer1, fnames)
         
         #create pandas data frame
@@ -208,13 +208,16 @@ class WEAangebot(object):
 
         #add percentages in new columns
         if "Laubwald" in pivot.columns:
-            pivot["Laubwald [%]"] = (pivot.Laubwald / (pivot.All)) * 100
+            pivot["Laubwald_Prozent"] = (pivot.Laubwald / (pivot.All)) * 100
         
         if "Nadelwald" in pivot.columns:
-            pivot["Nadelwald [%]"] = (pivot.Nadelwald / (pivot.All)) * 100
+            pivot["Nadelwald_Prozent"] = (pivot.Nadelwald / (pivot.All)) * 100
             
         if "Mischwald" in pivot.columns:
-            pivot["Mischwald [%]"] = (pivot.Mischwald / (pivot.All)) * 100
+            pivot["Mischwald_Prozent"] = (pivot.Mischwald / (pivot.All)) * 100
+
+        #round dataframe to 2 decimal places (percentage columns)
+        pivot = pivot.round(2)
 
         #group data frame by distance and aggregate with sum (total area in each buffer)
         groupforest = corine_data_frame.groupby("DISTANCE", as_index = True)
@@ -225,9 +228,12 @@ class WEAangebot(object):
         groupforestagg["AREA_HA"].update(groupforestagg2["AREA_HA"])
 
         #add percentages column of forest at total area of buffer
-        groupforestagg["Waldanteil [%]"] = (groupforestagg.HA_Wald / groupforestagg.AREA_HA) * 100
+        groupforestagg["Waldanteil_Prozent"] = (groupforestagg.HA_Wald / groupforestagg.AREA_HA) * 100
 
-        groupforestagg.columns = ["Puffer", "Fläche [ha]", "Waldanteil [ha]", "Waldanteil [%]"]
+        #round dataframe to 2 decimal places
+        groupforestagg = groupforestagg.round(2)
+        #rename columns
+        #groupforestagg.columns = ["Puffer", "Fläche [ha]", "Waldanteil [ha]", "Waldanteil [%]"]
         #write tables to Excel (each table to one sheet)
         ###### ADD VARIABLE TO WRITE FILE #######
         writer = pd.ExcelWriter(out_table)
