@@ -1,3 +1,4 @@
+# coding: utf8
 import arcpy
 import numpy as np
 #import openpyxl
@@ -115,18 +116,18 @@ class WEAangebot(object):
 
             #get list with fields of selected layer
             existfield1 = arcpy.ListFields(shp, fieldName1)
-            existfield2 = arcpy.ListFields(shp, fieldName2)
+            #existfield2 = arcpy.ListFields(shp, fieldName2)
 
             #add fields to table of shapefile if not already existant
             if len(existfield1) != 1:
                 arcpy.AddField_management(shp, fieldName1, "FLOAT", fieldPrecision, fieldScale)
 
-            if len(existfield2) != 1:
-                arcpy.AddField_management(shp, fieldName2, "FLOAT", fieldPrecision, fieldScale)
+            #if len(existfield2) != 1:
+               # arcpy.AddField_management(shp, fieldName2, "FLOAT", fieldPrecision, fieldScale)
 
             #calculate geometry
             arcpy.CalculateField_management(shp, fieldName1, "!SHAPE.AREA@HECTARES!", "PYTHON")
-            arcpy.CalculateField_management(shp, fieldName2, "round(!SHAPE.AREA@SQUAREMETERS!, 0)", "PYTHON")
+            #arcpy.CalculateField_management(shp, fieldName2, "round(!SHAPE.AREA@SQUAREMETERS!, 0)", "PYTHON")
             
             return
         
@@ -191,13 +192,12 @@ class WEAangebot(object):
         arcpy.ApplySymbologyFromLayer_management(buffer_layer, buffer_lyr_style)
 
         # Process: Tabelle in Excel
-       # tempEnvironment0 = arcpy.env.scratchWorkspace
-       # arcpy.env.scratchWorkspace = "C:\\Users\\benjamin.roesner\\Documents\\ArcGIS\\Default.gdb"
-       # arcpy.TableToExcel_conversion(Ausgabe-Feature-Class__9_, Ausgabe-Excel-Datei, "NAME", "CODE")
-       # arcpy.env.scratchWorkspace = tempEnvironment0
+        # arcpy.env.scratchWorkspace = "C:\\Users\\benjamin.roesner\\Documents\\ArcGIS\\Default.gdb"
+        # arcpy.TableToExcel_conversion(Ausgabe-Feature-Class__9_, Ausgabe-Excel-Datei, "NAME", "CODE")
+        # arcpy.env.scratchWorkspace = tempEnvironment0
         
         #extract specified fields to numpy array
-        fnames = ["DISTANCE", "AREA_HA", "AREA_QM", "CODE_06", "WA_ART", "HA_Wald", "QM_Wald"]
+        fnames = ["DISTANCE", "AREA_HA", "CODE_06", "WA_ART", "HA_Wald"]
         table_as_nparray = arcpy.da.FeatureClassToNumPyArray(newlayer1, fnames)
         
         #create pandas data frame
@@ -209,21 +209,23 @@ class WEAangebot(object):
 
         #add percentages in new columns
         if "Laubwald" in pivot.columns:
-            pivot["pct_Laub"] = (pivot.Laubwald / (pivot.All)) * 100
+            pivot["Laubwald [%]"] = np.round((pivot.Laubwald / (pivot.All)) * 100, 2)
         
         if "Nadelwald" in pivot.columns:
-            pivot["pct_Nadel"] = (pivot.Nadelwald / (pivot.All)) * 100
+            pivot["Nadelwald [%]"] = np.round((pivot.Nadelwald / (pivot.All)) * 100, 2)
             
         if "Mischwald" in pivot.columns:
-            pivot["pct_Misch"] = (pivot.Mischwald / (pivot.All)) * 100
+            pivot["Mischwald [%]"] = np.round((pivot.Mischwald / (pivot.All)) * 100, 2)
 
         #group data frame by distance and aggregate with sum (total area in each buffer)
-        groupforest = corine_data_frame.groupby("DISTANCE", as_index = False)
-        groupforestagg = groupforest.aggregate(np.sum)
-
+        groupforest = corine_data_frame.groupby("DISTANCE", as_index = True)
+        groupforestagg = groupforest.aggregate({"AREA_HA": "max", "HA_Wald": "sum"})
+        
         #add percentages column of forest at total area of buffer
-        groupforestagg["Pct"] = (groupforestagg.HA_Wald / groupforestagg.AREA_HA) * 100
+        groupforestagg["Waldanteil_prozent"] = np.round((groupforestagg.HA_Wald / groupforestagg.AREA_HA) * 100, 2)
 
+        #rename columns
+        groupforestagg.columns = ["Flaeche [ha]", "Waldanteil [ha]", "Waldanteil [%]"]
         #write tables to Excel (each table to one sheet)
         ###### ADD VARIABLE TO WRITE FILE #######
         writer = pd.ExcelWriter(out_table)
@@ -240,7 +242,7 @@ class WEAangebot(object):
         #clear up in_memory workspace
         arcpy.Delete_management("in_memory")
         #clean up variables
-        del mxd, df, tmp_buffers, buffer_intersected, corine_selected, merged_buffers
+        del mxd, df, tmp_buffers, buffer_intersected, corine_selected, merged_buffers, groupforest, groupforestagg, pivot, table_as_nparray
         
         return
 
