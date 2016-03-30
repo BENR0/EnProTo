@@ -1,3 +1,4 @@
+# coding: utf8
 import arcpy
 import numpy as np
 #import openpyxl
@@ -208,32 +209,23 @@ class WEAangebot(object):
 
         #add percentages in new columns
         if "Laubwald" in pivot.columns:
-            pivot["Laubwald_Prozent"] = (pivot.Laubwald / (pivot.All)) * 100
+            pivot["Laubwald [%]"] = np.round((pivot.Laubwald / (pivot.All)) * 100, 2)
         
         if "Nadelwald" in pivot.columns:
-            pivot["Nadelwald_Prozent"] = (pivot.Nadelwald / (pivot.All)) * 100
+            pivot["Nadelwald [%]"] = np.round((pivot.Nadelwald / (pivot.All)) * 100, 2)
             
         if "Mischwald" in pivot.columns:
-            pivot["Mischwald_Prozent"] = (pivot.Mischwald / (pivot.All)) * 100
-
-        #round dataframe to 2 decimal places (percentage columns)
-        pivot = pivot.round(2)
+            pivot["Mischwald [%]"] = np.round((pivot.Mischwald / (pivot.All)) * 100, 2)
 
         #group data frame by distance and aggregate with sum (total area in each buffer)
         groupforest = corine_data_frame.groupby("DISTANCE", as_index = True)
-        groupforestagg = groupforest.aggregate(np.sum)
-        groupforestagg2 = groupforest.aggregate(np.max)
-
-        #create new data frame only with needed columns form groupforestagg df's
-        groupforestagg["AREA_HA"].update(groupforestagg2["AREA_HA"])
-
+        groupforestagg = groupforest.aggregate({"AREA_HA": "max", "HA_Wald": "sum"})
+        
         #add percentages column of forest at total area of buffer
-        groupforestagg["Waldanteil_Prozent"] = (groupforestagg.HA_Wald / groupforestagg.AREA_HA) * 100
+        groupforestagg["Waldanteil_prozent"] = np.round((groupforestagg.HA_Wald / groupforestagg.AREA_HA) * 100, 2)
 
-        #round dataframe to 2 decimal places
-        groupforestagg = groupforestagg.round(2)
         #rename columns
-        #groupforestagg.columns = ["Puffer", "Fläche [ha]", "Waldanteil [ha]", "Waldanteil [%]"]
+        groupforestagg.columns = ["Flaeche [ha]", "Waldanteil [ha]", "Waldanteil [%]"]
         #write tables to Excel (each table to one sheet)
         ###### ADD VARIABLE TO WRITE FILE #######
         writer = pd.ExcelWriter(out_table)
@@ -250,7 +242,7 @@ class WEAangebot(object):
         #clear up in_memory workspace
         arcpy.Delete_management("in_memory")
         #clean up variables
-        del mxd, df, tmp_buffers, buffer_intersected, corine_selected, merged_buffers
+        del mxd, df, tmp_buffers, buffer_intersected, corine_selected, merged_buffers, groupforest, groupforestagg, pivot, table_as_nparray
         
         return
 
