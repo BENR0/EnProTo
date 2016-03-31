@@ -513,13 +513,25 @@ class ListAllLocksForLayers(object):
         out_msg = ""
         
         for lyr in lyrs:
-            out_msg += str(lyr) + " is locked by user(s):\n"
-            #get lyr path
-            desc = arcpy.Describe(lyr)
-            lyr_path = desc.path + "\\" + str(lyr) +  ".shp"
-            #get all locks for this layer and append to msg string
-            strlocks, listlocks = ListLocks(lyr_path)
-            out_msg += strlocks + "\n"
+            if not lyr.isGroupLayer:                      #Is layer a group layer
+                # print(lyr.isGroupLayer)
+                # for glyr in arcpy.mapping.ListLayers(lyr): #loop layer in group layer
+                #     if glyr != lyr:
+                #         out_msg += str(lyr) + " is locked by user(s):\n"
+                #         #get lyr path
+                #         desc = arcpy.Describe(lyr)
+                #         lyr_path = desc.path + "\\" + str(lyr) +  ".shp"
+                #         #get all locks for this layer and append to msg string
+                #         strlocks, listlocks = ListLocks(lyr_path)
+                #         out_msg += strlocks + "\n"
+           # else:
+                out_msg += str(lyr) + " is locked by user(s):\n"
+                #get lyr path
+                desc = arcpy.Describe(lyr)
+                lyr_path = desc.path + "\\" + str(lyr) +  ".shp"
+                #get all locks for this layer and append to msg string
+                strlocks, listlocks = ListLocks(lyr_path)
+                out_msg += strlocks + "\n"
         
         if out_msg == "":
             out_msg = "No lock on any layer found."
