@@ -41,8 +41,13 @@ try:
     OSMfile = file('osm.xml', 'wb')
     OSMfile.write(OSMurlHandle.read())
     OSMfile.close()
-except urllib2.URLError:
-        raise
+except urllib2.URLError, e:
+        if hasattr(e, 'reason'):
+				AddMsgAndPrint('Unable to reach the server.', 2)
+				AddMsgAndPrint(e.reason, 2)
+			elif hasattr(e, 'code'):
+				AddMsgAndPrint('The server was unable to fulfill the request.', 2)
+				AddMsgAndPrint(e.code, 2)
 
 
 

@@ -8,122 +8,122 @@ import os
 import matplotlib.pyplot as plt
 
 
-        def create_field_name(fc, new_field):  
-            '''Return a valid field name that does not exist in fc and  
-            that is based on new_field.  
-          
-            fc: feature class, feature layer, table, or table view  
-            new_field: new field name, will be altered if field already exists  
-          
-            Example:  
-            >>> fc = 'c:\\testing.gdb\\ne_110m_admin_0_countries'  
-            >>> createFieldName(fc, 'NEWCOL') # NEWCOL  
-            >>> createFieldName(fc, 'Shape') # Shape_1  
-            '''  
-          
-            # if fc is a table view or a feature layer, some fields may be hidden;  
-            # grab the data source to make sure all columns are examined  
-            fc = arcpy.Describe(fc).catalogPath  
-            new_field = arcpy.ValidateFieldName(new_field, fc)  
-          
-            # maximum length of the new field name
-            maxlen = 64
-            dtype = arcpy.Describe(fc).dataType  
-            if dtype.lower() in ('dbasetable', 'shapefile'):  
-                maxlen = 10  
-            fields = [f.name.lower() for f in arcpy.ListFields(fc)]  
-          
-            # see if field already exists  
-            if new_field.lower() in fields:  
-                count = 1  
-                while new_field.lower() in fields:  
-          
-                    if count > 1000:  
-                        raise bmiError('Maximum number of iterations reached in uniqueFieldName.')  
-          
-                    if len(new_field) > maxlen:  
-                        ind = maxlen - (1 + len(str(count)))  
-                        new_field = '{0}_{1}'.format(new_field[:ind], count)  
-                        count += 1  
-                    else:  
-                        new_field = '{0}_{1}'.format(new_field, count)  
-                        count += 1  
-          
-            return new_field  
-              
-        def CopyFields(source_table, in_field, join_dict, join_values):  
-            '''  
-            Copies field(s) from one table to another  
-          
-            source_table: table in which to add new fields  
-            in_field: a field that has common values to a field in the join_table.  
-                      think of this as a "join_field"  
-            join_dict: dictionary created from the join table
-            join_values: fields to add to source_table (list)  
-            '''  
-                  
-            # Find out if source table is NULLABLE                  
-            #if not os.path.splitext(cat_path)[1] in ['.dbf','.shp']:  
-                #nullable = 'NULLABLE'  
-            #else:  
-                #nullable = 'NON_NULLABLE'  
-             
-            #get field data types from joindict
-            ftype = "TEXT"  
-            length = 200  
-            #pres = field.precision  
-            #scale = field.scale  
-            #alias = field.aliasName  
-            #domain = field.domain  
+def create_field_name(fc, new_field):
+    '''Return a valid field name that does not exist in fc and
+    that is based on new_field.
 
-            #Add fields to be copied  
-            update_fields = []
-            fieldlist = [f.name for f in arcpy.ListFields(source_table, "", "String")]
-            for f in join_values:  
-                #if field name exists create new name
-                if f in fieldlist:  
-                    #newname = create_field_name(source_table, fldb)  
-                    newname = "J" + f
-                    arcpy.AddField_management(source_table,newname,ftype,length)  
-                    #Message("Added '%s' field to \"%s\"" %(name, os.path.basename(source_table)))  
-                    update_fields.insert(join_values.index(f), newname.encode('utf-8'))  
-                else:
-                    newname = f
-                    arcpy.AddField_management(source_table,newname,ftype,length)  
-                    #Message("Added '%s' field to \"%s\"" %(name, os.path.basename(source_table)))  
-                    update_fields.insert(join_values.index(f), newname.encode('utf-8'))  
-                                                  
+    fc: feature class, feature layer, table, or table view
+    new_field: new field name, will be altered if field already exists
+
+    Example:
+    >>> fc = 'c:\\testing.gdb\\ne_110m_admin_0_countries'
+    >>> createFieldName(fc, 'NEWCOL') # NEWCOL
+    >>> createFieldName(fc, 'Shape') # Shape_1
+    '''
+
+    # if fc is a table view or a feature layer, some fields may be hidden;
+    # grab the data source to make sure all columns are examined
+    fc = arcpy.Describe(fc).catalogPath
+    new_field = arcpy.ValidateFieldName(new_field, fc)
+
+    # maximum length of the new field name
+    maxlen = 64
+    dtype = arcpy.Describe(fc).dataType
+    if dtype.lower() in ('dbasetable', 'shapefile'):
+        maxlen = 10
+    fields = [f.name.lower() for f in arcpy.ListFields(fc)]
+
+    # see if field already exists
+    if new_field.lower() in fields:
+        count = 1
+        while new_field.lower() in fields:
+
+            if count > 1000:
+                raise bmiError('Maximum number of iterations reached in uniqueFieldName.')
+
+            if len(new_field) > maxlen:
+                ind = maxlen - (1 + len(str(count)))
+                new_field = '{0}_{1}'.format(new_field[:ind], count)
+                count += 1
+            else:
+                new_field = '{0}_{1}'.format(new_field, count)
+                count += 1
+
+    return new_field
+
+def CopyFields(source_table, in_field, join_dict, join_values):
+    '''
+    Copies field(s) from one table to another
+
+    source_table: table in which to add new fields
+    in_field: a field that has common values to a field in the join_table.
+              think of this as a "join_field"
+    join_dict: dictionary created from the join table
+    join_values: fields to add to source_table (list)
+    '''
+
+    # Find out if source table is NULLABLE
+    #if not os.path.splitext(cat_path)[1] in ['.dbf','.shp']:
+    #nullable = 'NULLABLE'
+    #else:
+    #nullable = 'NON_NULLABLE'
+
+    #get field data types from joindict
+    ftype = "TEXT"
+    length = 200
+    #pres = field.precision
+    #scale = field.scale
+    #alias = field.aliasName
+    #domain = field.domain
+
+    #Add fields to be copied
+    update_fields = []
+    fieldlist = [f.name for f in arcpy.ListFields(source_table, "")]
+    for f in join_values:
+        #if field name exists create new name
+        if f in fieldlist:
+            #newname = create_field_name(source_table, fldb)
+            newname = "J" + f
+            arcpy.AddField_management(source_table,newname,ftype,length)
+            #Message("Added '%s' field to \"%s\"" %(name, os.path.basename(source_table)))
+            update_fields.insert(join_values.index(f), newname.encode('utf-8'))
+        else:
+            newname = f
+            arcpy.AddField_management(source_table,newname,ftype,length)
+            #Message("Added '%s' field to \"%s\"" %(name, os.path.basename(source_table)))
+            update_fields.insert(join_values.index(f), newname.encode('utf-8'))
+
 
             #Update Cursor  
-            print("updating fields")
-            update_index = list(range(len(update_fields)))  
-            row_index = list(x+1 for x in update_index)  
-            update_fields.insert(0, in_field)  
-            nomatchfound = []
-            with arcpy.da.UpdateCursor(source_table, update_fields) as urows:  
-                for row in urows:  
-                    if row[0] in join_dict:
-                        try:  
-                            allVals =[join_dict[row[0]][i] for i in update_index]  
-                            for r,v in zip(row_index, allVals):  
-                                row[r] = v  
-                            urows.updateRow(row)  
-                        except:
-                            pass  
-                    elif row[0] not in join_dict:
-                        nomatchfound.append(row[0])
-                  
-            #Message('Fields in "%s" updated successfully' %(os.path.basename(source_table)))  
-            print("no matches found for the following values:")
-            print(nomatchfound)
-            return  
-          
+    print("updating fields")
+    update_index = list(range(len(update_fields)))
+    row_index = list(x+1 for x in update_index)
+    update_fields.insert(0, in_field)
+    nomatchfound = []
+    with arcpy.da.UpdateCursor(source_table, update_fields) as urows:
+        for row in urows:
+            if row[0] in join_dict:
+                try:
+                    allVals =[join_dict[row[0]][i] for i in update_index]
+                    for r,v in zip(row_index, allVals):
+                        row[r] = v
+                    urows.updateRow(row)
+                except:
+                    pass
+            elif row[0] not in join_dict:
+                nomatchfound.append(row[0])
+
+    #Message('Fields in "%s" updated successfully' %(os.path.basename(source_table)))
+    print("no matches found for the following values:")
+    print(nomatchfound)
+    return
+
 #function to delete value of join key from list wenn converting dictionary
-        def delkey(x, key):
-            tmp = x[key]
-            tmplist = list(x.values())
-            tmplist.remove(tmp)
-            return tuple(tmplist)
+def delkey(x, key):
+    tmp = x[key]
+    tmplist = list(x.values())
+    tmplist.remove(tmp)
+    return tuple(tmplist)
 
 class WEAangebot(object):
     def __init__(self):
@@ -343,21 +343,26 @@ class WEAangebot(object):
 
         arcpy.AddMessage("Joining aggregated data to buffer shape...")
         #convert pandas df to dictionary for joining values to buffer shape
-        groupforestaggdict = groupforestagg.transpose.to_dict()
-        joindict = {groupforestaggdict[r]["DISTANCE"]: delkey(v, "DISTANCE") for r,v in
-                groupforestaggdict.items()}
+        groupforestaggdict = groupforestagg.transpose().to_dict()
+        joindict = {groupforestaggdict[r]["DISTANCE"]: delkey(v, "DISTANCE") for r,v in groupforestaggdict.items()}
 
         CopyFields(buffer_layer, "DISTANCE", joindict, ["AREA_HA", "HA_Wald"])
 
         arcpy.AddMessage("Adding information do layer descriptions...")
         class_descriptions = []
+        arcpy.AddMessage(joindict)
         for i in buffer_layer.symbology.classValues:
-            class_descriptions.append(joindict[i][1] + " ha / davon " + joindict[i][0] + " ha Wald")
+            i = float(i)
+            if i in joindict.keys():
+                class_descriptions.append(str(int(round(joindict[i][0], 0))) + " ha / davon ca." + str(int(round(joindict[i][2], 0))) + " ha Wald")
+            else:
+                class_descriptions.append(" ")
 
         buffer_layer.symbology.classDescriptions = class_descriptions
 
         #rename columns
-        groupforestagg.columns = ["Flaeche [ha]", "Waldanteil [ha]", "Waldanteil [%]"]
+        groupforestagg.columns = ["Puffer", "Flaeche [ha]", "Waldanteil [ha]", "Waldanteil [%]"]
+        arcpy.AddMessage("Writing Data to Excel spreadsheet...")
         #write tables to Excel (each table to one sheet)
         ###### ADD VARIABLE TO WRITE FILE #######
         writer = pd.ExcelWriter(out_table)
