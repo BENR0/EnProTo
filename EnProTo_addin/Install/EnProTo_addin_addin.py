@@ -1158,3 +1158,166 @@ class TB(object):
         #clean uo
         #del legendDict, iPosition
         pass
+
+
+class OSM(object):
+    """Implementation for OSM.combobox (ComboBox)"""
+    def __init__(self):
+        self.editable = True
+        self.enabled = True
+        self.dropdownWidth = 'WWWWWWW'
+        self.width = ''
+    def onSelChange(self, selection):
+        import arcpy
+        from arcpy import env
+        import urllib
+        import urllib2
+        import os
+        import errno
+
+        def make_dir(path):
+            try:
+                os.makedirs(path)
+            except OSError as exception:
+                #if exception.errno != errno.EEXIST:
+                    raise
+
+        # load the OpenStreetMap specific toolbox
+        arcpy.ImportToolbox(r"c:\program files (x86)\arcgis\desktop10.3\ArcToolbox\Toolboxes\OpenStreetMap Toolbox.tbx")
+
+        #assign drop down choice
+        amenity = selection
+
+        #get path to project
+        mxd = arcpy.mapping.MapDocument("current")
+        mxdpath = mxd.filePath
+
+        #create path to GIS data directory in project directory
+        rootpath = re.split("05_GIS",mxdpath)[0]
+        OSMdir = os.path.join(rootpath, "05_GIS", "av_daten", "10_OSM", amenity)
+
+        #create osm dir if not existent
+        make_dir(OSMdir)
+
+        #create temp directory for storing osm xml data
+        OSMtmp = os.path.join(OSMdir, "ztmp")
+        make_dir(OSMtmp)
+
+        #get bounding box of current viewing extent or (largest) layer?
+        toclayer = pythonaddins.GetSelectedTOCLayerOrDataFrame()
+        lyrDesc = arcpy.Describe(toclayer)
+        lyrext = lyrDesc.extent
+        #transform coord of extent if not WGS84
+        GK3 = "31467"
+        GK4 = "31468"
+        utmn32 = "5652"
+        utmn33 = "5653"
+        wgs = "4326"
+        gt = "DHDN_To_ETRS_1989_8_NTv2"
+        gt1 = "ETRS_1989_To_WGS_1984"
+        gt2 = "DHDN_To_WGS_1984_4_NTv2"
+        #gt = "DHDN_to_WGS_1984_4_NTv2 + ETRS_1989_to_WGS_1984"
+        layerPCS = lyrDesc.spatialReference.PCSCode
+        if not str(layerPCS) == wgs:
+            if str(layerPCS) in [utmn32, utmn33]:
+                lyrext = templateExtent.projectAs(wgs, gt1)
+            elif str(layerPCS) in [GK3, GK4]:
+                lyrext = templateExtent.projectAs(wgs, gt2)
+            else:
+                lyrext = templateExtent.projectAs(wgs)
+
+        bboxtuple = (lyrext.YMin, lyrext.XMin, lyrext.YMax, lyrext.XMax)
+
+        #bboxtuple = (41.88269405444917,12.48070478439331,41.89730998384814,12.503278255462645)
+        overpassurl = "https://overpass-api.de/api/interpreter?data=[out:xml];"
+
+        ######## queries #########
+        churches = """
+        (
+          node["amenity"="place_of_worship"]["religion"="christian"]{0};
+          way["amenity"="place_of_worship"]["religion"="christian"]{0};
+          relation["amenity"="place_of_worship"]["religion"="christian"]{0};
+        );
+        out body;
+        >;
+        out skel qt;""".format(bboxtuple)
+
+
+        highway = """
+        (
+          node["highway"="track"]{0};
+          way["highway"="track"]{0};
+          relation["highway"="track"]{0};
+        );
+        out body;
+        >;
+        out skel qt;""".format(bboxtuple)
+
+
+        #fetch data from Overpass
+        requesturl = overpassurl + urllib.quote_plus(highway)
+
+        myRequest = urllib2.Request(requesturl)
+        #file path for temporary osm data
+        OSMdata = os.path.join(OSMtmp, "osm.xml")
+        try:
+            OSMurlHandle = urllib2.urlopen(myRequest, timeout=600)
+            OSMfile = file(OSMdata, 'wb')
+            OSMfile.write(OSMurlHandle.read())
+            OSMfile.close()
+        except urllib2.URLError, e:
+            if hasattr(e, 'reason'):
+                AddMsgAndPrint('Unable to reach the server.', 2)
+                AddMsgAndPrint(e.reason, 2)
+            elif hasattr(e, 'code'):
+                AddMsgAndPrint('The server was unable to fulfill the request.', 2)
+                AddMsgAndPrint(e.code, 2)
+
+        # define the names for the feature dataset and the feature classes
+        inputName = amenity
+        #set workspace to scratch workspace
+        wspace = env.scratchWorkspace
+
+        validatedTableName = arcpy.ValidateTableName(inputName, wspace)
+        nameOfTargetDataset = os.path.join(wspace, validatedTableName)
+
+        fcpoint = os.path.join(validatedTableName, validatedTableName + r"_osm_pt")
+        fcline = os.path.join(validatedTableName, validatedTableName + r"_osm_ln")
+        fcpoly = os.path.join(validatedTableName, validatedTableName + r"_osm_ply")
+
+        nameOfPointFeatureClass = os.path.join(wspace, fcpoint)
+        nameOfLineFeatureClass = os.path.join(wspace, fcline)
+        nameOfPolygonFeatureClass = os.path.join(wspace, fcpoly)
+
+        print(nameOfLineFeatureClass)
+        print(OSMdata)
+
+        #import downloaded osm.xml into default database and get attributes
+        arcpy.OSMGPFileLoader_osmtools(OSMdata, "CONSERVE_MEMORY", "ALL", nameOfTargetDataset, nameOfPointFeatureClass, nameOfLineFeatureClass, nameOfPolygonFeatureClass)
+
+        #loop through all feature classes in database and get attributes.
+        # extract the name tag for all line features
+        arcpy.OSMGPAttributeSelector_osmtools(fcpoint, 'name')
+
+        # filter the points to only process the attribute carrying nodes
+        #filteredPointLayer = 'Only attributed nodes'
+        #arcpy.MakeFeatureLayer_management(r'stuttgart\stuttgart_osm_pt', filteredPointLayer, "osmSupportingElement = 'no'")
+
+        # extract the name tag for the filtered point features
+        #arcpy.OSMGPAttributeSelector_osmtools(filteredPointLayer, 'name,note')
+
+        #loop reproject feature classes to coord of project dataframe
+        #arcpy.Project_management(in_layer, outlayer, PCS, transformation)
+        #!?copy transformations from rna analyse tool
+
+        #add shapes to project (create group layer?)
+        pass
+    def onEditChange(self, text):
+        pass
+    def onFocus(self, focused):
+        self.items = ["Churches", "Highway"]
+        pass
+    def onEnter(self):
+        pass
+    def refresh(self):
+        pass
