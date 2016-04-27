@@ -1180,8 +1180,8 @@ class OSM(object):
         def make_dir(path):
             try:
                 os.makedirs(path)
-            except OSError as exception:
-                #if exception.errno != errno.EEXIST:
+            except OSError:
+                if not os.path.isdir(path):
                     raise
 
         # load the OpenStreetMap specific toolbox
@@ -1195,7 +1195,11 @@ class OSM(object):
         mxdpath = mxd.filePath
         #get data frame and df PCS
         df  = arcpy.mapping.ListDataFrames(mxd)[0]
-        dfPCS = df.spatialReference.PCSCode
+        try:
+            dfPCS = df.spatialReference.PCSCode
+        except:
+            err_dfcs = pythonaddin.MessageBox("Data frame has no coordinate system assigned.", "Error", 0)
+            print(err_dfcs)
 
         #create path to GIS data directory in project directory
         rootpath = re.split("05_GIS",mxdpath)[0]
@@ -1222,15 +1226,15 @@ class OSM(object):
         gt1 = "ETRS_1989_To_WGS_1984"
         gt2 = "DHDN_To_WGS_1984_4_NTv2"
         #gt = "DHDN_to_WGS_1984_4_NTv2 + ETRS_1989_to_WGS_1984"
-        trafoDict = {GK3: gt1, GK4: gt1, utm32: gt2, utm33: gt2}
+        trafoDict = {GK3: gt1, GK4: gt1, utmn32: gt2, utmn33: gt2}
         dfPCS = lyrDesc.spatialReference.PCSCode
         if not str(dfPCS) == wgs:
             if str(dfPCS) in [utmn32, utmn33]:
-                lyrext = templateExtent.projectAs(wgs, gt1)
+                lyrext = lyrext.projectAs(wgs, gt1)
             elif str(dfPCS) in [GK3, GK4]:
-                lyrext = templateExtent.projectAs(wgs, gt2)
+                lyrext = lyrext.projectAs(wgs, gt2)
             else:
-                lyrext = templateExtent.projectAs(wgs)
+                lyrext = lyrext.projectAs(wgs)
 
         bboxtuple = (lyrext.YMin, lyrext.XMin, lyrext.YMax, lyrext.XMax)
 
@@ -1272,15 +1276,16 @@ class OSM(object):
             OSMfile.write(OSMurlHandle.read())
             OSMfile.close()
         except urllib2.URLError, e:
-            if hasattr(e, 'reason'):
-                AddMsgAndPrint('Unable to reach the server.', 2)
-                AddMsgAndPrint(e.reason, 2)
-            elif hasattr(e, 'code'):
-                AddMsgAndPrint('The server was unable to fulfill the request.', 2)
-                AddMsgAndPrint(e.code, 2)
+            raise
+            # if hasattr(e, 'reason'):
+            #     AddMsgAndPrint('Unable to reach the server.', 2)
+            #     AddMsgAndPrint(e.reason, 2)
+            # elif hasattr(e, 'code'):
+            #     AddMsgAndPrint('The server was unable to fulfill the request.', 2)
+            #     AddMsgAndPrint(e.code, 2)
 
         # define the names for the feature dataset and the feature classes
-        inputName = amenity
+        inputName = "OSM"
         #set workspace to scratch workspace
         wspace = env.scratchWorkspace
 
@@ -1294,9 +1299,6 @@ class OSM(object):
         nameOfPointFeatureClass = os.path.join(wspace, fcpoint)
         nameOfLineFeatureClass = os.path.join(wspace, fcline)
         nameOfPolygonFeatureClass = os.path.join(wspace, fcpoly)
-
-        print(nameOfLineFeatureClass)
-        print(OSMdata)
 
         #import downloaded osm.xml into default database and get attributes
         arcpy.OSMGPFileLoader_osmtools(OSMdata, "CONSERVE_MEMORY", "ALL", nameOfTargetDataset, nameOfPointFeatureClass, nameOfLineFeatureClass, nameOfPolygonFeatureClass)
@@ -1313,20 +1315,17 @@ class OSM(object):
         #arcpy.OSMGPAttributeSelector_osmtools(filteredPointLayer, 'name,note')
 
         #loop reproject feature classes to coord of project dataframe
-        for fc in LIST_FEATURE_CLASSES_IN_DB:
-            #get basename of fc
-            basename =
-
+        for fc in arcpy.ListFeatureClasses(feature_dataset="OSM"):
             #create save path for shapefile
-            outshp = OSMdir + basename + ".shp"
+            outshp = os.path.join(OSMdir + fc + ".shp")
             #print warning if dfPCS is not utm or gk
-            if not dfPCS in trafoDict.keys():
-                outMSG = "The data frame coordinate system does not
-                match any of the following EPSG codes: " + trafoDict.keys() + " Therefore no transformation was used
-                while reprojecting, which might lead to inaccuracies."
-                PCSwarning = pythonaddins.MessageBox(, "Ergebnis", 0)
+            if not str(dfPCS) in trafoDict.keys():
+                outMSG = ("The data frame coordinate system does not"
+                "match any of the following EPSG codes: {0}. Therefore no transformation was used"
+                "while reprojecting, which might lead to inaccuracies.").format(trafoDict.keys())
+                PCSwarning = pythonaddins.MessageBox(outMSG, "PCS Warning", 0)
                 print(PCSwarning)
-            arcpy.Project_management(fc, outshp, dfPCS, trafoDict[dfPCS])
+            arcpy.Project_management(fc, outshp, str(dfPCS), trafoDict[str(dfPCS)])
         #!?copy transformations from rna analyse tool
 
         #add shapes to project (create group layer?)
