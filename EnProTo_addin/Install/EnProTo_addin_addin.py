@@ -911,19 +911,19 @@ class NewShapeFromStandardShape(object):
             #create full path of template shape
             templatepath = os.path.join(templatedir,name_btt_poly)
             #create content block string
-            contstr = "BTT" + project + "_" + strdate + "_" + "poly"
+            contstr = "BTT_" + project + "_" + strdate + "_" + "poly"
         elif selection == "BTT_point":
             templatepath = os.path.join(templatedir,name_btt_point)
-            contstr = "BTT" + project + "_" + strdate + "_" + "point"
+            contstr = "BTT_" + project + "_" + strdate + "_" + "point"
         elif selection == "RNA_Voegel":
             templatepath = os.path.join(templatedir,name_rna_bird)
-            contstr = "RNA" + project + "_" + strdate + "_" + "line"
+            contstr = "RNA_" + project + "_" + strdate + "_" + "line"
         elif selection == "Rastvoegel":
             templatepath = os.path.join(templatedir,name_rast)
-            contstr = "Rastvoegel" + project + "_" + strdate + "_" + "point"
+            contstr = "Rastvoegel_" + project + "_" + strdate + "_" + "point"
         elif selection == "Horste":
             templatepath = os.path.join(templatedir,name_horste)
-            contstr = "Horste" + project + "_" + strdate + "_" + "point"
+            contstr = "Horste_" + project + "_" + strdate + "_" + "point"
         else:
             notemplate = pythonaddins.MessageBox("No template file found!", "Error", 0)
             print(notemplate)
@@ -1214,7 +1214,10 @@ class OSM(object):
 
         #get bounding box of current viewing extent or (largest) layer?
         toclayer = pythonaddins.GetSelectedTOCLayerOrDataFrame()
-        lyrDesc = arcpy.Describe(toclayer)
+        try:
+            lyrDesc = arcpy.Describe(toclayer)
+        except:
+            msg = arcpy.pythonaddin.MessageBox("No TOC layer is selected.")
         lyrext = lyrDesc.extent
         #transform coord of extent if not WGS84
         GK3 = "31467"
@@ -1226,7 +1229,7 @@ class OSM(object):
         gt1 = "ETRS_1989_To_WGS_1984"
         gt2 = "DHDN_To_WGS_1984_4_NTv2"
         #gt = "DHDN_to_WGS_1984_4_NTv2 + ETRS_1989_to_WGS_1984"
-        trafoDict = {GK3: gt1, GK4: gt1, utmn32: gt2, utmn33: gt2}
+        trafoDict = {GK3: gt2, GK4: gt2, utmn32: gt1, utmn33: gt1}
         dfPCS = lyrDesc.spatialReference.PCSCode
         if not str(dfPCS) == wgs:
             if str(dfPCS) in [utmn32, utmn33]:
@@ -1255,9 +1258,7 @@ class OSM(object):
 
         highway = """
         (
-          node["highway"="track"]{0};
-          way["highway"="track"]{0};
-          relation["highway"="track"]{0};
+          way["highway"]{0};
         );
         out body;
         >;
