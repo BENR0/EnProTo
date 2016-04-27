@@ -1174,6 +1174,8 @@ class OSM(object):
         import urllib2
         import os
         import errno
+        
+        timeout = 600
 
         def make_dir(path):
             try:
@@ -1191,6 +1193,9 @@ class OSM(object):
         #get path to project
         mxd = arcpy.mapping.MapDocument("current")
         mxdpath = mxd.filePath
+        #get data frame and df PCS
+        df  = arcpy.mapping.ListDataFrames(mxd)[0]
+        dfPCS = df.spatialReference.PCSCode
 
         #create path to GIS data directory in project directory
         rootpath = re.split("05_GIS",mxdpath)[0]
@@ -1217,11 +1222,12 @@ class OSM(object):
         gt1 = "ETRS_1989_To_WGS_1984"
         gt2 = "DHDN_To_WGS_1984_4_NTv2"
         #gt = "DHDN_to_WGS_1984_4_NTv2 + ETRS_1989_to_WGS_1984"
-        layerPCS = lyrDesc.spatialReference.PCSCode
-        if not str(layerPCS) == wgs:
-            if str(layerPCS) in [utmn32, utmn33]:
+        trafoDict = {GK3: gt1, GK4: gt1, utm32: gt2, utm33: gt2}
+        dfPCS = lyrDesc.spatialReference.PCSCode
+        if not str(dfPCS) == wgs:
+            if str(dfPCS) in [utmn32, utmn33]:
                 lyrext = templateExtent.projectAs(wgs, gt1)
-            elif str(layerPCS) in [GK3, GK4]:
+            elif str(dfPCS) in [GK3, GK4]:
                 lyrext = templateExtent.projectAs(wgs, gt2)
             else:
                 lyrext = templateExtent.projectAs(wgs)
@@ -1261,7 +1267,7 @@ class OSM(object):
         #file path for temporary osm data
         OSMdata = os.path.join(OSMtmp, "osm.xml")
         try:
-            OSMurlHandle = urllib2.urlopen(myRequest, timeout=600)
+            OSMurlHandle = urllib2.urlopen(myRequest, timeout=timeout)
             OSMfile = file(OSMdata, 'wb')
             OSMfile.write(OSMurlHandle.read())
             OSMfile.close()
@@ -1307,11 +1313,25 @@ class OSM(object):
         #arcpy.OSMGPAttributeSelector_osmtools(filteredPointLayer, 'name,note')
 
         #loop reproject feature classes to coord of project dataframe
-        #arcpy.Project_management(in_layer, outlayer, PCS, transformation)
+        for fc in LIST_FEATURE_CLASSES_IN_DB:
+            #get basename of fc
+            basename =
+
+            #create save path for shapefile
+            outshp = OSMdir + basename + ".shp"
+            #print warning if dfPCS is not utm or gk
+            if not dfPCS in trafoDict.keys():
+                outMSG = "The data frame coordinate system does not
+                match any of the following EPSG codes: " + trafoDict.keys() + " Therefore no transformation was used
+                while reprojecting, which might lead to inaccuracies."
+                PCSwarning = pythonaddins.MessageBox(, "Ergebnis", 0)
+                print(PCSwarning)
+            arcpy.Project_management(fc, outshp, dfPCS, trafoDict[dfPCS])
         #!?copy transformations from rna analyse tool
 
         #add shapes to project (create group layer?)
         pass
+
     def onEditChange(self, text):
         pass
     def onFocus(self, focused):
