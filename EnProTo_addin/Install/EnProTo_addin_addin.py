@@ -1193,6 +1193,14 @@ class OSM(object):
         #assign drop down choice
         amenity = selection
 
+        #get bounding box of current viewing extent or (largest) layer?
+        toclayer = pythonaddins.GetSelectedTOCLayerOrDataFrame()
+        try:
+            lyrDesc = arcpy.Describe(toclayer)
+        except:
+            msg = pythonaddins.MessageBox("No TOC layer is selected.", "Error", 0)
+            print(msg)
+
         #get path to project
         mxd = arcpy.mapping.MapDocument("current")
         mxdpath = mxd.filePath
@@ -1215,13 +1223,6 @@ class OSM(object):
         OSMtmp = os.path.join(OSMdir, "ztmp")
         make_dir(OSMtmp)
 
-        #get bounding box of current viewing extent or (largest) layer?
-        toclayer = pythonaddins.GetSelectedTOCLayerOrDataFrame()
-        try:
-            lyrDesc = arcpy.Describe(toclayer)
-        except:
-            msg = pythonaddin.MessageBox("No TOC layer is selected.")
-            print(msg)
 
         lyrext = lyrDesc.extent
         #transform coord of extent if not WGS84
@@ -1321,9 +1322,10 @@ class OSM(object):
         validatedTableName = arcpy.ValidateTableName(inputName, wspace)
         nameOfTargetDataset = os.path.join(wspace, validatedTableName)
 
-        fcpoint = os.path.join(validatedTableName, validatedTableName + r"_osm_pt")
-        fcline = os.path.join(validatedTableName, validatedTableName + r"_osm_ln")
-        fcpoly = os.path.join(validatedTableName, validatedTableName + r"_osm_ply")
+        fcpoint = os.path.join(validatedTableName, selection + r"_osm_pt")
+        fcline = os.path.join(validatedTableName, selection + r"_osm_ln")
+        fcpoly = os.path.join(validatedTableName, selection + r"_osm_ply")
+        print(fcpoint)
 
         nameOfPointFeatureClass = os.path.join(wspace, fcpoint)
         nameOfLineFeatureClass = os.path.join(wspace, fcline)
@@ -1332,10 +1334,6 @@ class OSM(object):
         #import downloaded osm.xml into default database and get attributes
         arcpy.OSMGPFileLoader_osmtools(OSMdata, "CONSERVE_MEMORY", "ALL", nameOfTargetDataset, nameOfPointFeatureClass, nameOfLineFeatureClass, nameOfPolygonFeatureClass)
 
-        #loop through all feature classes in database and get attributes.
-        # extract the name tag for all line features
-        arcpy.OSMGPAttributeSelector_osmtools(fcpoint, 'name')
-
         # filter the points to only process the attribute carrying nodes
         #filteredPointLayer = 'Only attributed nodes'
         #arcpy.MakeFeatureLayer_management(r'stuttgart\stuttgart_osm_pt', filteredPointLayer, "osmSupportingElement = 'no'")
@@ -1343,13 +1341,15 @@ class OSM(object):
         # extract the name tag for the filtered point features
         #arcpy.OSMGPAttributeSelector_osmtools(filteredPointLayer, 'name,note')
 
-        #loop reproject feature classes to coord of project dataframe
+        tmpLayer = []
+        #loop feature classes get attributes and project to coord of project dataframe
         for fc in arcpy.ListFeatureClasses(feature_dataset="OSM"):
-            #create save path for shapefile
-            shpName = fc + ".shp"
+            # extract the name tag for all line features
+            arcpy.OSMGPAttributeSelector_osmtools(fc, 'name')
             #export fc to shape in memory
-            shptmp = arcpy.FeatureClassToFeatureClass_conversion (fc, OSMtmp, shpName)
-            #FeatureClassToShapefile_conversion (Input_Features, Output_Folder)
+            #shptmp = arcpy.FeatureClassToFeatureClass_conversion (fc, OSMtmp, shpName)
+            arcpy.FeatureClassToShapefile_conversion(wspace + "//OSM//" + fc, OSMtmp)
+            tmpLayer.append(fc)
             #print warning if dfPCS is not utm or gk
             if not str(dfPCS) in trafoDict.keys():
                 outMSG = ("The data frame coordinate system does not"
@@ -1358,6 +1358,7 @@ class OSM(object):
                 PCSwarning = pythonaddins.MessageBox(outMSG, "PCS Warning", 0)
                 print(PCSwarning)
             outshp = os.path.join(OSMdir, fc + ".shp")
+            shptmp = os.path.join(OSMtmp, fc + ".shp")
             arcpy.Project_management(shptmp, outshp, str(dfPCS), trafoDict[str(dfPCS)])
 
 
@@ -1366,8 +1367,20 @@ class OSM(object):
         arcpy.Delete_management(wspace + "//OSM_osm_relation")
         arcpy.Delete_management(wspace + "//OSM_osm_revision")
 
+        #move layers to OSM group layer
+        lyrs = arcpy.mapping.ListLayers(mxd, "OSM*")
+        for lyr in lyrs:
+            if not lyr.isGroupLayer:
+                arcpy.mapping.AddLayertoGroup(mxd, "OSM", lyr)
+
         #remove layers
-        #arcpy.RemoveLayer
+        for lyr in tmpLayer:
+            try:
+                arcpy.mapping.RemoveLayer(df, lyr)
+            except:
+                raise
+
+
 
         #add shapes to project (create group layer?)
 
