@@ -511,7 +511,9 @@ class ListAllLocksForLayers(object):
 
         lyrs = arcpy.mapping.ListLayers(mxd)
         out_msg = ""
-        
+
+        #HUNB20: Isgard
+        #HUNB10: Benjamin
         for lyr in lyrs:
             if not lyr.isGroupLayer:                      #Is layer a group layer
                 # print(lyr.isGroupLayer)
@@ -1218,7 +1220,9 @@ class OSM(object):
         try:
             lyrDesc = arcpy.Describe(toclayer)
         except:
-            msg = arcpy.pythonaddin.MessageBox("No TOC layer is selected.")
+            msg = pythonaddin.MessageBox("No TOC layer is selected.")
+            print(msg)
+
         lyrext = lyrDesc.extent
         #transform coord of extent if not WGS84
         GK3 = "31467"
@@ -1245,37 +1249,52 @@ class OSM(object):
         #bboxtuple = (41.88269405444917,12.48070478439331,41.89730998384814,12.503278255462645)
         overpassurl = "https://overpass-api.de/api/interpreter?data=[out:xml];"
 
+        #end tag for query
+        etag = """out body; >; out skel qt;"""
+
         ######## queries #########
         churches = """
         (
           node["amenity"="place_of_worship"]["religion"="christian"]{0};
           way["amenity"="place_of_worship"]["religion"="christian"]{0};
           relation["amenity"="place_of_worship"]["religion"="christian"]{0};
-        );
-        out body;
-        >;
-        out skel qt;""".format(bboxtuple)
-
+        );"""
 
         qHighway = """
         (
           way["highway"]{0};
-        );
-        out body;
-        >;
-        out skel qt;""".format(bboxtuple)
+        );"""
 
-        qWEA = """ """
+        qWEA = """
+        (
+          node [power=generator][power_source=wind]{0};
+          node [power=generator]["generator:source"=wind]{0};
+          way [power=generator][power_source=wind]{0};
+          way [power=generator]["generator:source"=wind]{0};
+        ); """
 
-        qHospitals = """ """
+        qHospitals = """
+         (
+          node["amenity"="hospital"]{0};
+          way["amenity"="hospital"]{0};
+          relation["amenity"="hospital"]{0};
+         );"""
 
-        qSchutz = """ """
+        #for classes of protected areas see http://wiki.openstreetmap.org/wiki/DE:Tag:boundary%3Dprotected_area
+        qSchutz = """
+         (
+          node["boundary"="protected_area"]{0};
+          way["boundary"="protected_area"]{0};
+          relation["boundary"="protected_area"]{0};
+         );"""
 
         #make dictionary from queries
-        qDict = {Streets: qHighway, WEA: qWEA, Hospitals: qHospitals, Schutzgebiete: qSchutz}
+        qDict = {"Streets": qHighway, "WEA": qWEA, "Hospitals": qHospitals, "Schutzgebiete": qSchutz}
 
+        #create full query
+        query = (qDict[selection] + etag).format(bboxtuple)
         #fetch data from Overpass
-        requesturl = overpassurl + urllib.quote_plus(qDict[selection])
+        requesturl = overpassurl + urllib.quote_plus(query)
 
         myRequest = urllib2.Request(requesturl)
         #file path for temporary osm data
@@ -1327,7 +1346,10 @@ class OSM(object):
         #loop reproject feature classes to coord of project dataframe
         for fc in arcpy.ListFeatureClasses(feature_dataset="OSM"):
             #create save path for shapefile
-            outshp = os.path.join(OSMdir + fc + ".shp")
+            shpName = fc + ".shp"
+            #export fc to shape in memory
+            shptmp = arcpy.FeatureClassToFeatureClass_conversion (fc, OSMtmp, shpName)
+            #FeatureClassToShapefile_conversion (Input_Features, Output_Folder)
             #print warning if dfPCS is not utm or gk
             if not str(dfPCS) in trafoDict.keys():
                 outMSG = ("The data frame coordinate system does not"
@@ -1335,8 +1357,17 @@ class OSM(object):
                 "while reprojecting, which might lead to inaccuracies.").format(trafoDict.keys())
                 PCSwarning = pythonaddins.MessageBox(outMSG, "PCS Warning", 0)
                 print(PCSwarning)
-            arcpy.Project_management(fc, outshp, str(dfPCS), trafoDict[str(dfPCS)])
-        #!?copy transformations from rna analyse tool
+            outshp = os.path.join(OSMdir, fc + ".shp")
+            arcpy.Project_management(shptmp, outshp, str(dfPCS), trafoDict[str(dfPCS)])
+
+
+        #delete fc from scratch db afterwards
+        arcpy.Delete_management(wspace + "//OSM")
+        arcpy.Delete_management(wspace + "//OSM_osm_relation")
+        arcpy.Delete_management(wspace + "//OSM_osm_revision")
+
+        #remove layers
+        #arcpy.RemoveLayer
 
         #add shapes to project (create group layer?)
 
@@ -1345,6 +1376,7 @@ class OSM(object):
             shutil.rmtree(OSMtmp)
         except:
             raise
+
         pass
 
     def onEditChange(self, text):
