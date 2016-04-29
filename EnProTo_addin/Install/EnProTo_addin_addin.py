@@ -1173,6 +1173,7 @@ class OSM(object):
         import urllib
         import urllib2
         import os
+        import shutil
         import errno
         
         timeout = 600
@@ -1256,7 +1257,7 @@ class OSM(object):
         out skel qt;""".format(bboxtuple)
 
 
-        highway = """
+        qHighway = """
         (
           way["highway"]{0};
         );
@@ -1264,9 +1265,17 @@ class OSM(object):
         >;
         out skel qt;""".format(bboxtuple)
 
+        qWEA = """ """
+
+        qHospitals = """ """
+
+        qSchutz = """ """
+
+        #make dictionary from queries
+        qDict = {Streets: qHighway, WEA: qWEA, Hospitals: qHospitals, Schutzgebiete: qSchutz}
 
         #fetch data from Overpass
-        requesturl = overpassurl + urllib.quote_plus(highway)
+        requesturl = overpassurl + urllib.quote_plus(qDict[selection])
 
         myRequest = urllib2.Request(requesturl)
         #file path for temporary osm data
@@ -1330,12 +1339,18 @@ class OSM(object):
         #!?copy transformations from rna analyse tool
 
         #add shapes to project (create group layer?)
+
+        #delete temporary data dir
+        try:
+            shutil.rmtree(OSMtmp)
+        except:
+            raise
         pass
 
     def onEditChange(self, text):
         pass
     def onFocus(self, focused):
-        self.items = ["Churches", "Highway"]
+        self.items = ["Streets", "WEA", "Hospitals", "Schutzgebiete"]
         pass
     def onEnter(self):
         pass
