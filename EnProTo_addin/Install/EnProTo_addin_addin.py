@@ -786,6 +786,7 @@ class Join(object):
                             trtabledict = tabledf.transpose().to_dict()
                             joindict = {trtabledict[r][joinkey]: delkey(v, joinkey) for r, v in trtabledict.items()}
                             print("created join dict")
+                            print(joindict)
                             #stop iterating keys
                             break
                     #if a match was found stop iterating tables
@@ -1190,9 +1191,6 @@ class OSM(object):
         # load the OpenStreetMap specific toolbox
         arcpy.ImportToolbox(r"c:\program files (x86)\arcgis\desktop10.3\ArcToolbox\Toolboxes\OpenStreetMap Toolbox.tbx")
 
-        #assign drop down choice
-        amenity = selection
-
         #get bounding box of current viewing extent or (largest) layer?
         toclayer = pythonaddins.GetSelectedTOCLayerOrDataFrame()
         try:
@@ -1214,7 +1212,7 @@ class OSM(object):
 
         #create path to GIS data directory in project directory
         rootpath = re.split("05_GIS",mxdpath)[0]
-        OSMdir = os.path.join(rootpath, "05_GIS", "av_daten", "10_OSM", amenity)
+        OSMdir = os.path.join(rootpath, "05_GIS", "av_daten", "10_OSM", selection)
 
         #create osm dir if not existent
         make_dir(OSMdir)
@@ -1315,7 +1313,8 @@ class OSM(object):
             #     AddMsgAndPrint(e.code, 2)
 
         # define the names for the feature dataset and the feature classes
-        inputName = "OSM"
+        #inputName = "OSM"
+        inputName = selection
         #set workspace to scratch workspace
         wspace = env.scratchWorkspace
 
@@ -1325,7 +1324,6 @@ class OSM(object):
         fcpoint = os.path.join(validatedTableName, selection + r"_osm_pt")
         fcline = os.path.join(validatedTableName, selection + r"_osm_ln")
         fcpoly = os.path.join(validatedTableName, selection + r"_osm_ply")
-        print(fcpoint)
 
         nameOfPointFeatureClass = os.path.join(wspace, fcpoint)
         nameOfLineFeatureClass = os.path.join(wspace, fcline)
@@ -1333,6 +1331,7 @@ class OSM(object):
 
         #import downloaded osm.xml into default database and get attributes
         arcpy.OSMGPFileLoader_osmtools(OSMdata, "CONSERVE_MEMORY", "ALL", nameOfTargetDataset, nameOfPointFeatureClass, nameOfLineFeatureClass, nameOfPolygonFeatureClass)
+
 
         # filter the points to only process the attribute carrying nodes
         #filteredPointLayer = 'Only attributed nodes'
@@ -1343,12 +1342,12 @@ class OSM(object):
 
         tmpLayer = []
         #loop feature classes get attributes and project to coord of project dataframe
-        for fc in arcpy.ListFeatureClasses(feature_dataset="OSM"):
+        for fc in arcpy.ListFeatureClasses(feature_dataset=selection):
             # extract the name tag for all line features
             arcpy.OSMGPAttributeSelector_osmtools(fc, 'name')
             #export fc to shape in memory
             #shptmp = arcpy.FeatureClassToFeatureClass_conversion (fc, OSMtmp, shpName)
-            arcpy.FeatureClassToShapefile_conversion(wspace + "//OSM//" + fc, OSMtmp)
+            arcpy.FeatureClassToShapefile_conversion(os.path.join(wspace, selection, fc), OSMtmp)
             tmpLayer.append(fc)
             #print warning if dfPCS is not utm or gk
             if not str(dfPCS) in trafoDict.keys():
@@ -1363,23 +1362,42 @@ class OSM(object):
 
 
         #delete fc from scratch db afterwards
-        arcpy.Delete_management(wspace + "//OSM")
-        arcpy.Delete_management(wspace + "//OSM_osm_relation")
-        arcpy.Delete_management(wspace + "//OSM_osm_revision")
-
-        #move layers to OSM group layer
-        lyrs = arcpy.mapping.ListLayers(mxd, "OSM*")
-        for lyr in lyrs:
-            if not lyr.isGroupLayer:
-                arcpy.mapping.AddLayertoGroup(mxd, "OSM", lyr)
+        arcpy.Delete_management(os.path.join(wspace, selection))
+        arcpy.Delete_management(os.path.join(wspace, selection + "_osm_relation"))
+        arcpy.Delete_management(os.path.join(wspace, selection + "_osm_revision"))
 
         #remove layers
-        for lyr in tmpLayer:
-            try:
-                arcpy.mapping.RemoveLayer(df, lyr)
-            except:
-                raise
+        #for lyr in tmpLayer:
+         #   rlyr = arcpy.mapping.ListLayers(mxd, lyr, df)[0]
+          #  try:
+           #     arcpy.mapping.RemoveLayer(df, rlyr)
+           # except:
+            #    raise
+        lyrs = arcpy.mapping.ListLayers(mxd, selection + "*")
+        for lyr in lyrs:
+            if not lyr.isGroupLayer:
+                try:
+                    arcpy.mapping.RemoveLayer(df, lyr)
+                except:
+                    raise
 
+        groupLyr = arcpy.mapping.ListLayers(mxd, selection)[0]
+        arcpy.env.workspace = OSMdir
+        fcList = arcpy.ListFeatureClasses()
+        for f in fcList:
+            #nlyr = arcpy.MakeFeatureLayer_management(os.path.join(OSMdir, f))
+            lyr = arcpy.mapping.Layer(os.path.join(OSMdir, f))
+                #arcpy.mapping.ListLayers(mxd, str(nlyr))[0]
+            arcpy.mapping.AddLayerToGroup(df, groupLyr, lyr)
+
+
+        #move layers to OSM group layer
+        #lyrs = arcpy.mapping.ListLayers(mxd, selection + "*")
+        #get group layer object
+        #groupLyr = arcpy.mapping.ListLayers(mxd, selection)[0]
+        #for lyr in lyrs:
+        #    if not lyr.isGroupLayer:
+        #        arcpy.mapping.AddLayerToGroup(df, groupLyr, lyr)
 
 
         #add shapes to project (create group layer?)
