@@ -187,15 +187,3 @@ def generatePointsFromFeatures(inputFC, descInput, zerodate=False):
             trkPtEle.text = valuesDict["ELEVATION"]
             trkPtTime = ET.SubElement(trkPt, "time")
             trkPtTime.text = valuesDict["DATETIMES"]
-
-
-
-if __name__ == "__main__":
-    ''' Gather tool inputs and pass them to featuresToGPX
-    '''
-
-    inputFC = arcpy.GetParameterAsText(0)
-    outGPX = arcpy.GetParameterAsText(1)
-    zerodate = arcpy.GetParameter(2)
-    pretty = arcpy.GetParameter(3)
-    featuresToGPX(inputFC, outGPX, zerodate, pretty)
