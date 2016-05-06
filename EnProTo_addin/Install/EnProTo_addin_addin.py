@@ -13,6 +13,7 @@ import time
 import datetime as dt
 import colorsys
 import comtypes
+import mod.FeaturesToGPX.py
 
 ############################
 #helper functions
@@ -1057,6 +1058,29 @@ class WritePathOfLayersToFile(object):
                 tfile.write(path)
 
         tfile.close()
+        pass
+
+class ToGPX(object):
+    """Implementation for ToGPX.button (Button)"""
+    def __init__(self):
+        self.enabled = True
+        self.checked = False
+    def onClick(self):
+        mxd = arcpy.mapping.MapDocument("CURRENT")
+        #get first data frame of map document
+
+        #get directory of map document
+        mxdpath = mxd.filePath
+        #split path by GIS directory, keep first part and add GIS folder again
+        base = re.split('05_GIS',mxdpath)[0]
+        startpath = base + "05_GIS/av_daten"
+
+        inputFC = pythonaddins.GetSelectedTOCLayerOrDataFrame()
+        outGPX = pythonaddins.SaveDialog("Speichern unter", "GPS.gpx", startpath)
+        zerodate = False
+        pretty = False
+
+        featuresToGPX(inputFC, outGPX, zerodate, pretty)
         pass
         
 class GetPip(object):
