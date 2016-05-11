@@ -413,10 +413,12 @@ def AddTextElement(bStandalone = False, position = (10.0, 25.0), txtfont = "Aria
     #pEnv = NewObj(esriGeometry.Envelope, esriGeometry.IEnvelope)
     #pElement.QueryBounds(pSD, pEnv)
     #print "Width = ", pEnv.Width
+    
 
 #############################
 #definitions for buttons start
 #############################
+
 class ChangeBrowsePath(object):
     """Implementation for ChangeBrowsePath.extension2 (Extension)"""
     def __init__(self):
@@ -448,7 +450,6 @@ class ChangeBrowsePath(object):
 		_winreg.SetValueEx(registrykey,"LastSaveToLocation",0,_winreg.REG_SZ,lastsave)
 		_winreg.CloseKey(registrykey)
         
-        
 class OpenPathForSelectedLayer(object):
     """Implementation for OpenPathForSelectedLayer.button (Button)"""
     def __init__(self):
@@ -477,7 +478,6 @@ class OpenPathForCurrentMXD(object):
         subprocess.Popen('explorer /select, "{0}"'.format(mxdpath))
         pass
         
-        
 class FindDefinitionQuerys(object):
     """Implementation for FindDefinitionQuerys.button (Button)"""
     def __init__(self):
@@ -499,7 +499,6 @@ class FindDefinitionQuerys(object):
         result = pythonaddins.MessageBox(out_msg, "Ergebnis", 0)
         print(result)
         pass
-        
         
 class ListAllLocksForLayers(object):
     """Implementation for ListAllLocksForLayers.button (Button)"""
@@ -542,8 +541,7 @@ class ListAllLocksForLayers(object):
         result = pythonaddins.MessageBox(out_msg, "Ergebnis", 0)
         print(result)
         pass
-
-
+        
 class CalculateArea(object):
     """Implementation for CalculateArea.button (Button)"""
     def __init__(self):
@@ -602,7 +600,6 @@ class CalculateArea(object):
 
         pass
         
-  
 class Join(object):
     """Implementation for Join.button (Button)"""
     def __init__(self):
@@ -805,8 +802,7 @@ class Join(object):
         CopyFields(toclayer, joinfield, joindict, updatefields)  
         #validate join => check if there are rows without match and list unmatched joinfield values
         pass
-
-
+        
 class BatchReproject(object):
     """Implementation for BatchReproject.button (Button)"""
     def __init__(self):
@@ -872,8 +868,7 @@ class BatchReproject(object):
             print(ex.args[0])
 
         pass
-
-
+        
 class NewShapeFromStandardShape(object):
     """Implementation for NewShapeFromStandardShape.combobox (ComboBox)"""
     def __init__(self):
@@ -934,17 +929,18 @@ class NewShapeFromStandardShape(object):
             #templatepath = ""            #present option to create new shape with specified fields?
 
         #get path where to save shp from user
-        savepath = pythonaddins.SaveDialog("Speichern unter", contstr, startpath, "Shapefile (*.shp)")
-        
-        #copy shape to user specified path
-        arcpy.CopyFeatures_management(templatepath, savepath)
-        #define projection for copied shape
-        #create full path with extension first
-        filepath = savepath + ".shp"
-        arcpy.DefineProjection_management(filepath, df_coord)
-        #add layer to document => not needed since define projection already adds shape to project
-        #newlayer = arcpy.mapping.Layer(filepath)
-        #arcpy.mapping.AddLayer(df, newlayer)
+        savepath = pythonaddins.SaveDialog("Speichern unter", contstr, startpath, "", "Shapefile (*.shp)")
+        #catch if save dialog is exited with cancel
+        if savepath != None:
+            #copy shape to user specified path
+            arcpy.CopyFeatures_management(templatepath, savepath)
+            #define projection for copied shape
+            #create full path with extension first
+            filepath = savepath + ".shp"
+            arcpy.DefineProjection_management(filepath, df_coord)
+            #add layer to document => not needed since define projection already adds shape to project
+            #newlayer = arcpy.mapping.Layer(filepath)
+            #arcpy.mapping.AddLayer(df, newlayer)
         pass
     def onEditChange(self, text):
         pass
@@ -955,8 +951,7 @@ class NewShapeFromStandardShape(object):
         pass
     def refresh(self):
         pass
-
-
+        
 class ChangePlankopf(object):
     """Implementation for ChangePlankopf.combobox (ComboBox)"""
     def __init__(self):
@@ -1035,8 +1030,7 @@ class ChangePlankopf(object):
         pass
     def refresh(self):
         pass
-
-
+        
 class WritePathOfLayersToFile(object):
     """Implementation for WritePathOfLayersToFile.button (Button)"""
     def __init__(self):
@@ -1059,7 +1053,7 @@ class WritePathOfLayersToFile(object):
 
         tfile.close()
         pass
-
+        
 class ToGPX(object):
     """Implementation for ToGPX.button (Button)"""
     def __init__(self):
@@ -1129,13 +1123,12 @@ class ToGPX(object):
 
             # Write the output GPX file
             try:
+                gpxFile = open(outGPX, "w")
                 if pretty:
-                    gpxFile = open(outGPX, "w")
                     gpxFile.write(prettify(gpx))
                 else:
-                    gpxFile = open(outGPX, "wb")
                     ET.ElementTree(gpx).write(gpxFile, encoding="UTF-8", xml_declaration=True)
-            except TypeError as e:
+            except TypeError:
                 arcpy.AddError("Error serializing GPX into the file.")
             finally:
                 gpxFile.close()
@@ -1255,42 +1248,26 @@ class ToGPX(object):
                     trkPtEle.text = valuesDict["ELEVATION"]
                     trkPtTime = ET.SubElement(trkPt, "time")
                     trkPtTime.text = valuesDict["DATETIMES"]
+                    
+                    
         mxd = arcpy.mapping.MapDocument("CURRENT")
         #get first data frame of map document
 
         #get directory of map document
         mxdpath = mxd.filePath
         #split path by GIS directory, keep first part and add GIS folder again
-        base = re.split('05_GIS',mxdpath)[0]
+        base = re.split('05_GIS', mxdpath)[0]
         startpath = base + "05_GIS/av_daten"
 
         inputFC = pythonaddins.GetSelectedTOCLayerOrDataFrame()
-        outGPX = pythonaddins.SaveDialog("Speichern unter", "GPS.gpx", startpath)
+        outGPX = pythonaddins.SaveDialog("Speichere GPX", "GPS.gpx", startpath, "", "GPX (*.gpx)")
+        print(outGPX)
         zerodate = False
         pretty = False
 
-        #featuresToGPX(inputFC, outGPX, zerodate, pretty)
+        featuresToGPX(inputFC, outGPX, zerodate, pretty)
         pass
         
-class GetPip(object):
-    """Implementation for GetPip.button (Button)"""
-    def __init__(self):
-        self.enabled = True
-        self.checked = False
-    def onClick(self):
-        #get pip install script
-        urllib.urlretrieve(r"https://bootstrap.pypa.io/get-pip.py", r"C:\Python27\ArcGIS10.3\Scripts\get_pip.py")
-        #install pip
-        subprocess.call(["python", r"C:\Python27\ArcGIS10.3\Scripts\get_pip.py"])
-        #get setup tools
-        #urllib.urlretrieve(r"https://bootstrap.pypa.io/ez_setup.py", r"C:\Python27\ArcGIS10.3\Scripts\ez_setup.py")
-        #install setuptools
-        #subprocess.call([pythonpath, r"C:\Python27\ArcGIS10.3\Scripts\ez_setup.py"])
-
-        subprocess.call([r"L:\Ablage_Mitarbeiter\Benjamin\pandas-0.13.1.win32-py2.7.exe"])
-        pass
-
-
 class TB(object):
     """Implementation for TB.button (Button)"""
     def __init__(self):
@@ -1374,8 +1351,7 @@ class TB(object):
         #clean uo
         #del legendDict, iPosition
         pass
-
-
+        
 class OSM(object):
     """Implementation for OSM.combobox (ComboBox)"""
     def __init__(self):
@@ -1631,4 +1607,22 @@ class OSM(object):
     def onEnter(self):
         pass
     def refresh(self):
+        pass
+        
+class GetPip(object):
+    """Implementation for GetPip.button (Button)"""
+    def __init__(self):
+        self.enabled = True
+        self.checked = False
+    def onClick(self):
+        #get pip install script
+        urllib.urlretrieve(r"https://bootstrap.pypa.io/get-pip.py", r"C:\Python27\ArcGIS10.3\Scripts\get_pip.py")
+        #install pip
+        subprocess.call(["python", r"C:\Python27\ArcGIS10.3\Scripts\get_pip.py"])
+        #get setup tools
+        #urllib.urlretrieve(r"https://bootstrap.pypa.io/ez_setup.py", r"C:\Python27\ArcGIS10.3\Scripts\ez_setup.py")
+        #install setuptools
+        #subprocess.call([pythonpath, r"C:\Python27\ArcGIS10.3\Scripts\ez_setup.py"])
+
+        subprocess.call([r"L:\Ablage_Mitarbeiter\Benjamin\pandas-0.13.1.win32-py2.7.exe"])
         pass
