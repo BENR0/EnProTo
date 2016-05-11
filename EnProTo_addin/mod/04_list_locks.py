@@ -12,6 +12,7 @@ class ListAllLocksForLayers(object):
 
         #HUNB20: Isgard
         #HUNB10: Benjamin
+        #HUPC28: Maren
         for lyr in lyrs:
             if not lyr.isGroupLayer:                      #Is layer a group layer
                 # print(lyr.isGroupLayer)
