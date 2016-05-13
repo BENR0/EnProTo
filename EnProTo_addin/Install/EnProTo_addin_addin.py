@@ -18,23 +18,24 @@ import comtypes
 ############################
 #helper functions
 ############################
-
 def ListLocks(shp_path):
     pattern = shp_path + "*.sr.lock"
     matches = glob.glob(pattern)
 
+    nodeDict = {"HUNB20": "Isgard", "HUNB10": "Benjamin", "HUPC28": "Maren", "HUPC24": "Yvonne", "HUPC30": "Andi", "HUPC07": "Jann"}
     lockslist = []
     locks = ""
     for item in matches:
         split_pattern = "shp."
         tmp = re.split(split_pattern, item)[1]
         tmp = re.split(".[0-9]+.[0-9]+.sr.lock", tmp)[0]
-        
+        print(tmp)
         node_name = os.environ["COMPUTERNAME"]
         if tmp == node_name:
             tmp = tmp + "(Eigener Rechner)"
 
         lockslist.append(tmp)
+        ##locks += tmp + nodeDict[tmp] + "\n"
         locks += tmp + "\n"
 
     return locks, lockslist
@@ -514,6 +515,10 @@ class ListAllLocksForLayers(object):
 
         #HUNB20: Isgard
         #HUNB10: Benjamin
+        #HUPC28: Maren
+        #HUPC24: Yvonne
+        #HUPC07: Jann
+        #HUPC30: Andi
         for lyr in lyrs:
             if not lyr.isGroupLayer:                      #Is layer a group layer
                 # print(lyr.isGroupLayer)
@@ -529,10 +534,14 @@ class ListAllLocksForLayers(object):
            # else:
                 out_msg += str(lyr) + " is locked by user(s):\n"
                 #get lyr path
-                desc = arcpy.Describe(lyr)
-                lyr_path = desc.path + "\\" + str(lyr) +  ".shp"
-                #get all locks for this layer and append to msg string
-                strlocks, listlocks = ListLocks(lyr_path)
+                try:
+                    desc = arcpy.Describe(lyr)
+                    lyr_path = desc.path + "\\" + str(lyr) +  ".shp"
+                    #get all locks for this layer and append to msg string
+                    strlocks, listlocks = ListLocks(lyr_path)
+                except:
+                    pass
+
                 out_msg += strlocks + "\n"
         
         if out_msg == "":
@@ -589,7 +598,7 @@ class CalculateArea(object):
 
             #calculate geometry
             arcpy.CalculateField_management(toclayer, fieldName1, "!SHAPE.AREA@HECTARES!", "PYTHON")
-            arcpy.CalculateField_management(toclayer, fieldName2, "round(!SHAPE.AREA@SQUAREMETERS!, 0)", "PYTHON")
+            arcpy.CalculateField_management(toclayer, fieldName2, "round(!SHAPE.AREA@SQUAREMETERS!, 2)", "PYTHON")
 
         except Exception, e:
             #if error occurs, print line number and error message
@@ -1261,11 +1270,12 @@ class ToGPX(object):
 
         inputFC = pythonaddins.GetSelectedTOCLayerOrDataFrame()
         outGPX = pythonaddins.SaveDialog("Speichere GPX", "GPS.gpx", startpath, "", "GPX (*.gpx)")
-        print(outGPX)
         zerodate = False
         pretty = False
 
-        featuresToGPX(inputFC, outGPX, zerodate, pretty)
+        if outGPX != None:
+            featuresToGPX(inputFC, outGPX, zerodate, pretty)
+
         pass
         
 class TB(object):
@@ -1448,11 +1458,15 @@ class OSM(object):
           relation["amenity"="place_of_worship"]["religion"="christian"]{0};
         );"""
 
+        ###### Straßennetz
         qHighway = """
         (
           way["highway"]{0};
         );"""
 
+        tHighway = ["highway", "name", "surface", "maxspeed", "access", "opening_date", "lanes", "source", "oneway"]
+
+        ###### Windenergieanlagen
         qWEA = """
         (
           node [power=generator][power_source=wind]{0};
@@ -1461,6 +1475,9 @@ class OSM(object):
           way [power=generator]["generator:source"=wind]{0};
         ); """
 
+        tWEA = ["power", "power:source", "note", "operator", "manufacturer", "manufacturer:type", "generator:output:electricity", "height", "rotor:diameter" ]
+
+        ###### Krankenhäuser
         qHospitals = """
          (
           node["amenity"="hospital"]{0};
@@ -1468,6 +1485,9 @@ class OSM(object):
           relation["amenity"="hospital"]{0};
          );"""
 
+        tHospitals = ["name"]
+
+        ###### Schutzgebiete
         #for classes of protected areas see http://wiki.openstreetmap.org/wiki/DE:Tag:boundary%3Dprotected_area
         qSchutz = """
          (
@@ -1475,12 +1495,36 @@ class OSM(object):
           way["boundary"="protected_area"]{0};
           relation["boundary"="protected_area"]{0};
          );"""
+        #http://wiki.openstreetmap.org/wiki/Tag:boundary%3Dprotected_area
+        tSchutz = ["name", "protected_title", "protected_object", "related_law", "operator", "website", "protected_class"]
+
+        ###### Energieleitungen und Masten
+        qPowerline = """
+         (
+          node["power"="line"]{0};
+          way["power"="line"]{0};
+          relation["power"="line"]{0};
+          node["power"="cable"]{0};
+          way["power"="cable"]{0};
+          relation["power"="cable"]{0};
+          node["power"="minor_underground_cable"]{0};
+          way["power"="minor_underground_cable"]{0};
+          relation["power"="minor_underground_cable"]{0};
+          node["power"="minor_line"]{0};
+          way["power"="minor_line"]{0};
+          relation["power"="minor_line"]{0};
+          node["power"="tower"]{0};
+          way["power"="tower"]{0};
+          relation["power"="tower"]{0};
+         );"""
+
+        tPowerline = ["cables", "operator", "frequency", "voltage", "source", "wires", "power", "note"] 
 
         #make dictionary from queries
-        qDict = {"Streets": qHighway, "WEA": qWEA, "Hospitals": qHospitals, "Schutzgebiete": qSchutz}
+        qDict = {"Streets": [qHighway, tHighway], "WEA": [qWEA, tWEA], "Powerlines": [qPowerline, tPowerline], "Hospitals": [qHospitals, tHospitals], "Schutzgebiete": [qSchutz, tSchutz]}
 
         #create full query
-        query = (qDict[selection] + etag).format(bboxtuple)
+        query = (qDict[selection][0] + etag).format(bboxtuple)
         #fetch data from Overpass
         requesturl = overpassurl + urllib.quote_plus(query)
 
@@ -1533,9 +1577,9 @@ class OSM(object):
         #loop feature classes get attributes and project to coord of project dataframe
         for fc in arcpy.ListFeatureClasses(feature_dataset=selection):
             # extract the name tag for all line features
-            arcpy.OSMGPAttributeSelector_osmtools(fc, 'name')
-            #export fc to shape in memory
-            #shptmp = arcpy.FeatureClassToFeatureClass_conversion (fc, OSMtmp, shpName)
+            print(qDict[selection][1])
+            arcpy.OSMGPAttributeSelector_osmtools(fc, qDict[selection][1])
+            #export fc to shape database
             arcpy.FeatureClassToShapefile_conversion(os.path.join(wspace, selection, fc), OSMtmp)
             tmpLayer.append(fc)
             #print warning if dfPCS is not utm or gk
@@ -1602,7 +1646,7 @@ class OSM(object):
     def onEditChange(self, text):
         pass
     def onFocus(self, focused):
-        self.items = ["Streets", "WEA", "Hospitals", "Schutzgebiete"]
+        self.items = ["Streets", "WEA", "Powerlines", "Hospitals", "Schutzgebiete"]
         pass
     def onEnter(self):
         pass

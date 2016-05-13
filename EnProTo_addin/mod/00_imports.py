@@ -18,23 +18,24 @@ import comtypes
 ############################
 #helper functions
 ############################
-
 def ListLocks(shp_path):
     pattern = shp_path + "*.sr.lock"
     matches = glob.glob(pattern)
 
+    nodeDict = {"HUNB20": "Isgard", "HUNB10": "Benjamin", "HUPC28": "Maren", "HUPC24": "Yvonne", "HUPC30": "Andi", "HUPC07": "Jann"}
     lockslist = []
     locks = ""
     for item in matches:
         split_pattern = "shp."
         tmp = re.split(split_pattern, item)[1]
         tmp = re.split(".[0-9]+.[0-9]+.sr.lock", tmp)[0]
-        
+        print(tmp)
         node_name = os.environ["COMPUTERNAME"]
         if tmp == node_name:
             tmp = tmp + "(Eigener Rechner)"
 
         lockslist.append(tmp)
+        ##locks += tmp + nodeDict[tmp] + "\n"
         locks += tmp + "\n"
 
     return locks, lockslist

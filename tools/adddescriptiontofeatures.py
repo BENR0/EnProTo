@@ -111,16 +111,26 @@ class AddDescriptionToFeatures(object):
             cursor_fields = [key_field] + list(set(valid_fields) - set([key_field]))
             with arcpy.da.SearchCursor(fc, cursor_fields) as cursor:
                 for row in set(cursor):
-                    attdict[row[0]] = dict(zip(cursor.fields,row))
+                    #get length of all row items
+                    rowitemlen = [len(i) for i in row]
+                    attdict[row[0]] = dict(zip(cursor.fields, zip(row, rowitemlen)))
             return attdict
 
         #create dictionary from table with selected fields
         attrdict = make_attribute_dict(features, keyfield, dict_valuetable.keys())
+        arcpy.AddMessage(attrdict)
         #init empty description list
         class_descriptions = []
 
+        #extract all lenth items from dictionary
+        lenarr = [[j[1] for j in i.values()] for i in attrdict.values()]
+        #get maximum length for each field name
+        maxlen = [max(i) for i in zip(*lenarr)]
+
+        cols = True
         for i in lyr.symbology.classValues:
             tmp = ""
+            colcounter = 0
             for f in dict_valuetable.keys():
                 otag = ""
                 ctag = ""
@@ -136,7 +146,14 @@ class AddDescriptionToFeatures(object):
                     otag = otag + "<UND>"
                     ctag = "</UND>" + ctag
 
-                tmp = tmp + otag + attrdict[i][f] + ctag + " "
+                if cols:
+                    txt = otag + attrdict[i][f][0] + ctag
+                    shift = str(maxlen[colcounter] + 10)
+                    tmpformat = "{:{shift}}".format(txt, shift=shift)
+                    tmp = tmp + tmpformat
+                    colcounter += 1
+                else:
+                    tmp = tmp + otag + attrdict[i][f][0] + ctag + " "
             class_descriptions.append(tmp)
 
         lyr.symbology.classDescriptions = class_descriptions

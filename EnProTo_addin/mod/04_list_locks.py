@@ -13,6 +13,9 @@ class ListAllLocksForLayers(object):
         #HUNB20: Isgard
         #HUNB10: Benjamin
         #HUPC28: Maren
+        #HUPC24: Yvonne
+        #HUPC07: Jann
+        #HUPC30: Andi
         for lyr in lyrs:
             if not lyr.isGroupLayer:                      #Is layer a group layer
                 # print(lyr.isGroupLayer)
@@ -28,10 +31,14 @@ class ListAllLocksForLayers(object):
            # else:
                 out_msg += str(lyr) + " is locked by user(s):\n"
                 #get lyr path
-                desc = arcpy.Describe(lyr)
-                lyr_path = desc.path + "\\" + str(lyr) +  ".shp"
-                #get all locks for this layer and append to msg string
-                strlocks, listlocks = ListLocks(lyr_path)
+                try:
+                    desc = arcpy.Describe(lyr)
+                    lyr_path = desc.path + "\\" + str(lyr) +  ".shp"
+                    #get all locks for this layer and append to msg string
+                    strlocks, listlocks = ListLocks(lyr_path)
+                except:
+                    pass
+
                 out_msg += strlocks + "\n"
         
         if out_msg == "":

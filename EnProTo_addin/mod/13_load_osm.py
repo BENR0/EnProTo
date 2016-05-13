@@ -100,7 +100,7 @@ class OSM(object):
           way["highway"]{0};
         );"""
 
-        tHighway = []
+        tHighway = ["highway", "name", "surface", "maxspeed", "access", "opening_date", "lanes", "source", "oneway"]
 
         ###### Windenergieanlagen
         qWEA = """
@@ -121,7 +121,7 @@ class OSM(object):
           relation["amenity"="hospital"]{0};
          );"""
 
-        tHospitals = []
+        tHospitals = ["name"]
 
         ###### Schutzgebiete
         #for classes of protected areas see http://wiki.openstreetmap.org/wiki/DE:Tag:boundary%3Dprotected_area
@@ -131,8 +131,8 @@ class OSM(object):
           way["boundary"="protected_area"]{0};
           relation["boundary"="protected_area"]{0};
          );"""
-
-        tSchutz = []
+        #http://wiki.openstreetmap.org/wiki/Tag:boundary%3Dprotected_area
+        tSchutz = ["name", "protected_title", "protected_object", "related_law", "operator", "website", "protected_class"]
 
         ###### Energieleitungen und Masten
         qPowerline = """
@@ -140,19 +140,15 @@ class OSM(object):
           node["power"="line"]{0};
           way["power"="line"]{0};
           relation["power"="line"]{0};
-          // query part for: “power=cable”
           node["power"="cable"]{0};
           way["power"="cable"]{0};
           relation["power"="cable"]{0};
-          // query part for: “power=minor_underground_cable”
           node["power"="minor_underground_cable"]{0};
           way["power"="minor_underground_cable"]{0};
           relation["power"="minor_underground_cable"]{0};
-          // query part for: “power=minor_line”
           node["power"="minor_line"]{0};
           way["power"="minor_line"]{0};
           relation["power"="minor_line"]{0};
-          // query part for: “power=tower”
           node["power"="tower"]{0};
           way["power"="tower"]{0};
           relation["power"="tower"]{0};
@@ -164,7 +160,7 @@ class OSM(object):
         qDict = {"Streets": [qHighway, tHighway], "WEA": [qWEA, tWEA], "Powerlines": [qPowerline, tPowerline], "Hospitals": [qHospitals, tHospitals], "Schutzgebiete": [qSchutz, tSchutz]}
 
         #create full query
-        query = (qDict[selection] + etag).format(bboxtuple)
+        query = (qDict[selection][0] + etag).format(bboxtuple)
         #fetch data from Overpass
         requesturl = overpassurl + urllib.quote_plus(query)
 
@@ -217,7 +213,8 @@ class OSM(object):
         #loop feature classes get attributes and project to coord of project dataframe
         for fc in arcpy.ListFeatureClasses(feature_dataset=selection):
             # extract the name tag for all line features
-            arcpy.OSMGPAttributeSelector_osmtools(fc, 'name')
+            print(qDict[selection][1])
+            arcpy.OSMGPAttributeSelector_osmtools(fc, qDict[selection][1])
             #export fc to shape database
             arcpy.FeatureClassToShapefile_conversion(os.path.join(wspace, selection, fc), OSMtmp)
             tmpLayer.append(fc)
@@ -285,7 +282,7 @@ class OSM(object):
     def onEditChange(self, text):
         pass
     def onFocus(self, focused):
-        self.items = ["Streets", "WEA", "Hospitals", "Schutzgebiete"]
+        self.items = ["Streets", "WEA", "Powerlines", "Hospitals", "Schutzgebiete"]
         pass
     def onEnter(self):
         pass
