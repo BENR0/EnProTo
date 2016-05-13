@@ -94,11 +94,15 @@ class OSM(object):
           relation["amenity"="place_of_worship"]["religion"="christian"]{0};
         );"""
 
+        ###### Straßennetz
         qHighway = """
         (
           way["highway"]{0};
         );"""
 
+        tHighway = []
+
+        ###### Windenergieanlagen
         qWEA = """
         (
           node [power=generator][power_source=wind]{0};
@@ -107,6 +111,9 @@ class OSM(object):
           way [power=generator]["generator:source"=wind]{0};
         ); """
 
+        tWEA = ["power", "power:source", "note", "operator", "manufacturer", "manufacturer:type", "generator:output:electricity", "height", "rotor:diameter" ]
+
+        ###### Krankenhäuser
         qHospitals = """
          (
           node["amenity"="hospital"]{0};
@@ -114,6 +121,9 @@ class OSM(object):
           relation["amenity"="hospital"]{0};
          );"""
 
+        tHospitals = []
+
+        ###### Schutzgebiete
         #for classes of protected areas see http://wiki.openstreetmap.org/wiki/DE:Tag:boundary%3Dprotected_area
         qSchutz = """
          (
@@ -122,8 +132,36 @@ class OSM(object):
           relation["boundary"="protected_area"]{0};
          );"""
 
+        tSchutz = []
+
+        ###### Energieleitungen und Masten
+        qPowerline = """
+         (
+          node["power"="line"]{0};
+          way["power"="line"]{0};
+          relation["power"="line"]{0};
+          // query part for: “power=cable”
+          node["power"="cable"]{0};
+          way["power"="cable"]{0};
+          relation["power"="cable"]{0};
+          // query part for: “power=minor_underground_cable”
+          node["power"="minor_underground_cable"]{0};
+          way["power"="minor_underground_cable"]{0};
+          relation["power"="minor_underground_cable"]{0};
+          // query part for: “power=minor_line”
+          node["power"="minor_line"]{0};
+          way["power"="minor_line"]{0};
+          relation["power"="minor_line"]{0};
+          // query part for: “power=tower”
+          node["power"="tower"]{0};
+          way["power"="tower"]{0};
+          relation["power"="tower"]{0};
+         );"""
+
+        tPowerline = ["cables", "operator", "frequency", "voltage", "source", "wires", "power", "note"] 
+
         #make dictionary from queries
-        qDict = {"Streets": qHighway, "WEA": qWEA, "Hospitals": qHospitals, "Schutzgebiete": qSchutz}
+        qDict = {"Streets": [qHighway, tHighway], "WEA": [qWEA, tWEA], "Powerlines": [qPowerline, tPowerline], "Hospitals": [qHospitals, tHospitals], "Schutzgebiete": [qSchutz, tSchutz]}
 
         #create full query
         query = (qDict[selection] + etag).format(bboxtuple)
@@ -180,8 +218,7 @@ class OSM(object):
         for fc in arcpy.ListFeatureClasses(feature_dataset=selection):
             # extract the name tag for all line features
             arcpy.OSMGPAttributeSelector_osmtools(fc, 'name')
-            #export fc to shape in memory
-            #shptmp = arcpy.FeatureClassToFeatureClass_conversion (fc, OSMtmp, shpName)
+            #export fc to shape database
             arcpy.FeatureClassToShapefile_conversion(os.path.join(wspace, selection, fc), OSMtmp)
             tmpLayer.append(fc)
             #print warning if dfPCS is not utm or gk
