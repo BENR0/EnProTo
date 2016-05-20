@@ -13,6 +13,7 @@ import time
 import datetime as dt
 import colorsys
 import comtypes
+from Tkinter import Tk
 #from mod.FeaturesToGPX import *
 
 ############################
@@ -451,7 +452,8 @@ class ChangeBrowsePath(object):
 		_winreg.SetValueEx(registrykey,"LastSaveToLocation",0,_winreg.REG_SZ,lastsave)
 		_winreg.CloseKey(registrykey)
         
-class OpenPathForSelectedLayer(object):
+		registrykey2 = _winreg.OpenKey(_winreg.HKEY_CURRENT_USER, r"Software\ESRI\Desktop10.3\Export\ExportDlg", 0,_winreg.KEY_WRITE)
+		winreg.SetValueEx(registrykey2,"WorkingDirectory",0,_winreg.REG_SZ,lastexport)class OpenPathForSelectedLayer(object):
     """Implementation for OpenPathForSelectedLayer.button (Button)"""
     def __init__(self):
         self.enabled = True
@@ -461,7 +463,6 @@ class OpenPathForSelectedLayer(object):
         toclayer = pythonaddins.GetSelectedTOCLayerOrDataFrame()
         desc = arcpy.Describe(toclayer)
         path = desc.path
-        mxdpath = mxd.filePath
        
         subprocess.Popen('explorer /select, "{0}"'.format(path))
         pass
@@ -479,7 +480,29 @@ class OpenPathForCurrentMXD(object):
         subprocess.Popen('explorer /select, "{0}"'.format(mxdpath))
         pass
         
-class FindDefinitionQuerys(object):
+class CopyPathToClipboard(object):
+    """Implementation for CopyPathToClipboard.button (Button)"""
+    def __init__(self):
+        self.enabled = True
+        self.checked = False
+    def onClick(self):
+        import pyperclip
+        mxd = arcpy.mapping.MapDocument("CURRENT")
+        toclayer = pythonaddins.GetSelectedTOCLayerOrDataFrame()
+        desc = arcpy.Describe(toclayer)
+        path = desc.path
+
+        pyperclip.copy(path)
+
+        #r = Tk()
+        #r.withdraw()
+        #r.clipboard_clear()
+        #r.clipboard_append(path)
+
+        #df=pd.DataFrame(['Text to copy'])
+        #df.to_clipboard(index=False,header=False)
+
+        passclass FindDefinitionQuerys(object):
     """Implementation for FindDefinitionQuerys.button (Button)"""
     def __init__(self):
         self.enabled = True
@@ -772,6 +795,7 @@ class Join(object):
                     #convert pandas dataframe to dictionary
                     #get first sheet of excel file -> 0
                     tabledf = pd.read_excel(table, 0)
+                    tabledf = tabledf.fillna(" ")
                     tabledict = tabledf.to_dict()
 
                     #init field list for update cursor 

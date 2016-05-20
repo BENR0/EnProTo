@@ -13,6 +13,7 @@ import time
 import datetime as dt
 import colorsys
 import comtypes
+from Tkinter import Tk
 #from mod.FeaturesToGPX import *
 
 ############################
