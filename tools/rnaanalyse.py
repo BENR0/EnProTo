@@ -144,6 +144,7 @@ class RNAanalyse(object):
         gt = "DHDN_To_ETRS_1989_8_NTv2"
         #gt = "DHDN_to_WGS_1984_4_NTv2 + ETRS_1989_to_WGS_1984"
         templateExtent = arcpy.Describe(layer).extent
+        projection = df_coord
         if str(df_coord) == "5652":
             projection = 31467
             templateExtent = templateExtent.projectAs("31467", gt)
@@ -199,7 +200,7 @@ class RNAanalyse(object):
         arcpy.env.outputCoordinateSystem = arcpy.SpatialReference(projection)
         fishnettmp = arcpy.CreateFishnet_management("in_memory/fishnet", lowerLeft, ycoord, "250", "250", "0", "0", upperRight, "NO_LABELS", "#", "POLYGON") 
         arcpy.DefineProjection_management(fishnettmp, str(projection))
-###############NEEDS TRANSFORMATION!!!!!###########
+
         fishnet = arcpy.Project_management(fishnettmp, outputLayer, str(layerPCS), gt)
         #reset output coordinate system 
         arcpy.env.outputCoordinateSystem = arcpy.SpatialReference(layerPCS)

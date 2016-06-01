@@ -31,3 +31,6 @@ class ChangeBrowsePath(object):
         
 		registrykey2 = _winreg.OpenKey(_winreg.HKEY_CURRENT_USER, r"Software\ESRI\Desktop10.3\Export\ExportDlg", 0,_winreg.KEY_WRITE)
 		winreg.SetValueEx(registrykey2,"WorkingDirectory",0,_winreg.REG_SZ,lastexport)
+
+		pass
+
