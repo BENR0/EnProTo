@@ -24,7 +24,6 @@ cat = r"V:\Vorlagen_CAD_GIS\GIS\Toolboxes\EnProTo\EnProTo_addin\cat.py"
 subprocess.call(["python", cat])
 
 #run make addin script
-V:\Vorlagen_CAD_GIS\GIS\Toolboxes\EnProTo\EnProTo_addin
 test = r"V:\Vorlagen_CAD_GIS\GIS\Toolboxes\EnProTo\EnProTo_addin\makeaddin.py" # os.path.join(desktop, "makeaddin.py")
 subprocess.call(["python", test])
 if os.path.exists(addindir):
