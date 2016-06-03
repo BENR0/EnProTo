@@ -8,6 +8,7 @@ import os
 import glob
 import _winreg
 import re
+import pyperclip
 import csv
 import time
 import datetime as dt
@@ -33,7 +34,7 @@ def ListLocks(shp_path):
         print(tmp)
         node_name = os.environ["COMPUTERNAME"]
         if tmp == node_name:
-            tmp = tmp + "(Eigener Rechner)"
+            tmp = tmp + " (Eigener Rechner)"
 
         lockslist.append(tmp)
         ##locks += tmp + nodeDict[tmp] + "\n"
@@ -451,9 +452,13 @@ class ChangeBrowsePath(object):
 		#write LastSave
 		_winreg.SetValueEx(registrykey,"LastSaveToLocation",0,_winreg.REG_SZ,lastsave)
 		_winreg.CloseKey(registrykey)
-        
-		registrykey2 = _winreg.OpenKey(_winreg.HKEY_CURRENT_USER, r"Software\ESRI\Desktop10.3\Export\ExportDlg", 0,_winreg.KEY_WRITE)
-		winreg.SetValueEx(registrykey2,"WorkingDirectory",0,_winreg.REG_SZ,lastexport)class OpenPathForSelectedLayer(object):
+
+        #registrykey2 = _winreg.OpenKey(_winreg.HKEY_CURRENT_USER, r"Software\ESRI\Desktop10.3\Export\ExportDlg", 0,_winreg.KEY_WRITE)
+		#_winreg.SetValueEx(registrykey2,"WorkingDirectory",0,_winreg.REG_SZ,lastexport)
+		#_winreg.CloseKey(registrykey2)
+		pass
+
+class OpenPathForSelectedLayer(object):
     """Implementation for OpenPathForSelectedLayer.button (Button)"""
     def __init__(self):
         self.enabled = True
@@ -466,8 +471,7 @@ class ChangeBrowsePath(object):
        
         subprocess.Popen('explorer /select, "{0}"'.format(path))
         pass
-        
-        
+
 class OpenPathForCurrentMXD(object):
     """Implementation for OpenPathForCurrentMXD.button (Button)"""
     def __init__(self):
@@ -486,13 +490,12 @@ class CopyPathToClipboard(object):
         self.enabled = True
         self.checked = False
     def onClick(self):
-        import pyperclip
         mxd = arcpy.mapping.MapDocument("CURRENT")
         toclayer = pythonaddins.GetSelectedTOCLayerOrDataFrame()
         desc = arcpy.Describe(toclayer)
         path = desc.path
 
-        pyperclip.copy(path)
+        pyperclip.copy(path + "\\" + str(toclayer) +  ".shp")
 
         #r = Tk()
         #r.withdraw()
@@ -502,7 +505,9 @@ class CopyPathToClipboard(object):
         #df=pd.DataFrame(['Text to copy'])
         #df.to_clipboard(index=False,header=False)
 
-        passclass FindDefinitionQuerys(object):
+        pass
+
+class FindDefinitionQuerys(object):
     """Implementation for FindDefinitionQuerys.button (Button)"""
     def __init__(self):
         self.enabled = True

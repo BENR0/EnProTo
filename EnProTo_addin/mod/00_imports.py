@@ -8,6 +8,7 @@ import os
 import glob
 import _winreg
 import re
+import pyperclip
 import csv
 import time
 import datetime as dt
@@ -33,7 +34,7 @@ def ListLocks(shp_path):
         print(tmp)
         node_name = os.environ["COMPUTERNAME"]
         if tmp == node_name:
-            tmp = tmp + "(Eigener Rechner)"
+            tmp = tmp + " (Eigener Rechner)"
 
         lockslist.append(tmp)
         ##locks += tmp + nodeDict[tmp] + "\n"
