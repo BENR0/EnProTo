@@ -161,7 +161,7 @@ class Join(object):
                     #convert pandas dataframe to dictionary
                     #get first sheet of excel file -> 0
                     tabledf = pd.read_excel(table, 0)
-                    tabledf = tabledf.fillna(" ")
+                    tabledf = tabledf.fillna("0")
                     tabledict = tabledf.to_dict()
 
                     #init field list for update cursor 

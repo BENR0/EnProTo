@@ -154,10 +154,25 @@ class OSM(object):
           relation["power"="tower"]{0};
          );"""
 
-        tPowerline = ["cables", "operator", "frequency", "voltage", "source", "wires", "power", "note"] 
+        tPowerline = ["cables", "operator", "frequency", "voltage", "source", "wires", "power", "note"]
 
+        #waterways and bodys
+        qWater = """
+        (
+         way["waterway"="riverbank"]{0};
+         relation["waterway"="riverbank"]{0};
+         way["waterway"="river"]{0};
+         way["waterway"="stream"]{0};
+         way["waterway"="river"]{0};
+         way["waterway"="canal"]{0};
+         way["waterway"="drain"]{0};
+         way["waterway"="ditch"]{0};
+         way["natural"="water"]{0};
+        );"""
+
+        tWater = ["name", "water", "waterway", "width", "tunnel", "boat"]
         #make dictionary from queries
-        qDict = {"Streets": [qHighway, tHighway], "WEA": [qWEA, tWEA], "Powerlines": [qPowerline, tPowerline], "Hospitals": [qHospitals, tHospitals], "Schutzgebiete": [qSchutz, tSchutz]}
+        qDict = {"Streets": [qHighway, tHighway], "WEA": [qWEA, tWEA], "Powerlines": [qPowerline, tPowerline], "Hospitals": [qHospitals, tHospitals], "Schutzgebiete": [qSchutz, tSchutz], "Gewässer": [qWater, tWater]}
 
         #create full query
         query = (qDict[selection][0] + etag).format(bboxtuple)
@@ -282,7 +297,7 @@ class OSM(object):
     def onEditChange(self, text):
         pass
     def onFocus(self, focused):
-        self.items = ["Streets", "WEA", "Powerlines", "Hospitals", "Schutzgebiete"]
+        self.items = ["Streets", "WEA", "Powerlines", "Hospitals", "Schutzgebiete", "Gewässer"]
         pass
     def onEnter(self):
         pass
