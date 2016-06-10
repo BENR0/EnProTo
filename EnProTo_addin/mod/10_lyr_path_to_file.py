@@ -14,9 +14,13 @@ class WritePathOfLayersToFile(object):
         #outfile = csv.writer(tfile)
         
         for lyr in lyrs:
-            if lyr.isFeatureLayer:
-                path = lyr.dataSource.encode("utf-8") + "\n"
-                tfile.write(path)
+            if lyr.supports('visible'):
+                if lyr.isFeatureLayer:
+                    path = lyr.dataSource.encode("utf-8") + "\n"
+                #elif lyr.isGroupLayer:
+                 #   path = lyr.name.encode("utf-8") + "\n"
+
+                    tfile.write(path)
 
         tfile.close()
         pass

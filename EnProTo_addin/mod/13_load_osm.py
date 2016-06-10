@@ -240,6 +240,7 @@ class OSM(object):
                 "while reprojecting, which might lead to inaccuracies.").format(trafoDict.keys())
                 PCSwarning = pythonaddins.MessageBox(outMSG, "PCS Warning", 0)
                 print(PCSwarning)
+                continue
             outshp = os.path.join(OSMdir, fc + ".shp")
             shptmp = os.path.join(OSMtmp, fc + ".shp")
             arcpy.Project_management(shptmp, outshp, str(dfPCS), trafoDict[str(dfPCS)])
