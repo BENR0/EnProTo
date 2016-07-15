@@ -36,7 +36,10 @@ class OSM(object):
 
         #get path to project
         mxd = arcpy.mapping.MapDocument("current")
-        mxdpath = mxd.filePath
+        try:
+            mxdpath = mxd.filePath
+        except:
+            print("Could not get projects path. Probably project is not saved yet.")
         #get data frame and df PCS
         df  = arcpy.mapping.ListDataFrames(mxd)[0]
         try:
@@ -172,7 +175,7 @@ class OSM(object):
 
         tWater = ["name", "water", "waterway", "width", "tunnel", "boat"]
         #make dictionary from queries
-        qDict = {"Streets": [qHighway, tHighway], "WEA": [qWEA, tWEA], "Powerlines": [qPowerline, tPowerline], "Hospitals": [qHospitals, tHospitals], "Schutzgebiete": [qSchutz, tSchutz], "Gewässer": [qWater, tWater]}
+        qDict = {"Streets": [qHighway, tHighway], "WEA": [qWEA, tWEA], "Powerlines": [qPowerline, tPowerline], "Hospitals": [qHospitals, tHospitals], "Schutzgebiete": [qSchutz, tSchutz], "Gewaesser": [qWater, tWater]}
 
         #create full query
         query = (qDict[selection][0] + etag).format(bboxtuple)
@@ -240,6 +243,7 @@ class OSM(object):
                 "while reprojecting, which might lead to inaccuracies.").format(trafoDict.keys())
                 PCSwarning = pythonaddins.MessageBox(outMSG, "PCS Warning", 0)
                 print(PCSwarning)
+                ####### Continue does not work, loop breaks if error is encounterd!!!!########
                 continue
             outshp = os.path.join(OSMdir, fc + ".shp")
             shptmp = os.path.join(OSMtmp, fc + ".shp")
@@ -298,7 +302,7 @@ class OSM(object):
     def onEditChange(self, text):
         pass
     def onFocus(self, focused):
-        self.items = ["Streets", "WEA", "Powerlines", "Hospitals", "Schutzgebiete", "Gewässer"]
+        self.items = ["Streets", "WEA", "Powerlines", "Hospitals", "Schutzgebiete", "Gewaesser"]
         pass
     def onEnter(self):
         pass
