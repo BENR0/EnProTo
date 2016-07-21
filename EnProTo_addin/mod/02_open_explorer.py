@@ -4,10 +4,12 @@ class OpenPathForSelectedLayer(object):
         self.enabled = True
         self.checked = False
     def onClick(self):
+        import os
         mxd = arcpy.mapping.MapDocument("CURRENT")
         toclayer = pythonaddins.GetSelectedTOCLayerOrDataFrame()
         desc = arcpy.Describe(toclayer)
-        path = desc.path
+        path = os.path.join(desc.path, str(toclayer) + ".shp")
+        print(path)
        
         subprocess.Popen('explorer /select, "{0}"'.format(path))
         pass
