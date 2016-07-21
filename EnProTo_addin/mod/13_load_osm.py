@@ -16,6 +16,17 @@ class OSM(object):
 
         timeout = 600
 
+        GK3 = "31467"
+        GK4 = "31468"
+        utmn32 = "5652"
+        utmn33 = "5653"
+        wgs = "4326"
+        gt = "DHDN_To_ETRS_1989_8_NTv2"
+        gt1 = "ETRS_1989_To_WGS_1984"
+        gt2 = "DHDN_To_WGS_1984_4_NTv2"
+        #gt = "DHDN_to_WGS_1984_4_NTv2 + ETRS_1989_to_WGS_1984"
+        trafoDict = {GK3: gt2, GK4: gt2, utmn32: gt1, utmn33: gt1}
+
         def make_dir(path):
             try:
                 os.makedirs(path)
@@ -48,6 +59,16 @@ class OSM(object):
             err_dfcs = pythonaddin.MessageBox("Data frame has no coordinate system assigned.", "Error", 0)
             print(err_dfcs)
 
+        if not str(dfPCS) in trafoDict.keys():
+            trafoNotUsed = True
+            outMSG = ("The data frame coordinate system did not"
+            "match any of the following EPSG codes: {0}. Please choose one of the specified"
+            "coordinate systems before using this tool in order to prevent inaccuacies while reprojecting.").format(trafoDict.keys())
+            PCSwarning = pythonaddins.MessageBox(outMSG, "PCS Warning", 0)
+            print(PCSwarning)
+            ####### Continue does not work, loop breaks if error is encounterd!!!!########
+            break
+
         #create path to GIS data directory in project directory
         rootpath = re.split("05_GIS",mxdpath)[0]
         OSMdir = os.path.join(rootpath, "05_GIS", "av_daten", "10_OSM", selection)
@@ -62,17 +83,8 @@ class OSM(object):
 
         lyrext = lyrDesc.extent
         #transform coord of extent if not WGS84
-        GK3 = "31467"
-        GK4 = "31468"
-        utmn32 = "5652"
-        utmn33 = "5653"
-        wgs = "4326"
-        gt = "DHDN_To_ETRS_1989_8_NTv2"
-        gt1 = "ETRS_1989_To_WGS_1984"
-        gt2 = "DHDN_To_WGS_1984_4_NTv2"
-        #gt = "DHDN_to_WGS_1984_4_NTv2 + ETRS_1989_to_WGS_1984"
-        trafoDict = {GK3: gt2, GK4: gt2, utmn32: gt1, utmn33: gt1}
-        dfPCS = lyrDesc.spatialReference.PCSCode
+
+        #lyrPCS = lyrDesc.spatialReference.PCSCode
         if not str(dfPCS) == wgs:
             if str(dfPCS) in [utmn32, utmn33]:
                 lyrext = lyrext.projectAs(wgs, gt1)
@@ -155,6 +167,12 @@ class OSM(object):
           node["power"="tower"]{0};
           way["power"="tower"]{0};
           relation["power"="tower"]{0};
+          node["power"="planned"]{0};
+          way["power"="planned"]{0};
+          relation["power"="planned"]{0};
+          node["power"="construction"]{0};
+          way["power"="construction"]{0};
+          relation["power"="construction"]{0};
          );"""
 
         tPowerline = ["cables", "operator", "frequency", "voltage", "source", "wires", "power", "note"]
@@ -236,15 +254,6 @@ class OSM(object):
             #export fc to shape database
             arcpy.FeatureClassToShapefile_conversion(os.path.join(wspace, selection, fc), OSMtmp)
             tmpLayer.append(fc)
-            #print warning if dfPCS is not utm or gk
-            if not str(dfPCS) in trafoDict.keys():
-                outMSG = ("The data frame coordinate system does not"
-                "match any of the following EPSG codes: {0}. Therefore no transformation was used"
-                "while reprojecting, which might lead to inaccuracies.").format(trafoDict.keys())
-                PCSwarning = pythonaddins.MessageBox(outMSG, "PCS Warning", 0)
-                print(PCSwarning)
-                ####### Continue does not work, loop breaks if error is encounterd!!!!########
-                continue
             outshp = os.path.join(OSMdir, fc + ".shp")
             shptmp = os.path.join(OSMtmp, fc + ".shp")
             arcpy.Project_management(shptmp, outshp, str(dfPCS), trafoDict[str(dfPCS)])
