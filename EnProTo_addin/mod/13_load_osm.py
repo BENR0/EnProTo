@@ -14,6 +14,19 @@ class OSM(object):
         import shutil
         import errno
 
+        def make_dir(path):
+            try:
+                os.makedirs(path)
+            except OSError:
+                if not os.path.isdir(path):
+                    raise
+
+        # load the OpenStreetMap specific toolbox
+        arcpy.ImportToolbox(r"c:\program files (x86)\arcgis\desktop10.3\ArcToolbox\Toolboxes\OpenStreetMap Toolbox.tbx")
+
+        ######################
+        ##constants
+        ######################
         timeout = 600
 
         GK3 = "31467"
@@ -27,16 +40,9 @@ class OSM(object):
         #gt = "DHDN_to_WGS_1984_4_NTv2 + ETRS_1989_to_WGS_1984"
         trafoDict = {GK3: gt2, GK4: gt2, utmn32: gt1, utmn33: gt1}
 
-        def make_dir(path):
-            try:
-                os.makedirs(path)
-            except OSError:
-                if not os.path.isdir(path):
-                    raise
-
-        # load the OpenStreetMap specific toolbox
-        arcpy.ImportToolbox(r"c:\program files (x86)\arcgis\desktop10.3\ArcToolbox\Toolboxes\OpenStreetMap Toolbox.tbx")
-
+        ######################
+        #begin of code
+        ######################
         #get bounding box of current viewing extent or (largest) layer?
         toclayer = pythonaddins.GetSelectedTOCLayerOrDataFrame()
         try:
@@ -60,14 +66,12 @@ class OSM(object):
             print(err_dfcs)
 
         if not str(dfPCS) in trafoDict.keys():
-            trafoNotUsed = True
             outMSG = ("The data frame coordinate system did not"
             "match any of the following EPSG codes: {0}. Please choose one of the specified"
             "coordinate systems before using this tool in order to prevent inaccuacies while reprojecting.").format(trafoDict.keys())
             PCSwarning = pythonaddins.MessageBox(outMSG, "PCS Warning", 0)
             print(PCSwarning)
             ####### Continue does not work, loop breaks if error is encounterd!!!!########
-            break
 
         #create path to GIS data directory in project directory
         rootpath = re.split("05_GIS",mxdpath)[0]
@@ -83,7 +87,6 @@ class OSM(object):
 
         lyrext = lyrDesc.extent
         #transform coord of extent if not WGS84
-
         #lyrPCS = lyrDesc.spatialReference.PCSCode
         if not str(dfPCS) == wgs:
             if str(dfPCS) in [utmn32, utmn33]:
