@@ -29,8 +29,10 @@ class OSM(object):
         ######################
         timeout = 600
 
+        GK2 = "31466"
         GK3 = "31467"
         GK4 = "31468"
+        GK5 = "31469"
         utmn32 = "5652"
         utmn33 = "5653"
         wgs = "4326"
@@ -38,7 +40,7 @@ class OSM(object):
         gt1 = "ETRS_1989_To_WGS_1984"
         gt2 = "DHDN_To_WGS_1984_4_NTv2"
         #gt = "DHDN_to_WGS_1984_4_NTv2 + ETRS_1989_to_WGS_1984"
-        trafoDict = {GK3: gt2, GK4: gt2, utmn32: gt1, utmn33: gt1}
+        trafoDict = {GK2: gt2, GK3: gt2, GK4: gt2, GK5: gt2, utmn32: gt1, utmn33: gt1}
 
         ######################
         #begin of code
@@ -91,7 +93,7 @@ class OSM(object):
         if not str(dfPCS) == wgs:
             if str(dfPCS) in [utmn32, utmn33]:
                 lyrext = lyrext.projectAs(wgs, gt1)
-            elif str(dfPCS) in [GK3, GK4]:
+            elif str(dfPCS) in [GK2, GK3, GK4, GK5]:
                 lyrext = lyrext.projectAs(wgs, gt2)
             else:
                 lyrext = lyrext.projectAs(wgs)
@@ -195,8 +197,20 @@ class OSM(object):
         );"""
 
         tWater = ["name", "water", "waterway", "width", "tunnel", "boat"]
+
+        qForest = """
+        (
+         way["natural" = "wood"]{0};
+         relation["natural" = "wood"]{0};
+         way["landuse" = "forest"]{0};
+         relation["landuse" = "forest"]{0};
+        );"""
+
+        tForest = ["name", "leaf_type", "leaf_cycle"]
+
         #make dictionary from queries
-        qDict = {"Streets": [qHighway, tHighway], "WEA": [qWEA, tWEA], "Powerlines": [qPowerline, tPowerline], "Hospitals": [qHospitals, tHospitals], "Schutzgebiete": [qSchutz, tSchutz], "Gewaesser": [qWater, tWater]}
+        qDict = ({"Streets": [qHighway, tHighway], "WEA": [qWEA, tWEA], "Powerlines": [qPowerline, tPowerline], "Hospitals": [qHospitals, tHospitals],
+                 "Schutzgebiete": [qSchutz, tSchutz], "Gewaesser": [qWater, tWater], "Wald": [qForest, tForest]})
 
         #create full query
         query = (qDict[selection][0] + etag).format(bboxtuple)
@@ -314,7 +328,7 @@ class OSM(object):
     def onEditChange(self, text):
         pass
     def onFocus(self, focused):
-        self.items = ["Streets", "WEA", "Powerlines", "Hospitals", "Schutzgebiete", "Gewaesser"]
+        self.items = ["Streets", "WEA", "Powerlines", "Hospitals", "Schutzgebiete", "Gewaesser", "Wald"]
         pass
     def onEnter(self):
         pass
