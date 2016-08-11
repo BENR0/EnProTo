@@ -201,9 +201,7 @@ class OSM(object):
         qForest = """
         (
          way["natural" = "wood"]{0};
-         relation["natural" = "wood"]{0};
          way["landuse" = "forest"]{0};
-         relation["landuse" = "forest"]{0};
         );"""
 
         tForest = ["name", "leaf_type", "leaf_cycle"]
