@@ -8,3 +8,5 @@ EnProTo.PlankopfWizard.pyt.xml
 EnProTo.pyt.xml
 *.xml
 EnProTo_addin/Images/Thumbs.db
+.idea/.name
+.idea/EnProTo_dev.iml
