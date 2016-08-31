@@ -321,7 +321,7 @@ class WEAangebot(object):
         corine_data_frame = pd.DataFrame(table_as_nparray)
 
         #create pivot table with col and row totals (margins = True)
-        pivot = pd.pivot_table(corine_data_frame, values = "HA_Wald", rows = "DISTANCE", cols = "WA_ART", aggfunc = np.sum, margins = True)
+        pivot = pd.pivot_table(corine_data_frame, values = "HA_Wald", index = "DISTANCE", columns = "WA_ART", aggfunc = np.sum, margins = True)
         pivot = pivot.fillna(0)
 
         #add percentages in new columns
