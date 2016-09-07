@@ -2,6 +2,7 @@ import arcpy
 import numpy as np
 import os
 
+
 class RNAanalyse(object):
     def __init__(self):
         self.label = "RNAanalyse"
@@ -137,18 +138,26 @@ class RNAanalyse(object):
         #get extent of input layer and calculate coordinates for alignment of fishnet
         #with dtk5 raster
         #DHDN_to_ETRS_1989_8_NTv2
+        #GK2 31566
         #GK3 31467
         #GK4 31468
-        #utmn32 5652
-        #utmn33 5653
+        #utmn31NZ-E 5661
+        #utmn32NZ-E 5652
+        #utmn33NZ-E 5653
+        #utm31 = 25831
+        #utm32 = 25832
+        #utm33 = 25833
         gt = "DHDN_To_ETRS_1989_8_NTv2"
         #gt = "DHDN_to_WGS_1984_4_NTv2 + ETRS_1989_to_WGS_1984"
         templateExtent = arcpy.Describe(layer).extent
         projection = df_coord
-        if str(df_coord) == "5652":
+        if str(df_coord) == "5651" or str(df_coord) == "25831":
+            projection = 31466
+            templateExtent = templateExtent.projectAs("31466", gt)
+        if str(df_coord) == "5652" or str(df_coord) == "25832":
             projection = 31467
             templateExtent = templateExtent.projectAs("31467", gt)
-        if str(df_coord) == "5653":
+        if str(df_coord) == "5653" or str(df_coord) == "25833":
             projection = 31468
             templateExtent = templateExtent.projectAs("31468", gt)
 
