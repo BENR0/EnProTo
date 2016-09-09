@@ -43,15 +43,15 @@ class OSM(object):
         utmn32NZ = "5652"
         utmn33NZ = "5653"
         # "normal" UTM Codes
-        utm = "25831"
-        utm32 = "25832"
-        utm33 = "25833"
+        utmn31 = "25831"
+        utmn32 = "25832"
+        utmn33 = "25833"
         wgs = "4326"
         gt = "DHDN_To_ETRS_1989_8_NTv2"
         gt1 = "ETRS_1989_To_WGS_1984"
         gt2 = "DHDN_To_WGS_1984_4_NTv2"
         #gt = "DHDN_to_WGS_1984_4_NTv2 + ETRS_1989_to_WGS_1984"
-        trafoDict = {GK2: gt2, GK3: gt2, GK4: gt2, GK5: gt2, utmn31NZ: gt1, utmn32NZ: gt1, utmn33NZ: gt1, utm31: gt1, utm32: gt1, utm33:gt1}
+        trafoDict = {GK2: gt2, GK3: gt2, GK4: gt2, GK5: gt2, utmn31NZ: gt1, utmn32NZ: gt1, utmn33NZ: gt1, utmn31: gt1, utmn32: gt1, utmn33:gt1}
 
         ######################
         #begin of code
@@ -102,7 +102,7 @@ class OSM(object):
         #transform coord of extent if not WGS84
         #lyrPCS = lyrDesc.spatialReference.PCSCode
         if not str(dfPCS) == wgs:
-            if str(dfPCS) in [utmn32, utmn33, utmn32NZ, utmn33NZ]:
+            if str(dfPCS) in [utmn31, utmn32, utmn33, utmn31NZ, utmn32NZ, utmn33NZ]:
                 lyrext = lyrext.projectAs(wgs, gt1)
             elif str(dfPCS) in [GK2, GK3, GK4, GK5]:
                 lyrext = lyrext.projectAs(wgs, gt2)
