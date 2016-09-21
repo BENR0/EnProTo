@@ -24,6 +24,9 @@
  - Reproject Button:
     - if the same feature class is in the project a second time don't reproject but update source path
     - choice to archive old layers?
+    
+ - New Shape Button:
+    - Example file name needs adaption to new scheme
 
 
 #### Features
@@ -33,6 +36,7 @@
   - repair broken layers
     - replaceDataSource (workspace_path, workspace_type, {dataset_name}, {validate})
     - ListBrokenDataSources (map_document_or_layer)
+  - open path for layer -> databases
     
     
      

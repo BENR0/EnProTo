@@ -27,7 +27,7 @@ class OSM(object):
                     raise
 
         # load the OpenStreetMap specific toolbox
-        arcpy.ImportToolbox(r"c:\program files (x86)\arcgis\desktop10.3\ArcToolbox\Toolboxes\OpenStreetMap Toolbox.tbx")
+        arcpy.ImportToolbox(r"c:\program files (x86)\arcgis\desktop10.4\ArcToolbox\Toolboxes\OpenStreetMap Toolbox.tbx")
 
         ######################
         ##constants
