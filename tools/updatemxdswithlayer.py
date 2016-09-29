@@ -121,7 +121,7 @@ class UpdateMXDswithLayer(object):
         for nmxd in in_mxd:
             arcpy.AddMessage("Adding layer(s) to project :" + str(nmxd))
             mapdoc = arcpy.mapping.MapDocument(nmxd)
-            df = arcpy.mapping.ListDataFrames(mapdoc, "Layers")[0]
+            df = arcpy.mapping.ListDataFrames(mapdoc)[0]
             #loop through all layer
             for lyr in in_features:
                 lyr_path = basepath + lyr + ".lyr"
