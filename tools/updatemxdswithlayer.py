@@ -1,4 +1,6 @@
 import arcpy
+import os
+import glob
 import re
 
 class UpdateMXDswithLayer(object):
@@ -59,15 +61,15 @@ class UpdateMXDswithLayer(object):
         #
         # merge_chkbox.value = "True"
 
-        out_features = arcpy.Parameter(
-            displayName="Buffer Output Feature",
-            name="buffer_out",
-            datatype="GPFeatureLayer",
-            parameterType="optional",
-            direction="Output")
+        #out_features = arcpy.Parameter(
+        #    displayName="Buffer Output Feature",
+        #    name="buffer_out",
+        #    datatype="GPFeatureLayer",
+        #    parameterType="optional",
+        #    direction="Output")
         
 
-        parameters = [in_features, in_mxd, out_features]
+        parameters = [in_features, in_mxd]
             
         return parameters
 
@@ -92,63 +94,57 @@ class UpdateMXDswithLayer(object):
         mxd = arcpy.mapping.MapDocument("current")
         df = arcpy.mapping.ListDataFrames(mxd)[0]
 		
-       #  in_features = parameters[0].valueAsText
-       #  in_features = in_features.split(";")
-       #  field_name = parameters[1].valueAsText
-       #  #change field name to upper case
-       #  field_name_upper = field_name.upper()
-       #  default_val_bool = parameters[2].valueAsText
-       #  default_val_txt = parameters[3].valueAsText
-       #  merge_chkbox = parameters[4].valueAsText
-       #  out_features = parameters[5].valueAsText
+        in_features = parameters[0].valueAsText
+        in_features = in_features.split(";")
+        in_mxd = parameters[1].valueAsText
+        in_mxd = in_mxd.split(";")
+
+        def make_dir(path):
+            try:
+                os.makedirs(path)
+            except OSError:
+                if not os.path.isdir(path):
+                    raise
+
+        #remove files by pattern
+        def del_files(dir, pattern):
+            for f in os.listdir(dir):
+    	        if re.search(pattern, f):
+    		        os.remove(os.path.join(dir, f))
+
+
+
+        user = os.environ.get("USERNAME")
+
+        basepath = "C:\\Users\\" + user + "\\Documents\\ArcGIS\\scratch\\"
+
+        for nmxd in in_mxd:
+            arcpy.AddMessage("Adding layer(s) to project :" + str(nmxd))
+            mapdoc = arcpy.mapping.MapDocument(nmxd)
+            df = arcpy.mapping.ListDataFrames(mapdoc, "Layers")[0]
+            #loop through all layer
+            for lyr in in_features:
+                lyr_path = basepath + lyr + ".lyr"
+                if not os.path.isfile(lyr_path):
+                    arcpy.SaveToLayerFile_management(lyr, lyr_path, "RELATIVE")
+
+                new_layer = arcpy.mapping.Layer(lyr_path)
+                #adding layer to project
+                arcpy.mapping.AddLayer(df, new_layer, "TOP")
+
+            mapdoc.save()
+
+        del nmxd, new_layer, mapdoc
+
+        # clean up lyr files
+        #del_files(basepath, "*.lyr")
+        delfiles = basepath + "*.lyr"
+        for f in glob.glob(delfiles):
+            os.remove(f)
        #
-       #  #local vars
-       #  #fieldName1 = "AREA_HA"
-       #  #fieldName2 = "AREA_QM"
-       #  fieldPrecision = 200 #length of field over all
-       #  #fieldScale = 2      #number of decimal places
-       #  fieldtype = "TEXT"
-       #
-       #  #init list for layers to be merged
-       #  merge_layers = []
-       #
-       #
-       #
-       #
-       #  import arcpy
-       #  import arcpy.mapping
-       #  import os
-       #  import sys
-       #  from arcpy import env
-       #  import string
-       #
-       #  env.workspace = r"M:\projects\mcag\Project_Site_Packet"
-       #  for mxd in arcpy.ListFiles("*.mxd"):
-       #      mapdoc = arcpy.mapping.MapDocument(r"M:\projects\mcag\Project_Site_Packet\\" + mxd)
-       #      df = arcpy.mapping.ListDataFrames(mapdoc, "Layers")[0]
-       #      addLayer = arcpy.mapping.Layer(r"M:\projects\mcag\Project_Site_Packet\Subject Property.lyr")
-       #      arcpy.mapping.AddLayer(df ,addLayer ,"TOP")
-       #      mapdoc.save()
-       #  del mxd, addLayer, mapdoc
-       #
-       #
-       #
-       #
-       #
-       #
-       #  #merge layers if in_features checkbox is set to true
-       # # if merge_chkbox == "True":
-       #  arcpy.AddMessage("Merging input layers...")
-       #  arcpy.Merge_management(merge_layers, out_features)
-       #
-       #  arcpy.AddMessage("Done")
+        arcpy.AddMessage("Done")
        #
        #  del mxd, df  #,new_layer
-
-
-        #TODO
-        #- add button in toolbar
-        #- automatically add layer to project
 
 	return
 
