@@ -274,7 +274,8 @@ class RNAanalyse(object):
         for line in lines_list:
             for point in points_list:
                 if line[0].contains(point[0]): #finding what points are on what lines
-                    arcpy.AddMessage("LineID:", line[1], "PointID:", point[1])
+                    msg = "LineID:" + str(line[1]) + "PointID:" + str(point[1])
+                    arcpy.AddMessage(msg)
                     if not line[1] in dictionary_lines_points: #handling situations when multiple points are on the same line
                         dictionary_lines_points[line[1]] = point[1] #lineid is key, point ids is value (can be a tuple)
                     else:
