@@ -13,6 +13,8 @@ class OSM(object):
         import os
         import shutil
         import ssl
+        import itertools
+
 
         #maybe a security risk but solves the issue with
         #URLError: <urlopen error [SSL: CERTIFICATE_VERIFY_FAILED] certificate verify failed (_ssl.c:590)>
@@ -243,11 +245,25 @@ class OSM(object):
             #     AddMsgAndPrint('The server was unable to fulfill the request.', 2)
             #     AddMsgAndPrint(e.code, 2)
 
+        #check if xml file contains "out of memory" message
+        with open(OSMdata, "r") as infile:
+            for line in itertools.islice(infile, 8):
+                if "Query run out of memory" in line:
+                    msg = pythonaddins.MessageBox("Query run out of memory on Server.\n Reason: Probably selected extent to large.", "Server message", 0)
+                    print(msg)
+                    raise SystemExit
+
         # define the names for the feature dataset and the feature classes
         #inputName = "OSM"
         inputName = selection
         #set workspace to scratch workspace
         wspace = env.scratchWorkspace
+
+        #check if workspace already contains seleted data and delete
+        if arcpy.Exists(os.path.join(wspace, selection)):
+            arcpy.Delete_management(os.path.join(wspace, selection))
+            arcpy.Delete_management(os.path.join(wspace, selection + "_osm_relation"))
+            arcpy.Delete_management(os.path.join(wspace, selection + "_osm_revision"))
 
         validatedTableName = arcpy.ValidateTableName(inputName, wspace)
         nameOfTargetDataset = os.path.join(wspace, validatedTableName)

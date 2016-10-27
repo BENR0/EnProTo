@@ -14,12 +14,13 @@ class OpenPathForSelectedLayer(object):
             if [any(ext) for ext in ('.gdb', '.mdb', '.sde') if ext in os.path.splitext(workspace)]:
                 return workspace
             else:
-                return os.path.join(workspace, str(toclayer) + ".shp")
+                filename = str(toclayer) + ".shp"
+                return os.path.join(input_table, filename)
 
         mxd = arcpy.mapping.MapDocument("CURRENT")
         toclayer = pythonaddins.GetSelectedTOCLayerOrDataFrame()
         desc = arcpy.Describe(toclayer)
-        path = get_geodatabase_path(desc, toclayer)
+        path = get_geodatabase_path(desc.path, toclayer)
         #path = os.path.join(desc.path, str(toclayer) + ".shp")
         print(path)
        
