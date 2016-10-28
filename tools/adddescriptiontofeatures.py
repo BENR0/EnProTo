@@ -17,7 +17,7 @@ class AddDescriptionToFeatures(object):
                 parameterType="Required",
                 direction="Input")
                 
-        in_features.filter.list = ["Point","Line","Polygon"]
+        #in_features.filter.list = ["Point","Line","Polygon"]
         
         #Field to use for sorting to unique values
         sorting_field = arcpy.Parameter(

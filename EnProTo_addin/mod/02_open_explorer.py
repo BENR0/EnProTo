@@ -4,10 +4,25 @@ class OpenPathForSelectedLayer(object):
         self.enabled = True
         self.checked = False
     def onClick(self):
+        import os
+
+        def get_geodatabase_path(input_table, toclayer):
+            '''Return the Geodatabase path from the input table or feature class.
+            :param input_table: path to the input table or feature class
+            '''
+            workspace = os.path.dirname(input_table)
+            if [any(ext) for ext in ('.gdb', '.mdb', '.sde') if ext in os.path.splitext(workspace)]:
+                return workspace
+            else:
+                filename = str(toclayer) + ".shp"
+                return os.path.join(input_table, filename)
+
         mxd = arcpy.mapping.MapDocument("CURRENT")
         toclayer = pythonaddins.GetSelectedTOCLayerOrDataFrame()
         desc = arcpy.Describe(toclayer)
-        path = desc.path
+        path = get_geodatabase_path(desc.path, toclayer)
+        #path = os.path.join(desc.path, str(toclayer) + ".shp")
+        print(path)
        
         subprocess.Popen('explorer /select, "{0}"'.format(path))
         pass

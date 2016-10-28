@@ -321,7 +321,7 @@ class WEAangebot(object):
         corine_data_frame = pd.DataFrame(table_as_nparray)
 
         #create pivot table with col and row totals (margins = True)
-        pivot = pd.pivot_table(corine_data_frame, values = "HA_Wald", rows = "DISTANCE", cols = "WA_ART", aggfunc = np.sum, margins = True)
+        pivot = pd.pivot_table(corine_data_frame, values = "HA_Wald", index = "DISTANCE", columns = "WA_ART", aggfunc = np.sum, margins = True)
         pivot = pivot.fillna(0)
 
         #add percentages in new columns
@@ -337,7 +337,8 @@ class WEAangebot(object):
         #group data frame by distance and aggregate with sum (total area in each buffer)
         groupforest = corine_data_frame.groupby("DISTANCE", as_index = False)
         groupforestagg = groupforest.aggregate({"AREA_HA": "max", "HA_Wald": "sum"})
-        
+
+
         #add percentages column of forest at total area of buffer
         groupforestagg["Waldanteil_prozent"] = np.round((groupforestagg.HA_Wald / groupforestagg.AREA_HA) * 100, 2)
 
@@ -350,7 +351,6 @@ class WEAangebot(object):
 
         arcpy.AddMessage("Adding information do layer descriptions...")
         class_descriptions = []
-        arcpy.AddMessage(joindict)
         for i in buffer_layer.symbology.classValues:
             i = float(i)
             if i in joindict.keys():

@@ -27,7 +27,8 @@ try:
     shutil.copy(addinsourcedir, addindir)
 
     #subprocess.Popen(["ArcMap.exe"])
+    subprocess.Popen([r"C:\Program Files (x86)\ArcGIS\Desktop10.4\bin\ArcMap.exe"])
 except:
     traceback.print_exc()
 
-raw_input("Press Enter to close") # Python 2
+#raw_input("Press Enter to close") # Python 2

@@ -12,9 +12,14 @@ class OSM(object):
         import urllib2
         import os
         import shutil
-        import errno
+        import ssl
+        import itertools
 
-        timeout = 600
+
+        #maybe a security risk but solves the issue with
+        #URLError: <urlopen error [SSL: CERTIFICATE_VERIFY_FAILED] certificate verify failed (_ssl.c:590)>
+        ssl._create_default_https_context = ssl._create_unverified_context
+        import errno
 
         def make_dir(path):
             try:
@@ -24,8 +29,35 @@ class OSM(object):
                     raise
 
         # load the OpenStreetMap specific toolbox
-        arcpy.ImportToolbox(r"c:\program files (x86)\arcgis\desktop10.3\ArcToolbox\Toolboxes\OpenStreetMap Toolbox.tbx")
+        arcpy.ImportToolbox(r"c:\program files (x86)\arcgis\desktop10.4\ArcToolbox\Toolboxes\OpenStreetMap Toolbox.tbx")
 
+        ######################
+        ##constants
+        ######################
+        timeout = 600
+
+        GK2 = "31466"
+        GK3 = "31467"
+        GK4 = "31468"
+        GK5 = "31469"
+        #NZ-E EPSG Codes
+        utmn31NZ = "5651"
+        utmn32NZ = "5652"
+        utmn33NZ = "5653"
+        # "normal" UTM Codes
+        utmn31 = "25831"
+        utmn32 = "25832"
+        utmn33 = "25833"
+        wgs = "4326"
+        gt = "DHDN_To_ETRS_1989_8_NTv2"
+        gt1 = "ETRS_1989_To_WGS_1984"
+        gt2 = "DHDN_To_WGS_1984_4_NTv2"
+        #gt = "DHDN_to_WGS_1984_4_NTv2 + ETRS_1989_to_WGS_1984"
+        trafoDict = {GK2: gt2, GK3: gt2, GK4: gt2, GK5: gt2, utmn31NZ: gt1, utmn32NZ: gt1, utmn33NZ: gt1, utmn31: gt1, utmn32: gt1, utmn33:gt1}
+
+        ######################
+        #begin of code
+        ######################
         #get bounding box of current viewing extent or (largest) layer?
         toclayer = pythonaddins.GetSelectedTOCLayerOrDataFrame()
         try:
@@ -36,7 +68,10 @@ class OSM(object):
 
         #get path to project
         mxd = arcpy.mapping.MapDocument("current")
-        mxdpath = mxd.filePath
+        try:
+            mxdpath = mxd.filePath
+        except:
+            print("Could not get projects path. Probably project is not saved yet.")
         #get data frame and df PCS
         df  = arcpy.mapping.ListDataFrames(mxd)[0]
         try:
@@ -44,6 +79,14 @@ class OSM(object):
         except:
             err_dfcs = pythonaddin.MessageBox("Data frame has no coordinate system assigned.", "Error", 0)
             print(err_dfcs)
+
+        if not str(dfPCS) in trafoDict.keys():
+            outMSG = ("The data frame coordinate system did not"
+            "match any of the following EPSG codes: {0}. Please choose one of the specified"
+            "coordinate systems before using this tool in order to prevent inaccuacies while reprojecting.").format(trafoDict.keys())
+            PCSwarning = pythonaddins.MessageBox(outMSG, "PCS Warning", 0)
+            print(PCSwarning)
+            ####### Continue does not work, loop breaks if error is encounterd!!!!########
 
         #create path to GIS data directory in project directory
         rootpath = re.split("05_GIS",mxdpath)[0]
@@ -59,21 +102,11 @@ class OSM(object):
 
         lyrext = lyrDesc.extent
         #transform coord of extent if not WGS84
-        GK3 = "31467"
-        GK4 = "31468"
-        utmn32 = "5652"
-        utmn33 = "5653"
-        wgs = "4326"
-        gt = "DHDN_To_ETRS_1989_8_NTv2"
-        gt1 = "ETRS_1989_To_WGS_1984"
-        gt2 = "DHDN_To_WGS_1984_4_NTv2"
-        #gt = "DHDN_to_WGS_1984_4_NTv2 + ETRS_1989_to_WGS_1984"
-        trafoDict = {GK3: gt2, GK4: gt2, utmn32: gt1, utmn33: gt1}
-        dfPCS = lyrDesc.spatialReference.PCSCode
+        #lyrPCS = lyrDesc.spatialReference.PCSCode
         if not str(dfPCS) == wgs:
-            if str(dfPCS) in [utmn32, utmn33]:
+            if str(dfPCS) in [utmn31, utmn32, utmn33, utmn31NZ, utmn32NZ, utmn33NZ]:
                 lyrext = lyrext.projectAs(wgs, gt1)
-            elif str(dfPCS) in [GK3, GK4]:
+            elif str(dfPCS) in [GK2, GK3, GK4, GK5]:
                 lyrext = lyrext.projectAs(wgs, gt2)
             else:
                 lyrext = lyrext.projectAs(wgs)
@@ -152,6 +185,12 @@ class OSM(object):
           node["power"="tower"]{0};
           way["power"="tower"]{0};
           relation["power"="tower"]{0};
+          node["power"="planned"]{0};
+          way["power"="planned"]{0};
+          relation["power"="planned"]{0};
+          node["power"="construction"]{0};
+          way["power"="construction"]{0};
+          relation["power"="construction"]{0};
          );"""
 
         tPowerline = ["cables", "operator", "frequency", "voltage", "source", "wires", "power", "note"]
@@ -171,8 +210,18 @@ class OSM(object):
         );"""
 
         tWater = ["name", "water", "waterway", "width", "tunnel", "boat"]
+
+        qForest = """
+        (
+         way["natural" = "wood"]{0};
+         way["landuse" = "forest"]{0};
+        );"""
+
+        tForest = ["name", "leaf_type", "leaf_cycle"]
+
         #make dictionary from queries
-        qDict = {"Streets": [qHighway, tHighway], "WEA": [qWEA, tWEA], "Powerlines": [qPowerline, tPowerline], "Hospitals": [qHospitals, tHospitals], "Schutzgebiete": [qSchutz, tSchutz], "Gewaesser": [qWater, tWater]}
+        qDict = ({"Streets": [qHighway, tHighway], "WEA": [qWEA, tWEA], "Powerlines": [qPowerline, tPowerline], "Hospitals": [qHospitals, tHospitals],
+                 "Schutzgebiete": [qSchutz, tSchutz], "Gewaesser": [qWater, tWater], "Wald": [qForest, tForest]})
 
         #create full query
         query = (qDict[selection][0] + etag).format(bboxtuple)
@@ -196,11 +245,25 @@ class OSM(object):
             #     AddMsgAndPrint('The server was unable to fulfill the request.', 2)
             #     AddMsgAndPrint(e.code, 2)
 
+        #check if xml file contains "out of memory" message
+        with open(OSMdata, "r") as infile:
+            for line in itertools.islice(infile, 8):
+                if "Query run out of memory" in line:
+                    msg = pythonaddins.MessageBox("Query run out of memory on Server.\n Reason: Probably selected extent to large.", "Server message", 0)
+                    print(msg)
+                    raise SystemExit
+
         # define the names for the feature dataset and the feature classes
         #inputName = "OSM"
         inputName = selection
         #set workspace to scratch workspace
         wspace = env.scratchWorkspace
+
+        #check if workspace already contains seleted data and delete
+        if arcpy.Exists(os.path.join(wspace, selection)):
+            arcpy.Delete_management(os.path.join(wspace, selection))
+            arcpy.Delete_management(os.path.join(wspace, selection + "_osm_relation"))
+            arcpy.Delete_management(os.path.join(wspace, selection + "_osm_revision"))
 
         validatedTableName = arcpy.ValidateTableName(inputName, wspace)
         nameOfTargetDataset = os.path.join(wspace, validatedTableName)
@@ -233,14 +296,6 @@ class OSM(object):
             #export fc to shape database
             arcpy.FeatureClassToShapefile_conversion(os.path.join(wspace, selection, fc), OSMtmp)
             tmpLayer.append(fc)
-            #print warning if dfPCS is not utm or gk
-            if not str(dfPCS) in trafoDict.keys():
-                outMSG = ("The data frame coordinate system does not"
-                "match any of the following EPSG codes: {0}. Therefore no transformation was used"
-                "while reprojecting, which might lead to inaccuracies.").format(trafoDict.keys())
-                PCSwarning = pythonaddins.MessageBox(outMSG, "PCS Warning", 0)
-                print(PCSwarning)
-                continue
             outshp = os.path.join(OSMdir, fc + ".shp")
             shptmp = os.path.join(OSMtmp, fc + ".shp")
             arcpy.Project_management(shptmp, outshp, str(dfPCS), trafoDict[str(dfPCS)])
@@ -298,7 +353,7 @@ class OSM(object):
     def onEditChange(self, text):
         pass
     def onFocus(self, focused):
-        self.items = ["Streets", "WEA", "Powerlines", "Hospitals", "Schutzgebiete", "Gewässer"]
+        self.items = ["Streets", "WEA", "Powerlines", "Hospitals", "Schutzgebiete", "Gewaesser", "Wald"]
         pass
     def onEnter(self):
         pass
