@@ -172,7 +172,7 @@ class OSM(object):
 
         tWater = ["name", "water", "waterway", "width", "tunnel", "boat"]
         #make dictionary from queries
-        qDict = {"Streets": [qHighway, tHighway], "WEA": [qWEA, tWEA], "Powerlines": [qPowerline, tPowerline], "Hospitals": [qHospitals, tHospitals], "Schutzgebiete": [qSchutz, tSchutz], "Gewässer": [qWater, tWater]}
+        qDict = {"Streets": [qHighway, tHighway], "WEA": [qWEA, tWEA], "Powerlines": [qPowerline, tPowerline], "Hospitals": [qHospitals, tHospitals], "Schutzgebiete": [qSchutz, tSchutz], "Gewaesser": [qWater, tWater]}
 
         #create full query
         query = (qDict[selection][0] + etag).format(bboxtuple)
