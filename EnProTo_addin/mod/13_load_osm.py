@@ -77,7 +77,7 @@ class OSM(object):
         try:
             dfPCS = df.spatialReference.PCSCode
         except:
-            err_dfcs = pythonaddin.MessageBox("Data frame has no coordinate system assigned.", "Error", 0)
+            err_dfcs = pythonaddins.MessageBox("Data frame has no coordinate system assigned.", "Error", 0)
             print(err_dfcs)
 
         if not str(dfPCS) in trafoDict.keys():
