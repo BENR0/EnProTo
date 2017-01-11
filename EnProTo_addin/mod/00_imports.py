@@ -14,7 +14,9 @@ import time
 import datetime as dt
 import colorsys
 import comtypes
-from Tkinter import Tk
+import zipfile
+#from Tkinter import Tk
+#import json
 #from mod.FeaturesToGPX import *
 
 ############################

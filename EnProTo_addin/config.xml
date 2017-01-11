@@ -12,6 +12,7 @@
         <ComboBox caption="ChangePlankopf" category="EnProTo Addin" class="ChangePlankopf" id="ChangePlankopf.combobox" itemSizeString="WWWWWW" message="" rows="4" sizeString="WWWWWW" tip="Change Plankopf Logo and company address."><Help heading="" /></ComboBox>
         <Button caption="LayersToFile" category="EnProTo Addin" class="WritePathOfLayersToFile" id="WritePathOfLayersToFile.button" image="Images/layerstotext.png" message="" tip="Write path of all shapefile layers to text file"><Help heading="" /></Button>
         <Button caption="ToGPX" category="EnProTo Addin" class="ToGPX" id="ToGPX.button" image="" message="" tip="ToGPX"><Help heading="" /></Button>
+        <Button caption="ZipShapes" category="EnProTo Addin" class="ZipShapes" id="ZipShapes.button" image="Images/zipshapes.png" message="" tip="Zip selected shapes"><Help heading="" /></Button>
         <Button caption="TB" category="EnProTo Addin" class="TB" id="TB.button" image="" message="" tip="TB"><Help heading="" /></Button>
         <ComboBox caption="OSM" category="EnProTo Addin" class="OSM" id="OSM.combobox" itemSizeString="" message="" rows="4" sizeString="" tip="Retrieves selectecd OSM data for boundary."><Help heading="" /></ComboBox>
         </Commands>
