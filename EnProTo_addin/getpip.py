@@ -6,15 +6,17 @@ import os
 
 if not os.path.exists(r"C:\Python27\ArcGIS10.4\Scripts\get_pip.py"):
     #get pip install script
-    urllib.urlretrieve(r"https://bootstrap.pypa.io/get-pip.py", r"C:\Python27\ArcGIS10.4\Scripts\get_pip.py")
+    #urllib.urlretrieve(r"https://bootstrap.pypa.io/get-pip.py", r"C:\Python27\ArcGIS10.4\Scripts\get_pip.py")
+    urllib.urlretrieve(r"https://bootstrap.pypa.io/get-pip.py", r"L:\Ablage_Mitarbeiter\Benjamin\dev\EnProTo_dev\EnProTo_addin\get_pip.py")
     #install pip
-    subprocess.call(["python", r"C:\Python27\ArcGIS10.4\Scripts\get_pip.py"])
+    subprocess.call(["python", r"L:\Ablage_Mitarbeiter\Benjamin\dev\EnProTo_dev\EnProTo_addin\get_pip.py"])
 
 import pip
 try:
     import comtypes
 except ImportError, e:
     pip.main(["install", "comtypes"])
+    
     pass
 #get setup tools
 #urllib.urlretrieve(r"https://bootstrap.pypa.io/ez_setup.py", r"C:\Python27\ArcGIS10.4\Scripts\ez_setup.py")
@@ -35,4 +37,4 @@ except ImportError, e:
     
 #subprocess.call([r"V:\Vorlagen_Software\toolbox_modules\ArcGIS_Editor_OSM_10_3Desktop\ArcGISEditor10_3\setup.exe"])
 
-#eingabe = input("Press any key.")
+#raw_input("Press Enter to close")

@@ -20,6 +20,7 @@ class ZipShapes(object):
                 if not os.path.isdir(path):
                     raise
 
+        # tk inter save file dialog
         # def saveFileDialog(FileExtension, InitialDirectory, DialogTitle):
         #     """
         #     Raises a standard File Save dialog and returns the absolute path of the file

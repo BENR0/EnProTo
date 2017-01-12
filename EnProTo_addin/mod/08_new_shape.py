@@ -26,18 +26,20 @@ class NewShapeFromStandardShape(object):
         mxdpath = mxd.filePath
         #split path by GIS directory, keep first part and add GIS folder again
         base = re.split('05_GIS',mxdpath)[0]
-        startpath = base + "05_GIS/av_daten"
+        startpath = os.path.join(base, "05_GIS/av_daten")
 
         #create filename
         #construct date
         today = dt.date.today()
         strdate = str(today.year) + str(today.month) + str(today.day)
+        print(strdate)
         #get projectname
         project = base.split("\\")[-2]
         #create content block string and path to template file
         if selection == "BTT_poly":
             #create full path of template shape
             templatepath = os.path.join(templatedir,name_btt_poly)
+            print(templatepath)
             #create content block string
             contstr = "BTT_" + project + "_" + strdate + "_" + "poly"
         elif selection == "BTT_point":
@@ -57,12 +59,17 @@ class NewShapeFromStandardShape(object):
             print(notemplate)
             #templatepath = ""            #present option to create new shape with specified fields?
 
+        templatepath = templatepath + ".shp"
+
         #get path where to save shp from user
         savepath = pythonaddins.SaveDialog("Speichern unter", contstr, startpath, "", "Shapefile (*.shp)")
+        print(savepath)
         #catch if save dialog is exited with cancel
         if savepath != None:
+            print("copy features")
             #copy shape to user specified path
             arcpy.CopyFeatures_management(templatepath, savepath)
+            print("define projection")
             #define projection for copied shape
             #create full path with extension first
             filepath = savepath + ".shp"

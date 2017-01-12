@@ -122,7 +122,7 @@ class AddDescriptionToFeatures(object):
         #init empty description list
         class_descriptions = []
 
-        #extract all lenth items from dictionary
+        #extract all length items from dictionary
         lenarr = [[j[1] for j in i.values()] for i in attrdict.values()]
         #get maximum length for each field name
         maxlen = [max(i) for i in zip(*lenarr)]
