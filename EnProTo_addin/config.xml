@@ -13,7 +13,7 @@
         <Button caption="LayersToFile" category="EnProTo Addin" class="WritePathOfLayersToFile" id="WritePathOfLayersToFile.button" image="Images/layerstotext.png" message="" tip="Write path of all shapefile layers to text file"><Help heading="" /></Button>
         <Button caption="ToGPX" category="EnProTo Addin" class="ToGPX" id="ToGPX.button" image="" message="" tip="ToGPX"><Help heading="" /></Button>
         <Button caption="ZipShapes" category="EnProTo Addin" class="ZipShapes" id="ZipShapes.button" image="Images/zipshapes.png" message="" tip="Zip selected shapes"><Help heading="" /></Button>
-        <Button caption="DynVogelTab" category="EnProTo Addin" class="DynVogelTab" id="DynVogelTab.button" image="" message="" tip="Build bird name table from attributes"><Help heading="" /></Button>
+        <Button caption="DynBirdTab" category="EnProTo Addin" class="DynBirdTab" id="DynBirdTab.button" image="" message="" tip="Create dynamic bird table from attributes"><Help heading="" /></Button>
         <Button caption="TB" category="EnProTo Addin" class="TB" id="TB.button" image="" message="" tip="TB"><Help heading="" /></Button>
         <ComboBox caption="OSM" category="EnProTo Addin" class="OSM" id="OSM.combobox" itemSizeString="" message="" rows="4" sizeString="" tip="Retrieves selectecd OSM data for boundary."><Help heading="" /></ComboBox>
         </Commands>
@@ -21,7 +21,7 @@
         <Extension autoLoad="true" category="EnProTo Addin" class="ChangeBrowsePath" description="Change path of Export/ Browse/ Save in registry at startup" id="ChangeBrowsePath.extension2" name="ChangeBrowsePath" productName="ChangeBrowsePath" showInExtensionDialog="true" />
         </Extensions>
     <Toolbars>
-        <Toolbar caption="EnProTo Toolbar" category="EnProTo Addin" id="EnProTo.toolbar" showInitially="true"><Items><Menu refID="OpenExplorer.menu" /><Button refID="FindDefinitionQuerys.button" /><Button refID="ListAllLocksForLayers.button" /><Button refID="CalculateArea.button" /><Button refID="Join.button" /><Button refID="BatchReproject.button" /><ComboBox refID="NewShapeFromStandardShape.combobox" /><ComboBox refID="ChangePlankopf.combobox" /><Button refID="WritePathOfLayersToFile.button" /><Button refID="ToGPX.button" /><Button refID="ZipShapes.button" /><Button refID="DynVogelTab.button" /><Button refID="TB.button" /><ComboBox refID="OSM.combobox" /></Items></Toolbar>
+        <Toolbar caption="EnProTo Toolbar" category="EnProTo Addin" id="EnProTo.toolbar" showInitially="true"><Items><Menu refID="OpenExplorer.menu" /><Button refID="FindDefinitionQuerys.button" /><Button refID="ListAllLocksForLayers.button" /><Button refID="CalculateArea.button" /><Button refID="Join.button" /><Button refID="BatchReproject.button" /><ComboBox refID="NewShapeFromStandardShape.combobox" /><ComboBox refID="ChangePlankopf.combobox" /><Button refID="WritePathOfLayersToFile.button" /><Button refID="ToGPX.button" /><Button refID="ZipShapes.button" /><Button refID="DynBirdTab.button" /><Button refID="TB.button" /><ComboBox refID="OSM.combobox" /></Items></Toolbar>
         </Toolbars>
     <Menus>
         <Menu caption="Open Explorer" category="Python Addin" id="OpenExplorer.menu" isRootMenu="true" isShortcutMenu="false" separator="false"><Items><Button refID="OpenPathForSelectedLayer.button" /><Button refID="CopyPathToClipboard.button" /><Button refID="OpenPathForCurrentMXD.button" /></Items></Menu>
