@@ -20,6 +20,7 @@ class DynBirdTab(object):
         rowHeight = 0.4
         fieldNames = ["Abk", "Name_dt", "Name_wiss"]
         colWidth = 4.0
+        smallColWidth = 1.5
 
 
         #Add initial text element
@@ -69,7 +70,7 @@ class DynBirdTab(object):
                     newCellTxt.elementPositionY = y
                     #make first column width smaller
                     if row.index(field) == 0:
-                        curColWidth = 1.0
+                        curColWidth = smallColWidth
                     else:
                         curColWidth = colWidth
                     x = x + curColWidth
