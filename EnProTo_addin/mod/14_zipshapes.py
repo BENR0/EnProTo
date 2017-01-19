@@ -69,7 +69,7 @@ class ZipShapes(object):
         #create filename
         #construct date
         today = dt.date.today()
-        strdate = str(today.year) + "-" + str(today.month) + "-" + str(today.day) + "_ .zip"
+        strdate = str(today.year) + "-" + "{:02d}".format(today.month) + "-" + "{:02d}".format(today.day) + "_ .zip"
 
         #get path where to save shp from user
         zipfilepath = pythonaddins.SaveDialog("Speichern unter", strdate, startpath, "", "Zipfile (*.zip)")
