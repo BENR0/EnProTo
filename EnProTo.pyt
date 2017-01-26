@@ -10,7 +10,6 @@ from tools.plankopf_wizard import PlankopfWizard
 from tools.multibufferspeciesexport import MultiBufferSpeciesExport
 from tools.polylinetopolygon import PolylineToPolygon
 from tools.group_annos_by_pf import GroupAnnosByPF
-from tools.legen_waitforit_dary import Legen_WaitForIt_Dary
 from tools.kartenserie_to_png import KartenserieToPng
 from tools.batchconvertpdftotif import BatchConvertPDFToTif
 from tools.buffertool import MultiPurposeBufferTool
@@ -19,6 +18,7 @@ from tools.WEA_angebot import WEAangebot
 from tools.definitionquerypolygons import DefinitionQueryPolygons
 from tools.rnaanalyse import RNAanalyse
 from tools.updatemxdswithlayer import UpdateMXDswithLayer
+from tools.create_btt_legend import CreateBttLegend
 
 #groupannosbypf not found
 
@@ -28,5 +28,5 @@ class Toolbox(object):
         self.alias = "EnProTo"
 
         #List of tool classes associated with this toolbox
-        self.tools = [AddDescriptionToFeatures,KartenserieToPng,BatchConvertPDFToTif,MultiPurposeBufferTool,BatchAddFieldMerge,DefinitionQueryPolygons,WEAangebot,RNAanalyse,UpdateMXDswithLayer]
+        self.tools = [AddDescriptionToFeatures,KartenserieToPng,BatchConvertPDFToTif,MultiPurposeBufferTool,BatchAddFieldMerge,DefinitionQueryPolygons,WEAangebot,RNAanalyse,UpdateMXDswithLayer,CreateBttLegend]
 

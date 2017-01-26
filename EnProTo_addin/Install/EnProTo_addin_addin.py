@@ -786,11 +786,11 @@ class Join(object):
         ########
         #pathes to join tables
         #path for each list which can be used for joins
-        birds = r"V:\Vorlagen_Kartierungen\Fauna\Voegel\Artenliste_Voegel\Index_deutscher_Vogelnamen_gis.xlsx"
-        btt_hessen = r"V:\Vorlagen_Kartierungen\Biotope_Erfassung_Bewertung\Bundeslaender\Hessen\Biotopschluessel_Hessen\TNL_Kartierschluessel\TNL_Biotoptypenschluessel_Basis_KV_GIS.xlsx"
+        birds = r"V:\Vorlagen_CAD_GIS\Vorlagen_Kartierungen\Fauna\Voegel\Artenliste_Voegel\Index_deutscher_Vogelnamen_gis.xlsx"
+        btt_hessen = r"V:\Vorlagen_CAD_GIS\Vorlagen_Kartierungen\Biotope_Erfassung_Bewertung\Hessen\Biotopschluessel\TNL_Kartierschluessel\TNL_Biotoptypenschluessel_Basis_KV_GIS.xlsx"
         #btt_nrw = r
-        btt_nieder = r"V:\Vorlagen_Kartierungen\Biotope_Erfassung_Bewertung\Bundeslaender\Niedersachsen\Biotopschluessel_Niedersachsen\Schluessel_Tab_fuer_GIS\Tabelle_GIS_BTT_NI_bearb_benjamin_GIS.xls"
-        btt_bayern = r"V:\Vorlagen_Kartierungen\Biotope_Erfassung_Bewertung\Bundeslaender\Bayern\Biotopschluessel_Bayern\Biotopwertliste_BayKompV\Biotopwertliste_neu_GIS.xlsx"
+        btt_nieder = r"V:\Vorlagen_CAD_GIS\Vorlagen_Kartierungen\Biotope_Erfassung_Bewertung\Niedersachsen\Biotopschluessel_Niedersachsen\Schluessel_Tab_fuer_GIS\Tabelle_GIS_BTT_NI_bearb_benjamin_GIS.xls"
+        btt_bayern = r"V:\Vorlagen_CAD_GIS\Vorlagen_Kartierungen\Biotope_Erfassung_Bewertung\Bayern\Biotopschluessel\Biotopwertliste_BayKompV\Biotopwertliste_neu_GIS.xlsx"
         #btt_bawu = r
         #fleder = r
         #btt
@@ -841,6 +841,7 @@ class Join(object):
                             trtabledict = tabledf.transpose().to_dict()
                             joindict = {trtabledict[r][joinkey]: delkey(v, joinkey) for r, v in trtabledict.items()}
                             print("created join dict")
+                            print(joinkey,joinfield)
                             #print(joindict)
                             #stop iterating keys
                             break
@@ -1910,7 +1911,7 @@ class ZipShapes(object):
         #create filename
         #construct date
         today = dt.date.today()
-        strdate = str(today.year) + "-" + str(today.month) + "-" + str(today.day) + "_ .zip"
+        strdate = str(today.year) + "-" + "{:02d}".format(today.month) + "-" + "{:02d}".format(today.day) + "_ .zip"
 
         #get path where to save shp from user
         zipfilepath = pythonaddins.SaveDialog("Speichern unter", strdate, startpath, "", "Zipfile (*.zip)")
