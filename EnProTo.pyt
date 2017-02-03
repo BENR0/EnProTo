@@ -19,6 +19,7 @@ from tools.definitionquerypolygons import DefinitionQueryPolygons
 from tools.rnaanalyse import RNAanalyse
 from tools.updatemxdswithlayer import UpdateMXDswithLayer
 from tools.create_btt_legend import CreateBttLegend
+from tools.pois4tomtom import POIS4TomTom
 
 #groupannosbypf not found
 
@@ -28,5 +29,5 @@ class Toolbox(object):
         self.alias = "EnProTo"
 
         #List of tool classes associated with this toolbox
-        self.tools = [AddDescriptionToFeatures,KartenserieToPng,BatchConvertPDFToTif,MultiPurposeBufferTool,BatchAddFieldMerge,DefinitionQueryPolygons,WEAangebot,RNAanalyse,UpdateMXDswithLayer,CreateBttLegend]
+        self.tools = [AddDescriptionToFeatures,KartenserieToPng,BatchConvertPDFToTif,MultiPurposeBufferTool,BatchAddFieldMerge,DefinitionQueryPolygons,WEAangebot,RNAanalyse,UpdateMXDswithLayer,POIS4TomTom,CreateBttLegend]
 
