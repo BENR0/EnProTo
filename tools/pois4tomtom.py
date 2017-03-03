@@ -106,7 +106,8 @@ class POIS4TomTom(object):
         features = parameters[0].valueAsText
         d_field = parameters[1].valueAsText
         fname = parameters[2].valueAsText
-        
+
+        fname = fname + ".ov2"
 
         mxd = arcpy.mapping.MapDocument("current")
         arcpy.AddMessage(arcpy.mapping.ListLayers(mxd, features))
