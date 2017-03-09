@@ -81,3 +81,4 @@ class DynBirdTab(object):
             elm.delete()
 
         pass
+
