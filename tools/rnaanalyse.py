@@ -34,6 +34,16 @@ class RNAanalyse(object):
             datatype="GPFeatureLayer",
             parameterType="Required",
             direction="Output")
+
+        hessen_chkbox = arcpy.Parameter(
+                displayName="Calculate RNA for Hessen? (If not checked Baden-Wuerttemberg)",
+                name="hessen_bool",
+                datatype="GPBoolean",
+                parameterType="optional",
+                direction="Input")
+
+
+        hessen_chkbox.value = "True"
             
         # threshold70_bool = arcpy.Parameter(
             # displayName="Use 70/20% (three categories) instead of 75/25% (two categories) threshold rule.",
@@ -44,7 +54,7 @@ class RNAanalyse(object):
 
         #threshold70_bool.value = "False"
 
-        parameters = [wea_lyr, flug_lyr, out_lyr]
+        parameters = [wea_lyr, flug_lyr, out_lyr, hessen_chkbox]
             
         return parameters
 
@@ -73,9 +83,10 @@ class RNAanalyse(object):
         layer = parameters[0].valueAsText
         flugLayer = parameters[1].valueAsText
         outputLayer = parameters[2].valueAsText
+        hessenbool = parameters[3].valueAsText
         #threshold_scheme = parameters[3].valueAsText
 
-        rna_main(layer, flugLayer, outputLayer)
+        rna_main(layer, flugLayer, outputLayer, hessenbool)
 
         #function to get center point of layer
         #def layerCenter(lyr):
@@ -107,7 +118,7 @@ class RNAanalyse(object):
                 #return sorted({row[0] for row in cursor})
         return
 
-def rna_main(layer, flugLayer, outputLayer):
+def rna_main(layer, flugLayer, outputLayer, hessenbool):
     #layer style for rna categories
     rnacategories = r"V:\Vorlagen_CAD_GIS\GIS\styles_aktuell\RNA_raster.lyr"
 
@@ -223,109 +234,6 @@ def rna_main(layer, flugLayer, outputLayer):
     arcpy.AddMessage("Intersecting fishnet with data...")
     fishIntersect = arcpy.Intersect_analysis([fishnet, flugLayer], "in_memory\intersect", "ALL", "", "POINT")
 
-    ######
-    #split lines at point code from http://gis.stackexchange.com/questions/101472/split-line-at-a-point-with-arcgis-10-1-basic-level-license
-    line_fc = flugLayer
-    point_fc = fishIntersect
-    point_fc_desc = arcpy.Describe(point_fc)
-    in_spatial_reference = point_fc_desc.spatialReference
-
-    #can use CopyFeatures to write the geometries to disk when troubleshooting
-    #buffered_point_fc = r"C:\GIS\Temp\test.gdb\PointsBuffered"
-    #intersected_line_fc = r"C:\GIS\Temp\test.gdb\LineIntersected"
-    #symmetrical_difference_line_fc = r"C:\GIS\Temp\test.gdb\LineIntersectedSymmDiff"
-    wkspace = arcpy.env.workspace
-    single_part_splitted_lines = r"in_memory\SplittedLines"
-    total_splitted_lines = r"in_memory\TotalSplittedLiens"
-        #os.path.join(wkspace, "TotalSplittedLines")
-    total_splitted_lines_attributed = r"in_memory\TotalSplittedLinesAttributed"
-        #os.path.join(wkspace, "TotalSplittedLinesAttributed")
-
-    #arcpy.TruncateTable_management(total_splitted_lines)
-
-    #--- reference dictionaries ----------------#
-    points_id_geometry_dict = {} #{pointID: pointGeometry}
-    lines_id_geometry_dict = {} #{lineID: lineGeometry}
-
-    search_cursor = arcpy.da.SearchCursor(point_fc,["FID","SHAPE@"])
-    for point_feature in search_cursor:
-        points_id_geometry_dict[point_feature[0]] = point_feature[1]
-    del search_cursor
-
-    search_cursor = arcpy.da.SearchCursor(line_fc,["FID","SHAPE@"])
-    for line_feature in search_cursor:
-        lines_id_geometry_dict[line_feature[0]] = line_feature[1]
-    del search_cursor
-    #-------------------------------------------#
-
-    points_list =[]
-    lines_list = []
-
-    dictionary_lines_points = {} #{lineID: pointID} or {lineID: (pointID, pointID,...)}
-
-    point_cursor = arcpy.da.SearchCursor(point_fc,["SHAPE@","FID"])
-    line_cursor = arcpy.da.SearchCursor(line_fc,["SHAPE@","FID"])
-
-    for point in point_cursor:
-        point_geom_and_id = [point[0],point[1]]
-        points_list.append(point_geom_and_id)
-
-    for line in line_cursor:
-        line_geom_and_id = [line[0],line[1]]
-        lines_list.append(line_geom_and_id)
-
-    del point_cursor
-    del line_cursor
-
-    for line in lines_list:
-        for point in points_list:
-            if line[0].contains(point[0]): #finding what points are on what lines
-                msg = "LineID:" + str(line[1]) + "PointID:" + str(point[1])
-                #arcpy.AddMessage(msg)
-                if not line[1] in dictionary_lines_points: #handling situations when multiple points are on the same line
-                    dictionary_lines_points[line[1]] = (point[1],) #lineid is key, point ids is value (can be a tuple)
-                    arcpy.AddMessage(dictionary_lines_points[line[1]])
-                else:
-                    dictionary_lines_points[line[1]] = dictionary_lines_points[line[1]] + (point[1],) #making tuple for "" line: (point ids) ""
-
-    arcpy.AddMessage(dictionary_lines_points)
-
-    for key_line in dictionary_lines_points.keys(): #iterating each line in the line_fc
-        pointID = dictionary_lines_points.get(key_line) #getting what PointID have match to lineID
-        arcpy.AddMessage(pointID)
-
-        if not isinstance(pointID,tuple):
-            input_point_geom_object = points_id_geometry_dict.get(pointID) #obtain point geometry based on pointID
-            multipoints = input_point_geom_object
-        else:
-            merged_point_geometries = arcpy.Array() #constructing a multipoint (if multiple points are on the same line)
-            for pointID_element in pointID:
-                input_point_geom_object = points_id_geometry_dict.get(pointID_element)
-                merged_point_geometries.add(input_point_geom_object.centroid) #creating array of points
-                multipoints = arcpy.Multipoint(merged_point_geometries,in_spatial_reference)
-
-        line_geometry_object = lines_id_geometry_dict.get(key_line) #obtain line geometry based on LineID
-
-        buffered_point = multipoints.buffer(0.1) #same units as the geometry
-        intersected_line = buffered_point.intersect(line_geometry_object,2) #2 - polyline returned
-        symmetrical_difference_line = intersected_line.symmetricDifference(line_geometry_object)
-        arcpy.MultipartToSinglepart_management(symmetrical_difference_line,single_part_splitted_lines)
-        arcpy.Integrate_management(single_part_splitted_lines,"0.1 Meters")
-        arcpy.Append_management(single_part_splitted_lines,total_splitted_lines,"NO_TEST")
-        arcpy.Delete_management(single_part_splitted_lines)
-
-        arcpy.SpatialJoin_analysis(target_features=total_splitted_lines,
-                                   join_features=line_fc,
-                                   out_feature_class=total_splitted_lines_attributed,
-                                   join_operation="JOIN_ONE_TO_ONE",join_type="KEEP_ALL",
-                                   match_option="INTERSECT",search_radius="#",distance_field_name="#")
-
-    ##TODO
-    #iterate through line features that did not have any points located on them (distanceTo geometry method / select by location)
-    #if there are any points located within the search distance >> move them on line and run the logic >> append to the output fc
-    #if no point features are located within the search distance >> append them directly to the output fc
-
-
 
     #arcpy.AddMessage("Exploding multipart features...")
     #fishIntersect2 = arcpy.MultipartToSinglepart_management(fishIntersect, "in_memory\intersect2")
@@ -333,16 +241,30 @@ def rna_main(layer, flugLayer, outputLayer):
 
     #create field name to be dissolved by (depends on name of output feature class)
     dissField = "FID_" + arcpy.Describe(outputLayer).baseName
-    #arcpy.AddMessage(dissField) (total_splitted_lines_attributed was fishIntersect when intersect was not to points but to lines)
-    dissolve = arcpy.Dissolve_management(total_splitted_lines_attributed, "in_memory\dissolve", dissField, [["Exemplare", "SUM"]], "MULTI_PART", "DISSOLVE_LINES")
+    dissField2 = "FID_" + arcpy.Describe(flugLayer).baseName
+    #arcpy.AddMessage(dissField)
+
+    if hessenbool == "true":
+        distmp = arcpy.Dissolve_management(fishIntersect, "in_memory\distmp", [dissField,dissField2] , [["Exemplare", "FIRST"]], "SINGLE_PART", "UNSPLIT_LINES")
+        fields = arcpy.ListFields(distmp)
+
+        distmpin = distmp
+
+        dissolve = arcpy.Dissolve_management(distmpin, "in_memory\dissolve", dissField, [["FIRST_Exemplare", "SUM"]], "MULTI_PART", "UNSPLIT_LINES")
+        sumfield = "SUM_FIRST_Exemplare"
+
+    else:
+        dissolve = arcpy.Dissolve_management(fishIntersect, "in_memory\dissolve", dissField, [["Exemplare", "SUM"]], "MULTI_PART", "DISSOLVE_LINES")
+        sumfield = "SUM_Exemplare"
+
 
     arcpy.AddMessage("Calculating threshold for RNA category...")
-    table_as_array = arcpy.da.FeatureClassToNumPyArray(dissolve, ["SUM_Exemplare"])
+    table_as_array = arcpy.da.FeatureClassToNumPyArray(dissolve, [sumfield])
     #percentile1 = np.percentile(table_as_array["SUM_Exempl"], 70)
 
     #sort in ascending/descending order and build cumulative sum
     #threshold2 for ascending (lower boundary) in three categorie scheme
-    exemplare_sorted_asc = np.sort(table_as_array["SUM_Exemplare"])
+    exemplare_sorted_asc = np.sort(table_as_array[sumfield])
     exemplare_sorted = exemplare_sorted_asc[::-1]
 
     cumsum = np.cumsum(exemplare_sorted)
@@ -376,7 +298,7 @@ def rna_main(layer, flugLayer, outputLayer):
     path_dict = {}
 
     #Create Dictionary
-    join_values = [dissField, "SUM_Exemplare"]
+    join_values = [dissField, sumfield]
     with arcpy.da.SearchCursor(dissolve, join_values) as srows:
         for srow in srows:
             path_dict[srow[0]] = tuple(srow[i] for i in range(1,len(join_values)))
@@ -435,6 +357,7 @@ if __name__ == '__main__':
     layer = r"L:\Ablage_Mitarbeiter\Benjamin\z_tmp\05_GIS\av_daten\wea.shp"
     flugLayer = r"L:\Ablage_Mitarbeiter\Benjamin\z_tmp\05_GIS\av_daten\flugbewegungen.shp"
     outputLayer = r"L:\Ablage_Mitarbeiter\Benjamin\z_tmp\05_GIS\av_daten\rna\rna.shp"
-    rna_main(layer, flugLayer, outputLayer)
+    hessen = True
+    rna_main(layer, flugLayer, outputLayer, hessen)
 
     raw_input("Press Enter to close") # Python 2
