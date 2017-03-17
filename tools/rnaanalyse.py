@@ -232,7 +232,7 @@ def rna_main(layer, flugLayer, outputLayer, hessenbool):
     arcpy.env.outputCoordinateSystem = arcpy.SpatialReference(layerPCS)
 
     arcpy.AddMessage("Intersecting fishnet with data...")
-    fishIntersect = arcpy.Intersect_analysis([fishnet, flugLayer], "in_memory\intersect", "ALL", "", "POINT")
+    fishIntersect = arcpy.Intersect_analysis([fishnet, flugLayer], "in_memory\intersect", "ALL", "", "LINE")
 
 
     #arcpy.AddMessage("Exploding multipart features...")
@@ -246,11 +246,11 @@ def rna_main(layer, flugLayer, outputLayer, hessenbool):
 
     if hessenbool == "true":
         distmp = arcpy.Dissolve_management(fishIntersect, "in_memory\distmp", [dissField,dissField2] , [["Exemplare", "FIRST"]], "SINGLE_PART", "UNSPLIT_LINES")
-        fields = arcpy.ListFields(distmp)
-
+        #distmp = arcpy.Dissolve_management(fishIntersect, r"L:\Ablage_Mitarbeiter\Benjamin\z_tmp\delete\first_diss.shp", [dissField,dissField2] , [["Exemplare", "FIRST"]], "SINGLE_PART", "UNSPLIT_LINES")
         distmpin = distmp
 
-        dissolve = arcpy.Dissolve_management(distmpin, "in_memory\dissolve", dissField, [["FIRST_Exemplare", "SUM"]], "MULTI_PART", "UNSPLIT_LINES")
+        dissolve = arcpy.Dissolve_management(distmpin, "in_memory\dissolve", dissField, [["FIRST_Exemplare", "SUM"]], "MULTI_PART", "DISSOLVE_LINES")
+        #dissolve = arcpy.Dissolve_management(distmpin, r"L:\Ablage_Mitarbeiter\Benjamin\z_tmp\delete\sec_diss.shp", dissField, [["FIRST_Exemplare", "SUM"]], "MULTI_PART", "DISSOLVE_LINES")
         sumfield = "SUM_FIRST_Exemplare"
 
     else:
