@@ -10,6 +10,11 @@ class ZipShapes(object):
         import re
         import zipfile
         import datetime as dt
+        import logging
+
+        #usage logging
+        user = os.environ.get("USERNAME")
+        logger.info('%s, %s', "Zip shapes", user)
 
         #local vars
 

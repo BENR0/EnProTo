@@ -6,6 +6,12 @@ class DynBirdTab(object):
     def onClick(self):
         import arcpy
         import pythonaddins
+        import logging
+
+        #usage logging
+        user = os.environ.get("USERNAME")
+        logger.info('%s, %s', "Dynamic Vogel table", user)
+
         #init vars
         #positioncounter
         #iPosition = [10.0, 25.0]

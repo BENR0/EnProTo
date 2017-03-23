@@ -4,6 +4,13 @@ class CalculateArea(object):
         self.enabled = True
         self.checked = False
     def onClick(self):
+        import logging
+
+        #usage logging
+        user = os.environ.get("USERNAME")
+        logger.info('%s, %s', "Calculate area", user)
+
+
         try:
             #local vars
             fieldName1 = "AREA_HA"

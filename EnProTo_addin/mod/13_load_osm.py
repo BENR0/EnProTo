@@ -14,6 +14,11 @@ class OSM(object):
         import shutil
         import ssl
         import itertools
+        import logging
+
+        #usage logging
+        user = os.environ.get("USERNAME")
+        logger.info('%s, %s', "OSM", user)
 
 
         #maybe a security risk but solves the issue with
@@ -29,7 +34,14 @@ class OSM(object):
                     raise
 
         # load the OpenStreetMap specific toolbox
-        arcpy.ImportToolbox(r"c:\program files (x86)\arcgis\desktop10.4\ArcToolbox\Toolboxes\OpenStreetMap Toolbox.tbx")
+        try:
+            arcpy.ImportToolbox(r"c:\program files (x86)\arcgis\desktop10.4\ArcToolbox\Toolboxes\OpenStreetMap Toolbox.tbx")
+        except:
+            msg = pythonaddins.MessageBox("Please install the ArcGIS Editor for OSM", "Error", 0)
+            print(msg)
+            raisev
+
+
 
         ######################
         ##constants
@@ -72,6 +84,7 @@ class OSM(object):
             mxdpath = mxd.filePath
         except:
             print("Could not get projects path. Probably project is not saved yet.")
+
         #get data frame and df PCS
         df  = arcpy.mapping.ListDataFrames(mxd)[0]
         try:
@@ -83,7 +96,7 @@ class OSM(object):
         if not str(dfPCS) in trafoDict.keys():
             outMSG = ("The data frame coordinate system did not"
             "match any of the following EPSG codes: {0}. Please choose one of the specified"
-            "coordinate systems before using this tool in order to prevent inaccuacies while reprojecting.").format(trafoDict.keys())
+            "coordinate systems before using this tool in order to prevent inaccuracies while reprojecting.").format(trafoDict.keys())
             PCSwarning = pythonaddins.MessageBox(outMSG, "PCS Warning", 0)
             print(PCSwarning)
             ####### Continue does not work, loop breaks if error is encounterd!!!!########
@@ -113,7 +126,7 @@ class OSM(object):
 
         bboxtuple = (lyrext.YMin, lyrext.XMin, lyrext.YMax, lyrext.XMax)
 
-        #bboxtuple = (41.88269405444917,12.48070478439331,41.89730998384814,12.503278255462645)
+
         overpassurl = "https://overpass-api.de/api/interpreter?data=[out:xml];"
 
         #end tag for query

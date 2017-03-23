@@ -6,6 +6,13 @@ class NewShapeFromStandardShape(object):
         self.dropdownWidth = 'WWWWWWW'
         self.width = ''
     def onSelChange(self, selection):
+        import logging
+
+        #usage logging
+        user = os.environ.get("USERNAME")
+        logger.info('%s, %s', "New Shape", user)
+
+
         #standard shapefile path
         templatedir = "V:\Vorlagen_CAD_GIS\GIS\Shape_Standard"
         #file names of template shapes
@@ -39,7 +46,6 @@ class NewShapeFromStandardShape(object):
         if selection == "BTT_poly":
             #create full path of template shape
             templatepath = os.path.join(templatedir,name_btt_poly)
-            print(templatepath)
             #create content block string
             contstr = "BTT_" + project + "_" + strdate + "_" + "poly"
         elif selection == "BTT_point":
@@ -59,7 +65,7 @@ class NewShapeFromStandardShape(object):
             print(notemplate)
             #templatepath = ""            #present option to create new shape with specified fields?
 
-        templatepath = templatepath + ".shp"
+        templatepath = templatepath # + ".shp"
 
         #get path where to save shp from user
         savepath = pythonaddins.SaveDialog("Speichern unter", contstr, startpath, "", "Shapefile (*.shp)")

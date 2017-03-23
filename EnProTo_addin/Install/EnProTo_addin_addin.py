@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 import arcpy
 import pythonaddins
+import logging
 import pandas as pd
 import subprocess
 import urllib
@@ -15,9 +16,34 @@ import datetime as dt
 import colorsys
 import comtypes
 import zipfile
+
 #from Tkinter import Tk
 #import json
 #from mod.FeaturesToGPX import *
+
+
+#logging
+#logging.basicConfig(filename=r"L:\Ablage_Mitarbeiter\Benjamin\dokumente\enproto.log", level=logging.INFO)
+#logging.basicConfig(format='%(asctime)s %(message)s', datefmt="%Y%d%m %H%M%S")
+
+# create logger
+logger = logging.getLogger('EnProTo_user_stats')
+logger.setLevel(logging.INFO)
+
+handler = logging.FileHandler(r"L:\Ablage_Mitarbeiter\Benjamin\dokumente\enproto.log")
+handler.setLevel(logging.INFO)
+
+# create formatter
+#formatter = logging.Formatter(format='%(asctime)s %(message)s', datefmt="%Y%d%m %H%M%S")
+formatter = logging.Formatter('%(asctime)s - %(levelname)s - %(message)s', "%Y%d%m %H%M%S")
+
+# add formatter to ch
+handler.setFormatter(formatter)
+
+# add ch to logger
+logger.addHandler(handler)
+
+
 
 ############################
 #helper functions
@@ -468,6 +494,11 @@ class OpenPathForSelectedLayer(object):
         self.checked = False
     def onClick(self):
         import os
+        import logging
+
+        #usage logging
+        user = os.environ.get("USERNAME")
+        logging.info('%s, %s', "Open path for layer", user)
 
         def get_geodatabase_path(input_table, toclayer):
             '''Return the Geodatabase path from the input table or feature class.
@@ -496,6 +527,12 @@ class OpenPathForCurrentMXD(object):
         self.enabled = True
         self.checked = False
     def onClick(self):
+        import logging
+
+        #usage logging
+        user = os.environ.get("USERNAME")
+        logger.info('%s, %s', "Open path for mxd", user)
+
         mxd = arcpy.mapping.MapDocument("CURRENT")
         mxdpath = mxd.filePath
        
@@ -508,6 +545,13 @@ class CopyPathToClipboard(object):
         self.enabled = True
         self.checked = False
     def onClick(self):
+        import logging
+
+        #usage logging
+        user = os.environ.get("USERNAME")
+        logging.info('%s, %s', "Copy path to clipboard", user)
+
+
         mxd = arcpy.mapping.MapDocument("CURRENT")
         toclayer = pythonaddins.GetSelectedTOCLayerOrDataFrame()
         desc = arcpy.Describe(toclayer)
@@ -532,6 +576,13 @@ class FindDefinitionQuerys(object):
         self.enabled = True
         self.checked = False
     def onClick(self):
+        import logging
+
+        #usage logging
+        user = os.environ.get("USERNAME")
+        logger.info('%s, %s', "Find definition queries", user)
+
+
         mxd = arcpy.mapping.MapDocument("CURRENT")
 
         lyrs = arcpy.mapping.ListLayers(mxd)
@@ -554,6 +605,11 @@ class ListAllLocksForLayers(object):
         self.enabled = True
         self.checked = False
     def onClick(self):
+        import logging
+
+        #usage logging
+        user = os.environ.get("USERNAME")
+        logger.info('%s, %s', "List locks", user)
 
         mxd = arcpy.mapping.MapDocument("CURRENT")
 
@@ -604,6 +660,13 @@ class CalculateArea(object):
         self.enabled = True
         self.checked = False
     def onClick(self):
+        import logging
+
+        #usage logging
+        user = os.environ.get("USERNAME")
+        logger.info('%s, %s', "Calculate area", user)
+
+
         try:
             #local vars
             fieldName1 = "AREA_HA"
@@ -662,6 +725,11 @@ class Join(object):
         self.enabled = True
         self.checked = False
     def onClick(self):
+        import logging
+
+        #usage logging
+        user = os.environ.get("USERNAME")
+        logger.info('%s, %s', "Join", user)
           
         def create_field_name(fc, new_field):  
             '''Return a valid field name that does not exist in fc and  
@@ -991,6 +1059,13 @@ class NewShapeFromStandardShape(object):
         self.dropdownWidth = 'WWWWWWW'
         self.width = ''
     def onSelChange(self, selection):
+        import logging
+
+        #usage logging
+        user = os.environ.get("USERNAME")
+        logger.info('%s, %s', "New Shape", user)
+
+
         #standard shapefile path
         templatedir = "V:\Vorlagen_CAD_GIS\GIS\Shape_Standard"
         #file names of template shapes
@@ -1024,7 +1099,6 @@ class NewShapeFromStandardShape(object):
         if selection == "BTT_poly":
             #create full path of template shape
             templatepath = os.path.join(templatedir,name_btt_poly)
-            print(templatepath)
             #create content block string
             contstr = "BTT_" + project + "_" + strdate + "_" + "poly"
         elif selection == "BTT_point":
@@ -1044,7 +1118,7 @@ class NewShapeFromStandardShape(object):
             print(notemplate)
             #templatepath = ""            #present option to create new shape with specified fields?
 
-        templatepath = templatepath + ".shp"
+        templatepath = templatepath # + ".shp"
 
         #get path where to save shp from user
         savepath = pythonaddins.SaveDialog("Speichern unter", contstr, startpath, "", "Shapefile (*.shp)")
@@ -1081,6 +1155,13 @@ class ChangePlankopf(object):
         self.dropdownWidth = 'WWWWWWWWWWWWWWWWWW'
         self.width = ''
     def onSelChange(self, selection):
+
+        import logging
+
+        #usage logging
+        user = os.environ.get("USERNAME")
+        logger.info('%s, %s', "Change Plankopf", user)
+
         mxd = arcpy.mapping.MapDocument("CURRENT")
         #get text and image boxes of mxd
         try:
@@ -1158,6 +1239,13 @@ class WritePathOfLayersToFile(object):
         self.enabled = True
         self.checked = False
     def onClick(self):
+        import logging
+
+        #usage logging
+        user = os.environ.get("USERNAME")
+        logger.info('%s, %s', "Layer paths to file", user)
+
+
         mxd = arcpy.mapping.MapDocument("CURRENT")
 
         lyrs = arcpy.mapping.ListLayers(mxd)
@@ -1185,6 +1273,13 @@ class ToGPX(object):
         self.enabled = True
         self.checked = False
     def onClick(self):
+        import logging
+
+        #usage logging
+        user = os.environ.get("USERNAME")
+        logger.info('%s, %s', "To GPX", user)
+
+
         '''
         Tool Name:  Features to GPX
         Source Name: FeaturesToGPX.py
@@ -1401,6 +1496,13 @@ class TB(object):
         self.checked = False
     @property
     def onClick(self):
+        import logging
+
+        #usage logging
+        user = os.environ.get("USERNAME")
+        logger.info('%s, %s', "Legend", user)
+
+
         #positioncounter
         iPosition = [10.0, 25.0]
         #distances of and between elements
@@ -1494,6 +1596,11 @@ class OSM(object):
         import shutil
         import ssl
         import itertools
+        import logging
+
+        #usage logging
+        user = os.environ.get("USERNAME")
+        logger.info('%s, %s', "OSM", user)
 
 
         #maybe a security risk but solves the issue with
@@ -1509,7 +1616,14 @@ class OSM(object):
                     raise
 
         # load the OpenStreetMap specific toolbox
-        arcpy.ImportToolbox(r"c:\program files (x86)\arcgis\desktop10.4\ArcToolbox\Toolboxes\OpenStreetMap Toolbox.tbx")
+        try:
+            arcpy.ImportToolbox(r"c:\program files (x86)\arcgis\desktop10.4\ArcToolbox\Toolboxes\OpenStreetMap Toolbox.tbx")
+        except:
+            msg = pythonaddins.MessageBox("Please install the ArcGIS Editor for OSM", "Error", 0)
+            print(msg)
+            raisev
+
+
 
         ######################
         ##constants
@@ -1552,6 +1666,7 @@ class OSM(object):
             mxdpath = mxd.filePath
         except:
             print("Could not get projects path. Probably project is not saved yet.")
+
         #get data frame and df PCS
         df  = arcpy.mapping.ListDataFrames(mxd)[0]
         try:
@@ -1563,7 +1678,7 @@ class OSM(object):
         if not str(dfPCS) in trafoDict.keys():
             outMSG = ("The data frame coordinate system did not"
             "match any of the following EPSG codes: {0}. Please choose one of the specified"
-            "coordinate systems before using this tool in order to prevent inaccuacies while reprojecting.").format(trafoDict.keys())
+            "coordinate systems before using this tool in order to prevent inaccuracies while reprojecting.").format(trafoDict.keys())
             PCSwarning = pythonaddins.MessageBox(outMSG, "PCS Warning", 0)
             print(PCSwarning)
             ####### Continue does not work, loop breaks if error is encounterd!!!!########
@@ -1593,7 +1708,7 @@ class OSM(object):
 
         bboxtuple = (lyrext.YMin, lyrext.XMin, lyrext.YMax, lyrext.XMax)
 
-        #bboxtuple = (41.88269405444917,12.48070478439331,41.89730998384814,12.503278255462645)
+
         overpassurl = "https://overpass-api.de/api/interpreter?data=[out:xml];"
 
         #end tag for query
@@ -1852,6 +1967,11 @@ class ZipShapes(object):
         import re
         import zipfile
         import datetime as dt
+        import logging
+
+        #usage logging
+        user = os.environ.get("USERNAME")
+        logger.info('%s, %s', "Zip shapes", user)
 
         #local vars
 
@@ -1952,6 +2072,12 @@ class DynBirdTab(object):
     def onClick(self):
         import arcpy
         import pythonaddins
+        import logging
+
+        #usage logging
+        user = os.environ.get("USERNAME")
+        logger.info('%s, %s', "Dynamic Vogel table", user)
+
         #init vars
         #positioncounter
         #iPosition = [10.0, 25.0]
@@ -2027,6 +2153,47 @@ class DynBirdTab(object):
             elm.delete()
 
         pass
+
+class RepairBrokenLayers(object):
+    """Implementation for RepairBrokenLayers.button (Button)"""
+    def __init__(self):
+        self.enabled = True
+        self.checked = False
+    def onClick(self):
+        import logging
+
+        #usage logging
+        user = os.environ.get("USERNAME")
+        logging.info('%s, %s', "Repair broken layers", user)
+
+        #function to split given path up to gis folder of project
+        def pathuptogisdir(path):
+            #split path by GIS directory, keep first part and add GIS folder again
+            base = re.split('05_GIS',path)[0]
+            startpath = os.path.join(base, "05_GIS")
+
+            return startpath
+
+        #get properties of map document
+        mxd = arcpy.mapping.MapDocument("CURRENT")
+        #get directory of map document
+        mxdpath = mxd.filePath
+
+        #get new path
+        newpath = pathuptogisdir(mxdpath)
+        print(newpath)
+
+        #get old path from broken layer
+        brkLyrpath = arcpy.mapping.ListBrokenDataSources(mxd)[0].dataSource
+        oldpath = pathuptogisdir(brkLyrpath)
+        print(oldpath)
+
+        #fix all broken layers
+        mxd.findAndReplaceWorkspacePaths(oldpath, newpath)
+
+        pass
+
+
 class GetPip(object):
     """Implementation for GetPip.button (Button)"""
     def __init__(self):

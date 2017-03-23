@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 import arcpy
 import pythonaddins
+import logging
 import pandas as pd
 import subprocess
 import urllib
@@ -15,9 +16,31 @@ import datetime as dt
 import colorsys
 import comtypes
 import zipfile
+
 #from Tkinter import Tk
 #import json
 #from mod.FeaturesToGPX import *
+
+
+#logging
+# create logger
+logger = logging.getLogger('EnProTo_user_stats')
+logger.setLevel(logging.INFO)
+
+handler = logging.FileHandler(r"L:\Ablage_Mitarbeiter\Benjamin\dokumente\enproto.log")
+handler.setLevel(logging.INFO)
+
+#create formatter
+#formatter = logging.Formatter(format='%(asctime)s %(message)s', datefmt="%Y%d%m %H%M%S")
+formatter = logging.Formatter('%(asctime)s - %(levelname)s - %(message)s', "%Y%d%m %H%M%S")
+
+#add formatter to ch
+handler.setFormatter(formatter)
+
+#add ch to logger
+logger.addHandler(handler)
+
+
 
 ############################
 #helper functions
