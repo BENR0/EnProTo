@@ -89,7 +89,7 @@ class ZipShapes(object):
             make_dir(savedir)
 
             #open zip file
-            with zipfile.ZipFile(os.path.join(savedir, os.path.basename(zipfilepath) + ".zip"), "w") as myzip:
+            with zipfile.ZipFile(os.path.join(savedir, os.path.basename(zipfilepath)), "w") as myzip:
                 for shape in toclayers:
                     shpsavepath = os.path.join(savedir, arcpy.Describe(shape).name)
 
