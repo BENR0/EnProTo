@@ -39,7 +39,7 @@ class OSM(object):
         except:
             msg = pythonaddins.MessageBox("Please install the ArcGIS Editor for OSM", "Error", 0)
             print(msg)
-            raisev
+            raise
 
 
 
