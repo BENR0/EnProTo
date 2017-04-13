@@ -38,7 +38,7 @@ class NewShapeFromStandardShape(object):
         #create filename
         #construct date
         today = dt.date.today()
-        strdate = str(today.year) + str(today.month) + str(today.day)
+        strdate = date.strftime("%Y%m%d")
         print(strdate)
         #get projectname
         project = base.split("\\")[-2]
@@ -74,6 +74,8 @@ class NewShapeFromStandardShape(object):
         if savepath != None:
             print("copy features")
             #copy shape to user specified path
+            #TODO:
+            # - check if target file exists and throw message
             arcpy.CopyFeatures_management(templatepath, savepath)
             print("define projection")
             #define projection for copied shape

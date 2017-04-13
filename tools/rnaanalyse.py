@@ -71,7 +71,7 @@ class RNAanalyse(object):
         if parameters[1].hasBeenValidated:
             exemplare_field = arcpy.ListFields(parameters[1].value, "Exemplare")
             if len(exemplare_field) < 1:
-                parameters[1].setErrorMessage("No Exemplare field could be found.")
+                parameters[1].setErrorMessage("No >>Exemplare<< field could be found.")
             else:
                 parameters[1].clearMessage()
 

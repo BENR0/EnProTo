@@ -17,7 +17,7 @@ class split_lines_by_points(object):
             parameterType="Required",
             direction="Input")
 
-        wea_lyr.filter.list = ["POINT"]
+        #wea_lyr.filter.list = ["POINT"]
 
         flug_lyr = arcpy.Parameter(
             displayName="Layer with bird observations.",
@@ -26,7 +26,7 @@ class split_lines_by_points(object):
             parameterType="Required",
             direction="Input")
 
-        flug_lyr.filter.list = ["LINE"]
+        #flug_lyr.filter.list = ["LINE"]
 
         out_lyr = arcpy.Parameter(
             displayName="Output Layer",
@@ -86,14 +86,14 @@ class split_lines_by_points(object):
         hessenbool = parameters[3].valueAsText
         #threshold_scheme = parameters[3].valueAsText
 
-        split_main(lines, points)
+        split_main(lines, points, outputLayer)
 
 
         return
 
 
 
-def split_main(lines, points):
+def split_main(lines, points, output):
     ######
     #split lines at point code from http://gis.stackexchange.com/questions/101472/split-line-at-a-point-with-arcgis-10-1-basic-level-license
     line_fc = lines
@@ -101,18 +101,29 @@ def split_main(lines, points):
     point_fc_desc = arcpy.Describe(point_fc)
     in_spatial_reference = point_fc_desc.spatialReference
 
+    # clear up in_memory workspace
+    arcpy.Delete_management("in_memory")
+
     #can use CopyFeatures to write the geometries to disk when troubleshooting
     #buffered_point_fc = r"C:\GIS\Temp\test.gdb\PointsBuffered"
     #intersected_line_fc = r"C:\GIS\Temp\test.gdb\LineIntersected"
     #symmetrical_difference_line_fc = r"C:\GIS\Temp\test.gdb\LineIntersectedSymmDiff"
     wkspace = arcpy.env.workspace
-    single_part_splitted_lines = r"in_memory\SplittedLines"
-    total_splitted_lines = r"in_memory\TotalSplittedLiens"
+    single_part_splitted_lines = r"C:\Users\Benjamin.Roesner\Documents\ArcGIS\Default.gdb\SplittedLines"
+    total_splitted_lines = r"C:\Users\Benjamin.Roesner\Documents\ArcGIS\Default.gdb\TotalSplittedLines"
         #os.path.join(wkspace, "TotalSplittedLines")
-    total_splitted_lines_attributed = r"in_memory\TotalSplittedLinesAttributed"
+    #total_splitted_lines_attributed = r"in_memory\TotalSplittedLinesAttributed"
         #os.path.join(wkspace, "TotalSplittedLinesAttributed")
 
+    total_splitted_lines_attributed = r"C:\Users\Benjamin.Roesner\Documents\ArcGIS\Default.gdb\TotalSplittedLinesattributed"
     #arcpy.TruncateTable_management(total_splitted_lines)
+
+    #arcpy.CreateFeatureclass_management(r"C:\Users\Benjamin.Roesner\Documents\ArcGIS\Default.gdb", "SplittedLines")
+    arcpy.CreateFeatureclass_management(r"C:\Users\Benjamin.Roesner\Documents\ArcGIS\Default.gdb", "TotalSplittedLines")
+    #arcpy.CreateFeatureclass_management(r"C:\Users\Benjamin.Roesner\Documents\ArcGIS\Default.gdb", "TotalSplittedLinesattributed")
+
+
+
 
     #--- reference dictionaries ----------------#
     points_id_geometry_dict = {} #{pointID: pointGeometry}
@@ -155,15 +166,16 @@ def split_main(lines, points):
                 #arcpy.AddMessage(msg)
                 if not line[1] in dictionary_lines_points: #handling situations when multiple points are on the same line
                     dictionary_lines_points[line[1]] = (point[1],) #lineid is key, point ids is value (can be a tuple)
-                    arcpy.AddMessage(dictionary_lines_points[line[1]])
+                    #arcpy.AddMessage(dictionary_lines_points[line[1]])
                 else:
                     dictionary_lines_points[line[1]] = dictionary_lines_points[line[1]] + (point[1],) #making tuple for "" line: (point ids) ""
 
-    arcpy.AddMessage(dictionary_lines_points)
-
+    #arcpy.AddMessage(dictionary_lines_points)
+    nn = 0
     for key_line in dictionary_lines_points.keys(): #iterating each line in the line_fc
+        arcpy.AddMessage(nn)
         pointID = dictionary_lines_points.get(key_line) #getting what PointID have match to lineID
-        arcpy.AddMessage(pointID)
+        #arcpy.AddMessage(pointID)
 
         if not isinstance(pointID,tuple):
             input_point_geom_object = points_id_geometry_dict.get(pointID) #obtain point geometry based on pointID
@@ -185,14 +197,85 @@ def split_main(lines, points):
         arcpy.Append_management(single_part_splitted_lines,total_splitted_lines,"NO_TEST")
         arcpy.Delete_management(single_part_splitted_lines)
 
-        arcpy.SpatialJoin_analysis(target_features=total_splitted_lines,
+        nn += 1
+
+    arcpy.SpatialJoin_analysis(target_features=total_splitted_lines,
                                    join_features=line_fc,
                                    out_feature_class=total_splitted_lines_attributed,
                                    join_operation="JOIN_ONE_TO_ONE",join_type="KEEP_ALL",
                                    match_option="INTERSECT",search_radius="#",distance_field_name="#")
+
+
 
     ##TODO
     #iterate through line features that did not have any points located on them (distanceTo geometry method / select by location)
     #if there are any points located within the search distance >> move them on line and run the logic >> append to the output fc
     #if no point features are located within the search distance >> append them directly to the output fc
     return total_splitted_lines_attributed
+
+
+
+import os
+import shapefile
+from shapely.geometry import *
+
+def cut(line_file, point_file, cut_file):
+    """Cuts a line shapefile using a point shapefile."""
+    # Line shapefile we are going to cut
+    line_sf = shapefile.Reader(line_file)
+
+    # Point shapefile containing the cut points
+    point_sf = shapefile.Reader(point_file)
+
+    # Prefix for output shapefile file name
+    cut_fn = cut_file
+
+    # Create the shapefile writer for the output line shapefile
+    cut_sf = shapefile.Writer(shapefile.POLYLINE)
+
+    cut_sf.fields = list(line_sf.fields)
+
+    for sr in line_sf.shapeRecords():
+        line = LineString(sr.shape.points)
+        envelope = box(*line.bounds)
+        pt = None
+        for shape in point_sf.shapes():
+            pt2 = Point(*shape.points[0])
+            if envelope.contains(pt2):
+                if not pt:
+                    pt = pt2
+                    continue
+                if line.distance(pt2) < line.distance(pt):
+                    pt = pt2
+        cut_line = None
+        if not pt:
+            cut_line = [line]
+        else:
+            coords = list(line.coords)
+            distance = line.project(pt)
+            if distance <= 0.0 or distance >= line.length:
+                return [LineString(line)]
+            for i, p in enumerate(coords):
+                pd = line.project(Point(p))
+                if pd == distance:
+                    return [LineString(coords[:i+1]), LineString(coords[i:])]
+                if pd > distance:
+                    cp = line.interpolate(distance)
+                    return [
+                        LineString(coords[:i] + [(cp.x, cp.y)]),
+                        LineString([(cp.x, cp.y)] + coords[i:])]
+        for part in cut_line:
+            coords = list(part.coords)
+            cut_sf.line([coords])
+            cut_sf.record(*sr.record)
+
+    cut_sf.save("{}.shp".format(cut_fn))
+
+    # If the line shapefile has a cry file, copy it for the new file.
+    shp_name = os.path.splitext(line_sf.shp.name)[0]
+    line_prj = "{}.prj".format(shp_name)
+    if os.path.exists(line_prj):
+        with open(line_prj, "r") as line_crs:
+            crs = line_crs.read()
+            with open("{}.prj".format(cut_fn), "w") as cut_crs:
+                cut_crs.write(crs)
