@@ -18,7 +18,7 @@ class ChangeBrowsePath(object):
 		#last browse is same path as last path
 
 		#write registry
-		registrykey = _winreg.OpenKey(_winreg.HKEY_CURRENT_USER, r"Software\ESRI\Desktop10.3\ArcCatalog\Settings", 0,_winreg.KEY_WRITE)
+		registrykey = _winreg.OpenKey(_winreg.HKEY_CURRENT_USER, r"Software\ESRI\Desktop10.4\ArcCatalog\Settings", 0,_winreg.KEY_WRITE)
 		#write LastLocation
 		_winreg.SetValueEx(registrykey,"LastLocation",0,_winreg.REG_SZ,rootpath)
 		#write LastBrowse
