@@ -215,67 +215,67 @@ def split_main(lines, points, output):
 
 
 
-import os
-import shapefile
-from shapely.geometry import *
-
-def cut(line_file, point_file, cut_file):
-    """Cuts a line shapefile using a point shapefile."""
-    # Line shapefile we are going to cut
-    line_sf = shapefile.Reader(line_file)
-
-    # Point shapefile containing the cut points
-    point_sf = shapefile.Reader(point_file)
-
-    # Prefix for output shapefile file name
-    cut_fn = cut_file
-
-    # Create the shapefile writer for the output line shapefile
-    cut_sf = shapefile.Writer(shapefile.POLYLINE)
-
-    cut_sf.fields = list(line_sf.fields)
-
-    for sr in line_sf.shapeRecords():
-        line = LineString(sr.shape.points)
-        envelope = box(*line.bounds)
-        pt = None
-        for shape in point_sf.shapes():
-            pt2 = Point(*shape.points[0])
-            if envelope.contains(pt2):
-                if not pt:
-                    pt = pt2
-                    continue
-                if line.distance(pt2) < line.distance(pt):
-                    pt = pt2
-        cut_line = None
-        if not pt:
-            cut_line = [line]
-        else:
-            coords = list(line.coords)
-            distance = line.project(pt)
-            if distance <= 0.0 or distance >= line.length:
-                return [LineString(line)]
-            for i, p in enumerate(coords):
-                pd = line.project(Point(p))
-                if pd == distance:
-                    return [LineString(coords[:i+1]), LineString(coords[i:])]
-                if pd > distance:
-                    cp = line.interpolate(distance)
-                    return [
-                        LineString(coords[:i] + [(cp.x, cp.y)]),
-                        LineString([(cp.x, cp.y)] + coords[i:])]
-        for part in cut_line:
-            coords = list(part.coords)
-            cut_sf.line([coords])
-            cut_sf.record(*sr.record)
-
-    cut_sf.save("{}.shp".format(cut_fn))
-
-    # If the line shapefile has a cry file, copy it for the new file.
-    shp_name = os.path.splitext(line_sf.shp.name)[0]
-    line_prj = "{}.prj".format(shp_name)
-    if os.path.exists(line_prj):
-        with open(line_prj, "r") as line_crs:
-            crs = line_crs.read()
-            with open("{}.prj".format(cut_fn), "w") as cut_crs:
-                cut_crs.write(crs)
+# import os
+# import shapefile
+# from shapely.geometry import *
+#
+# def cut(line_file, point_file, cut_file):
+#     """Cuts a line shapefile using a point shapefile."""
+#     # Line shapefile we are going to cut
+#     line_sf = shapefile.Reader(line_file)
+#
+#     # Point shapefile containing the cut points
+#     point_sf = shapefile.Reader(point_file)
+#
+#     # Prefix for output shapefile file name
+#     cut_fn = cut_file
+#
+#     # Create the shapefile writer for the output line shapefile
+#     cut_sf = shapefile.Writer(shapefile.POLYLINE)
+#
+#     cut_sf.fields = list(line_sf.fields)
+#
+#     for sr in line_sf.shapeRecords():
+#         line = LineString(sr.shape.points)
+#         envelope = box(*line.bounds)
+#         pt = None
+#         for shape in point_sf.shapes():
+#             pt2 = Point(*shape.points[0])
+#             if envelope.contains(pt2):
+#                 if not pt:
+#                     pt = pt2
+#                     continue
+#                 if line.distance(pt2) < line.distance(pt):
+#                     pt = pt2
+#         cut_line = None
+#         if not pt:
+#             cut_line = [line]
+#         else:
+#             coords = list(line.coords)
+#             distance = line.project(pt)
+#             if distance <= 0.0 or distance >= line.length:
+#                 return [LineString(line)]
+#             for i, p in enumerate(coords):
+#                 pd = line.project(Point(p))
+#                 if pd == distance:
+#                     return [LineString(coords[:i+1]), LineString(coords[i:])]
+#                 if pd > distance:
+#                     cp = line.interpolate(distance)
+#                     return [
+#                         LineString(coords[:i] + [(cp.x, cp.y)]),
+#                         LineString([(cp.x, cp.y)] + coords[i:])]
+#         for part in cut_line:
+#             coords = list(part.coords)
+#             cut_sf.line([coords])
+#             cut_sf.record(*sr.record)
+#
+#     cut_sf.save("{}.shp".format(cut_fn))
+#
+#     # If the line shapefile has a cry file, copy it for the new file.
+#     shp_name = os.path.splitext(line_sf.shp.name)[0]
+#     line_prj = "{}.prj".format(shp_name)
+#     if os.path.exists(line_prj):
+#         with open(line_prj, "r") as line_crs:
+#             crs = line_crs.read()
+#             with open("{}.prj".format(cut_fn), "w") as cut_crs:
+#                 cut_crs.write(crs)
