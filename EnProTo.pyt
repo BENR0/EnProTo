@@ -23,6 +23,7 @@ from tools.pois4tomtom import POIS4TomTom
 from tools.tablefromattributes import TableFromAttributes
 from tools.blattschnittfuerfeatures import BlattschnittFuerFeatures
 from tools.split_lines_by_points import split_lines_by_points
+from tools.joinask import JoinASK
 
 class Toolbox(object):
     def __init__(self):
@@ -30,5 +31,5 @@ class Toolbox(object):
         self.alias = "EnProTo"
 
         #List of tool classes associated with this toolbox
-        self.tools = [AddDescriptionToFeatures,KartenserieToPng,BatchConvertPDFToTif,MultiPurposeBufferTool,BatchAddFieldMerge,DefinitionQueryPolygons,WEAangebot,RNAanalyse,UpdateMXDswithLayer,POIS4TomTom,CreateBttLegend,TableFromAttributes,BlattschnittFuerFeatures,split_lines_by_points]
+        self.tools = [AddDescriptionToFeatures,KartenserieToPng,BatchConvertPDFToTif,MultiPurposeBufferTool,BatchAddFieldMerge,DefinitionQueryPolygons,WEAangebot,RNAanalyse,UpdateMXDswithLayer,POIS4TomTom,CreateBttLegend,TableFromAttributes,BlattschnittFuerFeatures,split_lines_by_points,JoinASK]
 
