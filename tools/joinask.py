@@ -86,7 +86,7 @@ class JoinASK(object):
         #mdbFile = r"K:\TNL_E\Radweg\Selb\05_GIS\av_daten\04_Bestandsdaten\ASK_Selb\ASK.mdb"
         connectionString = "Driver={Microsoft Access Driver (*.mdb)};Dbq=%s" % mdbFile
         dbConnection = pyodbc.connect(connectionString)
-        sql = "select top 5 * from ask_art"
+        sql = "select * from ask_art"
         ################################################
         #cursor.execute(sql)
         #rows = cursor.fetchall()
@@ -101,13 +101,16 @@ class JoinASK(object):
         dfmdb = pd.read_sql(sql, dbConnection)
 
         mergedData = pd.merge(dfmdb, dffeatures, on = "id", how = "inner")
+        arcpy.AddMessage(mergedData)
+        #arcpy.AddMessage(pd.merge(dfmdb, dffeatures, on = "id", how = "inner"))
+
 
 
         x = np.array(np.rec.fromrecords(mergedData.values))
         names = mergedData.dtypes.index.tolist()
-        print(names)
-        x.dtype.names = tuple(names)
+        strnames = [str(i) for i in names]
+        x.dtype.names = tuple(strnames)
         #arcpy.da.NumPyArrayToTable(x, r'E:\Workspace\testData.gdb\testTable')
-        arcpy.da.NumPyArrayToFeatureClass(x, outfeatures, ("SHAPE@Y", "SHAPE@Y"), spatialRef)
+        arcpy.da.NumPyArrayToFeatureClass(x, outfeatures, ("SHAPE@X", "SHAPE@Y"), spatialRef)
 
         pass
