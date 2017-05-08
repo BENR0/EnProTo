@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 import arcpy
 import os
 import colorsys
@@ -63,11 +64,12 @@ class JoinASK(object):
         mdbFile = parameters[1].valueAsText
         outfeatures = parameters[2].valueAsText
 
-        #layer = r'K:\TNL_E\Radweg\Selb\05_GIS\av_daten\04_Bestandsdaten\ASK_Selb\ASK_PUNKTE.shp'
+        #layer = r"\\VBOXSVR\virtualbox\ASK_Wurmloh\ASK_PUNKTE.shp"
+        #mdbFile = r"\\VBOXSVR\virtualbox\ASK_wurmloh\ASK.mdb"
+        #outfeatures = r"\\VBOXSVR\virtualbox\delete\ask_join.shp"
 
-        spatialRef = arcpy.Describe(layer).spatialReference
-
-
+        #spatialRef = arcpy.Describe(layer).spatialReference
+        spatialRef = arcpy.SpatialReference(31468)
 
         features = arcpy.da.FeatureClassToNumPyArray(layer,["id", "SHAPE@X", "SHAPE@Y"])
         dffeatures = pd.DataFrame(features)
@@ -85,7 +87,7 @@ class JoinASK(object):
 
         #mdbFile = r"K:\TNL_E\Radweg\Selb\05_GIS\av_daten\04_Bestandsdaten\ASK_Selb\ASK.mdb"
         connectionString = "Driver={Microsoft Access Driver (*.mdb)};Dbq=%s" % mdbFile
-        dbConnection = pyodbc.connect(connectionString)
+        dbConnection = pyodbc.connect(connectionString, charset = "utf8")
         sql = "select * from ask_art"
         ################################################
         #cursor.execute(sql)
@@ -101,7 +103,10 @@ class JoinASK(object):
         dfmdb = pd.read_sql(sql, dbConnection)
 
         mergedData = pd.merge(dfmdb, dffeatures, on = "id", how = "inner")
-        arcpy.AddMessage(mergedData)
+        mergedData.fillna(0, inplace = True)
+        #mergedData.to_csv("test.csv", encoding = "utf-8")
+        #arcpy.AddMessage(mergedData)
+        print(mergedData)
         #arcpy.AddMessage(pd.merge(dfmdb, dffeatures, on = "id", how = "inner"))
 
 
@@ -114,3 +119,11 @@ class JoinASK(object):
         arcpy.da.NumPyArrayToFeatureClass(x, outfeatures, ("SHAPE@X", "SHAPE@Y"), spatialRef)
 
         pass
+
+
+if __name__ == "__main__":
+
+    tool = JoinASK()
+    tool.execute(tool.getParameterInfo(), None)
+
+
