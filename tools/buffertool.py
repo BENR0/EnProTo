@@ -58,10 +58,10 @@ class MultiPurposeBufferTool(object):
         mxd = arcpy.mapping.MapDocument("current")
         df = arcpy.mapping.ListDataFrames(mxd)[0]
 		
-	in_features = parameters[0].valueAsText
+    	in_features = parameters[0].valueAsText
         in_features = in_features.split(";")
-	out_features = parameters[1].valueAsText
-	buffer_ranges = parameters[2].valueAsText
+    	out_features = parameters[1].valueAsText
+    	buffer_ranges = parameters[2].valueAsText
         buffer_ranges = buffer_ranges.split(";")
         
         #merge layers if in_features list > 1

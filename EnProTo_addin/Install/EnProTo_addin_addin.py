@@ -1,9 +1,11 @@
+# -*- coding: utf-8 -*-
 import arcpy
 import pythonaddins
 import subprocess
 import os
 import _winreg
 import re
+import csv
 
 class ChangeBrowsePath(object):
     """Implementation for ChangeBrowsePath.extension2 (Extension)"""
@@ -118,10 +120,9 @@ class CalculateArea(object):
 class NewShapeFromStandardShape(object):
     """Implementation for NewShapeFromStandardShape.combobox (ComboBox)"""
     def __init__(self):
-        self.items = ["BTT_poly", "BTT_point", "RNA_Voegel", "Rastvoegel", "Horste"]
-        self.editable = False
+        self.editable = True
         self.enabled = True
-        self.dropdownWidth = 'WWWWWW'
+        self.dropdownWidth = 'WWWWWWW'
         self.width = ''
     def onSelChange(self, selection):
         #standard shapefile path
@@ -138,7 +139,7 @@ class NewShapeFromStandardShape(object):
         #get first data frame of map document
         df = arcpy.mapping.ListDataFrames(mxd)[0]
         #get coordinate system of data frame
-        df_coord = df.spatialReference
+        df_coord = df.spatialReference.PCSCode
 
         #get directory of map document
         mxdpath = mxd.filePath
@@ -146,7 +147,7 @@ class NewShapeFromStandardShape(object):
         startpath = re.split('05_GIS',mxdpath)[0] + "05_GIS/av_daten"
 
         #get path where to save shp from user
-        savepath = pythonaddins.SaveDialog("Speichern unter", "name dataset", startpath)
+        savepath = pythonaddins.SaveDialog("Speichern unter", "name dataset", startpath, "Shapefile (*.shp)")
         
         if selection == "BTT_poly":
             #create full path of template shape
@@ -160,21 +161,101 @@ class NewShapeFromStandardShape(object):
         elif selection == "Horste":
             templatepath = os.path.join(templatedir,name_horste)
         else:
-            notemplate = pythonaddins.MessageBox("No template file found!")
+            notemplate = pythonaddins.MessageBox("No template file found!", "Error", 1)
             print(notemplate)
             #templatepath = ""            #present option to create new shape with specified fields?
 
         #copy shape to user specified path
         arcpy.CopyFeatures_management(templatepath, savepath)
         #define projection for copied shape
-        arcpy.DefineProjection_management(savepath, df_coord)
-        #add layer to document
-        newlayer = arcpy.mapping.Layer(savepath)
-        arcpy.mapping.AddLayer(df, newlayer)
+        #create full path with extension first
+        filepath = savepath + ".shp"
+        arcpy.DefineProjection_management(filepath, df_coord)
+        #add layer to document => not needed since define projection already adds shape to project
+        #newlayer = arcpy.mapping.Layer(filepath)
+        #arcpy.mapping.AddLayer(df, newlayer)
         pass
     def onEditChange(self, text):
         pass
     def onFocus(self, focused):
+        self.items = ["BTT_poly", "BTT_point", "RNA_Voegel", "Rastvoegel", "Horste"]
+        pass
+    def onEnter(self):
+        pass
+    def refresh(self):
+        pass
+
+
+class ChangePlankopf(object):
+    """Implementation for ChangePlankopf.combobox (ComboBox)"""
+    def __init__(self):
+        self.editable = True
+        self.enabled = True
+        self.dropdownWidth = 'WWWWWWWWWWWWWWWWWW'
+        self.width = ''
+    def onSelChange(self, selection):
+        mxd = arcpy.mapping.MapDocument("CURRENT")
+        #get text and image boxes of mxd
+        try:
+            txt_comp_name = arcpy.mapping.ListLayoutElements(mxd,"TEXT_ELEMENT","comp_name")[0]
+            txt_comp_address = arcpy.mapping.ListLayoutElements(mxd,"TEXT_ELEMENT","comp_adress")[0]
+            txt_zeichner = arcpy.mapping.ListLayoutElements(mxd,"TEXT_ELEMENT","zeichner")[0]
+            img_logo = arcpy.mapping.ListLayoutElements(mxd,"PICTURE_ELEMENT","comp_logo")[0]
+        except:
+            element.error = pythonaddins.MessageBox("Check if text and graphic elements exist.",
+                    "Error", 1)
+            print(element.error)
+        
+        auftr_csv = csv.DictReader(open(r"V:\Vorlagen_CAD_GIS\GIS\Toolboxes\auftraggeber.csv","r"))
+        logodir = "V:\Vorlagen_Logo\extern"
+
+        #populate variable with appropiate auftraggeber data from dictionary
+        for row in auftr_csv:
+            print(row["name"])
+            if selection == row["name"]:
+                comp_name = row["name"]
+                comp_address = row["adresse"] + "\r\n" + row["plz"] + " " + row["ort"]
+                img_src = os.path.join(logodir,row["src"])
+        
+        #zeichnerl = ["zeichner1", "zeichner1", "zeichner13", u"B. Sc. Benjamin Rösner"]
+        zeichnerl = [u"Dipl. Geo. Julia Krimkowski",u"M.Sc. Geoökol. Isgard Rudloff",u"M.Sc. Landsch.-Ökol. Andreas Menzel",u"B.Sc. Geo. Benjamin Rösner",u"Dipl. Geo. Thorsten Knies",u"Dipl. Geo. Sandra Kiessling"]
+        #get username from system and set zeichner variable acordingly
+        user = os.environ.get("USERNAME")
+        if user == "Julia.Krimkowski":
+            zeichner = zeichnerl[0]
+        elif user == "Isgard.Rudloff":
+            zeichner = zeichnerl[1]
+        elif user == "Andreas.Menzel":
+            zeichner == zeichnerl[2]
+        elif user == "Benjamin.Roesner":
+            zeichner = zeichnerl[3]
+        elif user == "Thorsten.Knies":
+            zeichner = zeichnerl[4]
+        elif user == "Sandra.Kiessling":
+            zeichner = zeichnerl[5]
+        else:
+            zeichner = txt_zeichner.text
+            
+        img_logo.sourceImage = img_src
+        
+        txt_comp_name.text = comp_name
+        txt_comp_address.text = comp_address
+        txt_zeichner.text = zeichner
+        pass
+    def onFocus(self, focused):
+        if focused:
+            #read auftraggeber liste as dictionary
+            auftr_csv = csv.DictReader(open(r"V:\Vorlagen_CAD_GIS\GIS\Toolboxes\auftraggeber.csv","r"))
+        
+            #init item list
+            self.items = []
+            #populate variable with appropiate auftraggeber data from dictionary
+            for row in auftr_csv:
+                self.items.append(row["name"])
+                    #parameters[1].value = row["adresse"] + "\r\n" + row["plz"] + " " + row["ort"]
+                    #parameters[2].value = "V:\\Vorlagen_Logo\\extern\\" + row["src"]
+        pass
+    def onEditChange(self, text):
         pass
     def onEnter(self):
         pass

@@ -14,6 +14,7 @@ from tools.legen_waitforit_dary import Legen_WaitForIt_Dary
 from tools.kartenserie_to_png import KartenserieToPng
 from tools.batchconvertpdftotif import BatchConvertPDFToTif
 from tools.buffertool import MultiPurposeBufferTool
+from tools.batchaddfieldmerge import BatchAddFieldMerge
 
 #groupannosbypf not found
 
@@ -24,5 +25,5 @@ class Toolbox(object):
 
         #List of tool classes associated with this toolbox
         #self.tools = [AddDescriptionToFeatures,MultiBufferSpeciesExport,PlankopfWizard,GroupAnnosByPF,Legen_WaitForIt_Dary,PolylineToPolygon,KartenserieToPng]
-        self.tools = [AddDescriptionToFeatures,MultiBufferSpeciesExport,KartenserieToPng,BatchConvertPDFToTif,PlankopfWizard,MultiPurposeBufferTool]
+        self.tools = [AddDescriptionToFeatures,MultiBufferSpeciesExport,KartenserieToPng,BatchConvertPDFToTif,PlankopfWizard,MultiPurposeBufferTool,BatchAddFieldMerge]
 

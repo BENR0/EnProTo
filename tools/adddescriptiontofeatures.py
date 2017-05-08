@@ -47,7 +47,7 @@ class AddDescriptionToFeatures(object):
 			parameterType="Optional",
 			direction="Input")
             
-        selected_fields.columns = (["GPString", "Field"])
+        #selected_fields.columns = (["GPString", "Field"])
 	
 		parameters = [in_features,description_field,sorting_field, selected_fields]
         
