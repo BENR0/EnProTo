@@ -68,8 +68,8 @@ class JoinASK(object):
         #mdbFile = r"\\VBOXSVR\virtualbox\ASK_wurmloh\ASK.mdb"
         #outfeatures = r"\\VBOXSVR\virtualbox\delete\ask_join.shp"
 
-        #spatialRef = arcpy.Describe(layer).spatialReference
-        spatialRef = arcpy.SpatialReference(31468)
+        spatialRef = arcpy.Describe(layer).spatialReference
+        #spatialRef = arcpy.SpatialReference(31468)
 
         features = arcpy.da.FeatureClassToNumPyArray(layer,["id", "SHAPE@X", "SHAPE@Y"])
         dffeatures = pd.DataFrame(features)
