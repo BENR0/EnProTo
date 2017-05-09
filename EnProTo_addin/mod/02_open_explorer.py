@@ -5,6 +5,11 @@ class OpenPathForSelectedLayer(object):
         self.checked = False
     def onClick(self):
         import os
+        import logging
+
+        #usage logging
+        user = os.environ.get("USERNAME")
+        logging.info('%s, %s', "Open path for layer", user)
 
         def get_geodatabase_path(input_table, toclayer):
             '''Return the Geodatabase path from the input table or feature class.
@@ -33,6 +38,12 @@ class OpenPathForCurrentMXD(object):
         self.enabled = True
         self.checked = False
     def onClick(self):
+        import logging
+
+        #usage logging
+        user = os.environ.get("USERNAME")
+        logger.info('%s, %s', "Open path for mxd", user)
+
         mxd = arcpy.mapping.MapDocument("CURRENT")
         mxdpath = mxd.filePath
        
@@ -45,6 +56,13 @@ class CopyPathToClipboard(object):
         self.enabled = True
         self.checked = False
     def onClick(self):
+        import logging
+
+        #usage logging
+        user = os.environ.get("USERNAME")
+        logging.info('%s, %s', "Copy path to clipboard", user)
+
+
         mxd = arcpy.mapping.MapDocument("CURRENT")
         toclayer = pythonaddins.GetSelectedTOCLayerOrDataFrame()
         desc = arcpy.Describe(toclayer)

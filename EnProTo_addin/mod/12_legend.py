@@ -5,6 +5,13 @@ class TB(object):
         self.checked = False
     @property
     def onClick(self):
+        import logging
+
+        #usage logging
+        user = os.environ.get("USERNAME")
+        logger.info('%s, %s', "Legend", user)
+
+
         #positioncounter
         iPosition = [10.0, 25.0]
         #distances of and between elements

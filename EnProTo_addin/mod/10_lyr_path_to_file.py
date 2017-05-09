@@ -4,6 +4,13 @@ class WritePathOfLayersToFile(object):
         self.enabled = True
         self.checked = False
     def onClick(self):
+        import logging
+
+        #usage logging
+        user = os.environ.get("USERNAME")
+        logger.info('%s, %s', "Layer paths to file", user)
+
+
         mxd = arcpy.mapping.MapDocument("CURRENT")
 
         lyrs = arcpy.mapping.ListLayers(mxd)

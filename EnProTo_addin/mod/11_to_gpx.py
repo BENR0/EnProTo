@@ -4,6 +4,13 @@ class ToGPX(object):
         self.enabled = True
         self.checked = False
     def onClick(self):
+        import logging
+
+        #usage logging
+        user = os.environ.get("USERNAME")
+        logger.info('%s, %s', "To GPX", user)
+
+
         '''
         Tool Name:  Features to GPX
         Source Name: FeaturesToGPX.py

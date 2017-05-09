@@ -10,6 +10,11 @@ class ZipShapes(object):
         import re
         import zipfile
         import datetime as dt
+        import logging
+
+        #usage logging
+        user = os.environ.get("USERNAME")
+        logger.info('%s, %s', "Zip shapes", user)
 
         #local vars
 
@@ -84,7 +89,7 @@ class ZipShapes(object):
             make_dir(savedir)
 
             #open zip file
-            with zipfile.ZipFile(os.path.join(savedir, os.path.basename(zipfilepath) + ".zip"), "w") as myzip:
+            with zipfile.ZipFile(os.path.join(savedir, os.path.basename(zipfilepath)), "w") as myzip:
                 for shape in toclayers:
                     shpsavepath = os.path.join(savedir, arcpy.Describe(shape).name)
 

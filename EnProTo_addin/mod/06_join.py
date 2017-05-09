@@ -4,6 +4,11 @@ class Join(object):
         self.enabled = True
         self.checked = False
     def onClick(self):
+        import logging
+
+        #usage logging
+        user = os.environ.get("USERNAME")
+        logger.info('%s, %s', "Join", user)
           
         def create_field_name(fc, new_field):  
             '''Return a valid field name that does not exist in fc and  

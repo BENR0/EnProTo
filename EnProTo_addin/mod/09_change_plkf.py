@@ -6,6 +6,13 @@ class ChangePlankopf(object):
         self.dropdownWidth = 'WWWWWWWWWWWWWWWWWW'
         self.width = ''
     def onSelChange(self, selection):
+
+        import logging
+
+        #usage logging
+        user = os.environ.get("USERNAME")
+        logger.info('%s, %s', "Change Plankopf", user)
+
         mxd = arcpy.mapping.MapDocument("CURRENT")
         #get text and image boxes of mxd
         try:

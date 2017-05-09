@@ -4,6 +4,12 @@ class RepairBrokenLayers(object):
         self.enabled = True
         self.checked = False
     def onClick(self):
+        import logging
+
+        #usage logging
+        user = os.environ.get("USERNAME")
+        logging.info('%s, %s', "Repair broken layers", user)
+
         #function to split given path up to gis folder of project
         def pathuptogisdir(path):
             #split path by GIS directory, keep first part and add GIS folder again

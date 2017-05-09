@@ -1,87 +1,8 @@
-# -*- coding: utf-8 -*-
 import arcpy
-import pythonaddins
-import logging
-import pandas as pd
-import subprocess
-import urllib
 import os
-import glob
-import _winreg
-import re
-import pyperclip
-import csv
-import time
-import datetime as dt
-import colorsys
 import comtypes
-import zipfile
-
-#from Tkinter import Tk
-#import json
-#from mod.FeaturesToGPX import *
-
-
-#logging
-# create logger
-logger = logging.getLogger('EnProTo_user_stats')
-logger.setLevel(logging.INFO)
-
-handler = logging.FileHandler(r"L:\Ablage_Mitarbeiter\Benjamin\dokumente\enproto.log")
-handler.setLevel(logging.INFO)
-
-#create formatter
-#formatter = logging.Formatter(format='%(asctime)s %(message)s', datefmt="%Y%d%m %H%M%S")
-formatter = logging.Formatter('%(asctime)s - %(levelname)s - %(message)s', "%Y%d%m %H%M%S")
-
-#add formatter to ch
-handler.setFormatter(formatter)
-
-#add ch to logger
-logger.addHandler(handler)
-
-
-
-############################
-#helper functions
-############################
-def ListLocks(shp_path):
-    pattern = shp_path + "*.sr.lock"
-    matches = glob.glob(pattern)
-
-    nodeDict = {"HUNB20": "Isgard", "HUNB10": "Benjamin", "HUPC28": "Maren", "HUPC24": "Yvonne", "HUPC30": "Andi", "HUPC07": "Jann"}
-    lockslist = []
-    locks = ""
-    for item in matches:
-        split_pattern = "shp."
-        tmp = re.split(split_pattern, item)[1]
-        tmp = re.split(".[0-9]+.[0-9]+.sr.lock", tmp)[0]
-        print(tmp)
-        node_name = os.environ["COMPUTERNAME"]
-        if tmp == node_name:
-            tmp = tmp + " (Eigener Rechner)"
-
-        lockslist.append(tmp)
-        ##locks += tmp + nodeDict[tmp] + "\n"
-        locks += tmp + "\n"
-
-    return locks, lockslist
-
-# Snippets.py
-# ************************************************
-# Updated for ArcGIS 10.3
-# ************************************************
-# Requires installation of the comtypes package
-# Available at: http://sourceforge.net/projects/comtypes/
-# Once comtypes is installed, the following modifications
-# need to be made for compatibility with ArcGIS 10.2:
-# 1) Delete automation.pyc, automation.pyo, safearray.pyc, safearray.pyo
-# 2) Edit automation.py
-# 3) Add the following entry to the _ctype_to_vartype dictionary (line 794):
-#    POINTER(BSTR): VT_BYREF|VT_BSTR,
-# ************************************************
-
-#**** Initialization ****
+import colorsys
+from fieldexistsfunction import fieldExists
 
 def GetLibPath():
     """Return location of ArcGIS type libraries as string"""
@@ -274,7 +195,7 @@ def AddRectangleElement(position = (10.0, 25.0), bgcolor = (255,0,0), bgtranspar
     pFillSymbol.Color = pbgColor
     pFillSymbol.Outline = pLineSymbol
     #pFillSymbol.Style = esriDisplay.esriSimpleFillStyle.esriSFSSolid
-    
+
     #create text box object and set font and color
     #pFillShapeElement = NewObj(esriDisplay.FillShapeElement, esriDisplay.IFillShapeElement)
     #pFillShapeElement.Symbol = pFillSymbol
@@ -288,10 +209,10 @@ def AddRectangleElement(position = (10.0, 25.0), bgcolor = (255,0,0), bgtranspar
     pElement = CType(pRectangleElement, esriCarto.IElementProperties3)
     #tag element with name
     pElement.Name = tag
-    
+
     pGC = CType(pMap, esriCarto.IGraphicsContainer)
     pGC.AddElement(pElement, 0)
-    
+
     pGCSel = CType(pMap, esriCarto.IGraphicsContainerSelect)
     pGCSel.SelectElement(pElement)
     iOpt = esriCarto.esriViewGraphics + \
@@ -360,7 +281,7 @@ def AddTextElement(bStandalone = False, position = (10.0, 25.0), txtfont = "Aria
     pColor.Red = txtcolor[0]
     pColor.Blue = txtcolor[1]
     pColor.Green = txtcolor[2]
-    
+
 	#create color object for background
     if bStandalone:
         pbgUnk = pFact.Create(CLSID(esriDisplay.RgbColor))
@@ -375,7 +296,7 @@ def AddTextElement(bStandalone = False, position = (10.0, 25.0), txtfont = "Aria
     pFillSymbol = NewObj(esriDisplay.SimpleFillSymbol, esriDisplay.ISimpleFillSymbol)
     pFillSymbol.Color = pbgColor
     #pFillSymbol.Style = esriDisplay.esriSimpleFillStyle.esriSFSSolid
-    
+
     #create font face object
     if bStandalone:
         pUnk = pFact.Create(CLSID(stdole.StdFont))
@@ -384,7 +305,7 @@ def AddTextElement(bStandalone = False, position = (10.0, 25.0), txtfont = "Aria
         pFontDisp = NewObj(stdole.StdFont, stdole.IFontDisp)
     pFontDisp.Name = txtfont
     pFontDisp.Bold = txtbold
-    
+
     #create text box object and set font and color
     if bStandalone:
         pUnk = pFact.Create(CLSID(esriDisplay.TextSymbol))
@@ -395,7 +316,7 @@ def AddTextElement(bStandalone = False, position = (10.0, 25.0), txtfont = "Aria
     pTextSymbol.Color = pColor
     pTextSymbol.Size = txtsize
     pTextSymbol.HorizontalAlignment = esriDisplay.esriTextHorizontalAlignment(0)
-    
+
     #create background object
     if bg:
         if bStandalone:
@@ -410,7 +331,7 @@ def AddTextElement(bStandalone = False, position = (10.0, 25.0), txtfont = "Aria
         pFormattedTS = CType(pTextSymbol, esriDisplay.IFormattedTextSymbol)
         pFormattedTS.Background = pTextBackground
 
-   
+
     # Create text element and add it to map
     if bStandalone:
         pUnk = pFact.Create(CLSID(esriCarto.TextElement))
@@ -424,10 +345,10 @@ def AddTextElement(bStandalone = False, position = (10.0, 25.0), txtfont = "Aria
     pElement = CType(pTextElement, esriCarto.IElementProperties3)
     #tag element with name
     pElement.Name = tag
-    
+
     pGC = CType(pMap, esriCarto.IGraphicsContainer)
     pGC.AddElement(pElement, 0)
-    
+
     pGCSel = CType(pMap, esriCarto.IGraphicsContainerSelect)
     pGCSel.SelectElement(pElement)
     iOpt = esriCarto.esriViewGraphics + \
@@ -441,9 +362,3 @@ def AddTextElement(bStandalone = False, position = (10.0, 25.0), txtfont = "Aria
     #pEnv = NewObj(esriGeometry.Envelope, esriGeometry.IEnvelope)
     #pElement.QueryBounds(pSD, pEnv)
     #print "Width = ", pEnv.Width
-    
-
-#############################
-#definitions for buttons start
-#############################
-

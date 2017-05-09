@@ -4,6 +4,11 @@ class ListAllLocksForLayers(object):
         self.enabled = True
         self.checked = False
     def onClick(self):
+        import logging
+
+        #usage logging
+        user = os.environ.get("USERNAME")
+        logger.info('%s, %s', "List locks", user)
 
         mxd = arcpy.mapping.MapDocument("CURRENT")
 
