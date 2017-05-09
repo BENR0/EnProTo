@@ -10,3 +10,6 @@ EnProTo.pyt.xml
 EnProTo_addin/Images/Thumbs.db
 .idea/.name
 .idea/EnProTo_dev.iml
+EnProTo_addin/Install/EnProTo_addin_addin.py
+EnProTo_addin/get_pip.py
+qgis_scripts/__init__.py

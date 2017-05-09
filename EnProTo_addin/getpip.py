@@ -34,6 +34,12 @@ try:
 except ImportError, e:
     pip.main(["install", "pyperclip"])
     pass
+
+try:
+    import pyodbc
+except ImportError, e:
+    pip.main(["install", "pyodbc"])
+    pass
     
 #subprocess.call([r"V:\Vorlagen_Software\toolbox_modules\ArcGIS_Editor_OSM_10_3Desktop\ArcGISEditor10_3\setup.exe"])
 
