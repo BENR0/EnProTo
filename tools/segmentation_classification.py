@@ -1,17 +1,32 @@
 import arcpy
+import numpy as np
+
+import os
+
+# Check out the ArcGIS Spatial Analyst extension license
+arcpy.CheckOutExtension("Spatial")
+
+
+class SOL(object):
+
+    wsdl = "http://modwebsrv.modaps.eosdis.nasa.gov/axis2/services/MODAPSservices?wsdl"
+
+
+    def __init__(self, ):
+        self.product = product
+
 
 
 # Set local variables
-files = r"L:/Ablage_Mitarbeiter/Benjamin/z_tmp/05_GIS/av_daten/sol_classifizierung/test_tiles"
+filesdir = r"L:/Ablage_Mitarbeiter/Benjamin/z_tmp/05_GIS/av_daten/sol_classifizierung/test_tiles"
+files += [f for f in os.listdir(filesdir) if f.endswith(".tif")]
 
-inRaster = "c:/test/moncton.tif"
+inRaster = os.path.join(filesdir, files[0])
 spectral_detail = "14.5"
 spatial_detail = "10"
 min_segment_size = "20"
 band_indexes = "4 3 2"
 
-# Check out the ArcGIS Spatial Analyst extension license
-arcpy.CheckOutExtension("Spatial")
 
 inRGB = "inrgb raster"
 inIR = "inir raster"
