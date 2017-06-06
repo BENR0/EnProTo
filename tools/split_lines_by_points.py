@@ -10,8 +10,8 @@ class split_lines_by_points(object):
         self.canRunInBackground = False
 
     def getParameterInfo(self):
-        wea_lyr = arcpy.Parameter(
-            displayName="Layer with WEA points.",
+        points_lyr = arcpy.Parameter(
+            displayName="Layer with points.",
             name="wea_lyr",
             datatype="GPFeatureLayer",
             parameterType="Required",
@@ -19,8 +19,8 @@ class split_lines_by_points(object):
 
         #wea_lyr.filter.list = ["POINT"]
 
-        flug_lyr = arcpy.Parameter(
-            displayName="Layer with bird observations.",
+        lines_lyr = arcpy.Parameter(
+            displayName="Layer with lines.",
             name="flug_lyr",
             datatype="GPFeatureLayer",
             parameterType="Required",
@@ -35,26 +35,7 @@ class split_lines_by_points(object):
             parameterType="Required",
             direction="Output")
 
-        hessen_chkbox = arcpy.Parameter(
-                displayName="Calculate RNA for Hessen? (If not checked Baden-Wuerttemberg)",
-                name="hessen_bool",
-                datatype="GPBoolean",
-                parameterType="optional",
-                direction="Input")
-
-
-        hessen_chkbox.value = "True"
-
-        # threshold70_bool = arcpy.Parameter(
-            # displayName="Use 70/20% (three categories) instead of 75/25% (two categories) threshold rule.",
-            # name="threshold70_bool",
-            # datatype="GPBoolean",
-            # parameterType="Optional",
-            # direction="Input")
-
-        #threshold70_bool.value = "False"
-
-        parameters = [wea_lyr, flug_lyr, out_lyr, hessen_chkbox]
+        parameters = [points_lyr, lines_lyr, out_lyr]
 
         return parameters
 
@@ -80,14 +61,11 @@ class split_lines_by_points(object):
     def execute(self, parameters, messages):
 
         #Input
-        points= parameters[0].valueAsText
+        points = parameters[0].valueAsText
         lines = parameters[1].valueAsText
         outputLayer = parameters[2].valueAsText
-        hessenbool = parameters[3].valueAsText
-        #threshold_scheme = parameters[3].valueAsText
 
         split_main(lines, points, outputLayer)
-
 
         return
 
@@ -105,13 +83,14 @@ def split_main(lines, points, output):
     arcpy.Delete_management("in_memory")
 
     #can use CopyFeatures to write the geometries to disk when troubleshooting
-    #buffered_point_fc = r"C:\GIS\Temp\test.gdb\PointsBuffered"
-    #intersected_line_fc = r"C:\GIS\Temp\test.gdb\LineIntersected"
-    #symmetrical_difference_line_fc = r"C:\GIS\Temp\test.gdb\LineIntersectedSymmDiff"
+    buffered_point_fc = r"C:\Users\Benjamin.Roesner\Documents\ArcGIS\Default.gdb\PointsBuffered"
+    intersected_line_fc = r"C:\Users\Benjamin.Roesner\Documents\ArcGIS\Default.gdb\LineIntersected"
+    symmetrical_difference_line_fc = r"C:\Users\Benjamin.Roesner\Documents\ArcGIS\Default.gdb\LineIntersectedSymmDiff"
     wkspace = arcpy.env.workspace
     single_part_splitted_lines = r"C:\Users\Benjamin.Roesner\Documents\ArcGIS\Default.gdb\SplittedLines"
     total_splitted_lines = r"C:\Users\Benjamin.Roesner\Documents\ArcGIS\Default.gdb\TotalSplittedLines"
         #os.path.join(wkspace, "TotalSplittedLines")
+
     #total_splitted_lines_attributed = r"in_memory\TotalSplittedLinesAttributed"
         #os.path.join(wkspace, "TotalSplittedLinesAttributed")
 

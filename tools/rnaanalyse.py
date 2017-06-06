@@ -177,6 +177,10 @@ def rna_main(layer, flugLayer, outputLayer, hessenbool):
     if str(df_coord) == "5653" or str(df_coord) == "25833":
         projection = 31468
         templateExtent = templateExtent.projectAs("31468", gt)
+    else:
+        arcpy.AddMessage("""Please choose one of the 25*** UTM or 31*** GK Coordinatesystems for the Data
+                          Frame and the WEA Points file. The current coordinate system is: {}""". format(str(df_coord)))
+
 
     extentXMin = templateExtent.XMin - uraum
     extentYMin = templateExtent.YMin - uraum
