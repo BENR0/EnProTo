@@ -141,6 +141,8 @@ class OSM(object):
         );"""
 
         ###### Straßennetz
+        #tag documentation
+        #http://wiki.openstreetmap.org/wiki/Key:highway
         qHighway = """
         (
           way["highway"]{0};
