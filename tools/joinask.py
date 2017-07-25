@@ -60,23 +60,17 @@ class JoinASK(object):
 
     def execute(self, parameters, messages):
 
-        #layer = parameters[0].valueAsText
-        #mdbFile = parameters[1].valueAsText
-        #outfeatures = parameters[2].valueAsText
+        layer = parameters[0].valueAsText
+        mdbFile = parameters[1].valueAsText
+        outfeatures = parameters[2].valueAsText
 
         #layer = r"\\VBOXSVR\virtualbox\ASK_Wurmloh\ASK_PUNKTE.shp"
         #mdbFile = r"\\VBOXSVR\virtualbox\ASK_wurmloh\ASK.mdb"
         #outfeatures = r"\\VBOXSVR\virtualbox\delete\ask_join.shp"
 
-        layer = r"K:\TNL_E\Radweg\Selb\05_GIS\av_daten\04_Bestandsdaten\ASK_Selb\ASK_PUNKTE.shp"
-        mdbFile = r"K:\TNL_E\Radweg\Selb\05_GIS\av_daten\04_Bestandsdaten\ASK_Selb\ASK.mdb"
-        #outfeatures = r"\\VBOXSVR\virtualbox\delete\ask_join.shp"
+        #spatialRef = arcpy.Describe(layer).spatialReference
+        spatialRef = arcpy.SpatialReference(31468)
 
-        spatialRef = arcpy.Describe(layer).spatialReference
-        #spatialRef = arcpy.SpatialReference(31468)
-
-        #use SHAPE keyword for whole geometry
-        #features = arcpy.da.FeatureClassToNumPyArray(layer, ["id", "SHAPE@"])
         features = arcpy.da.FeatureClassToNumPyArray(layer,["id", "SHAPE@X", "SHAPE@Y"])
         dffeatures = pd.DataFrame(features)
 
@@ -111,24 +105,18 @@ class JoinASK(object):
         mergedData = pd.merge(dfmdb, dffeatures, on = "id", how = "inner")
         mergedData.fillna(0, inplace = True)
         #mergedData.to_csv("test.csv", encoding = "utf-8")
+        #arcpy.AddMessage(mergedData)
+        print(mergedData)
         #arcpy.AddMessage(pd.merge(dfmdb, dffeatures, on = "id", how = "inner"))
 
 
-        print(mergedData.dtypes)
-        #dtyp = np.dtype(list(zip(mergedData.dtypes.index, mergedData.dtypes)))
-        #print(dtyp)
-        #tarr = [tuple(i) for i in mergedData.as_matrix()]
-       # print(tarr)
-        #x = np.array(tarr, dtyp)
 
-
-        #x = np.array(np.rec.fromrecords(mergedData.values))
-
-        #names = mergedData.dtypes.index.tolist()
-        #strnames = [str(i) for i in names]
-        #x.dtype.names = tuple(strnames)
+        x = np.array(np.rec.fromrecords(mergedData.values))
+        names = mergedData.dtypes.index.tolist()
+        strnames = [str(i) for i in names]
+        x.dtype.names = tuple(strnames)
         #arcpy.da.NumPyArrayToTable(x, r'E:\Workspace\testData.gdb\testTable')
-        #arcpy.da.NumPyArrayToFeatureClass(x, outfeatures, ("SHAPE@X", "SHAPE@Y"), spatialRef)
+        arcpy.da.NumPyArrayToFeatureClass(x, outfeatures, ("SHAPE@X", "SHAPE@Y"), spatialRef)
 
         pass
 
@@ -137,9 +125,5 @@ if __name__ == "__main__":
 
     tool = JoinASK()
     tool.execute(tool.getParameterInfo(), None)
-
-    raw_input("Press Enter to close")
-
-
 
 
