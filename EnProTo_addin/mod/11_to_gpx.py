@@ -211,7 +211,8 @@ class ToGPX(object):
         startpath = base + "05_GIS/av_daten"
 
         inputFC = pythonaddins.GetSelectedTOCLayerOrDataFrame()
-        outGPX = pythonaddins.SaveDialog("Speichere GPX", "GPS.gpx", startpath, "", "GPX (*.gpx)")
+        #outGPX = pythonaddins.SaveDialog("Speichere GPX", "GPS.gpx", startpath, "", "GPX (*.gpx)")
+        outGPX = pythonaddins.SaveDialog("Speichere GPX", "GPS.gpx", startpath, "", "")
         zerodate = False
         pretty = False
 

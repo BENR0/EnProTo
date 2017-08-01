@@ -14,7 +14,7 @@ class NewShapeFromStandardShape(object):
 
 
         #standard shapefile path
-        templatedir = "V:\Vorlagen_CAD_GIS\GIS\Shape_Standard"
+        templatedir = r"V:\Vorlagen_CAD_GIS\GIS\Shape_Standard"
         #file names of template shapes
         name_btt_poly = "Biotoptyp_PNL_Projektnummer.shp"
         name_btt_point = "Biotoptyp_Punkte_Projektnummer_PNL.shp"
