@@ -17,9 +17,15 @@ class RenameLayers(object):
         layers = arcpy.mapping.ListLayers(mxd)
 
         for lyr in layers:
-            if not lyr.isGroupLayer:
+            if lyr.isFeatureLayer:
+                #lyrpath = arcpy.Describe(lyr).path
+                #if [any(ext) for ext in ('.gdb', '.mdb', '.sde') if ext in os.path.splitext(lyrpath)]:
+                #    continue
+                #elif not lyr.isGroupLayer:
                 lyrname = os.path.basename(lyr.dataSource).split(".")[0]
                 lyr.name = lyrname
+
+        arcpy.RefreshTOC()
 
         pass
 
