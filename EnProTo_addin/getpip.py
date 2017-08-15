@@ -41,6 +41,6 @@ except ImportError, e:
     pip.main(["install", "pyodbc"])
     pass
     
-#subprocess.call([r"V:\Vorlagen_Software\toolbox_modules\ArcGIS_Editor_OSM_10_3Desktop\ArcGISEditor10_3\setup.exe"])
+subprocess.call([r"V:\Vorlagen_Software\toolbox_modules\ArcGIS_Editor_OSM_10_3Desktop\ArcGISEditor10_4\setup.exe"])
 
-#raw_input("Press Enter to close")
+raw_input("Press Enter to close")
