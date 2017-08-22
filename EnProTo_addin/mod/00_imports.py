@@ -27,7 +27,9 @@ import zipfile
 logger = logging.getLogger('EnProTo_user_stats')
 logger.setLevel(logging.INFO)
 
-handler = logging.FileHandler(r"L:\Ablage_Mitarbeiter\Benjamin\dokumente\enproto.log")
+
+user = os.environ.get("USERNAME")
+handler = logging.FileHandler(r"L:\Ablage_Mitarbeiter\Benjamin\dokumente\enproto_" + user + ".log")
 handler.setLevel(logging.INFO)
 
 #create formatter
