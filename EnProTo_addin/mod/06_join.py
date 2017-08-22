@@ -8,7 +8,7 @@ class Join(object):
 
         #usage logging
         log_use(str(self.__class__.__name__))
-          
+
         def create_field_name(fc, new_field):  
             '''Return a valid field name that does not exist in fc and  
             that is based on new_field.  

@@ -12,6 +12,7 @@ class ChangePlankopf(object):
         #usage logging
         log_use(str(self.__class__.__name__))
 
+
         mxd = arcpy.mapping.MapDocument("CURRENT")
         #get text and image boxes of mxd
         try:

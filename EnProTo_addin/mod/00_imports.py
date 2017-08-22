@@ -71,10 +71,12 @@ def ListLocks(shp_path):
 
 
 #logging helper
+#get logging to get class name also
+#http://www.karoltomala.com/blog/?p=720
 def log_use(tool):
     user = os.environ.get("USERNAME")
     node_name = os.environ["COMPUTERNAME"]
-    logger.info('%s, %s', tool, user, node_name)
+    logger.info('%s, %s, %s', tool, user, node_name)
 
 
 

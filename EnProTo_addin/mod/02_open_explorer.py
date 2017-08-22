@@ -40,8 +40,7 @@ class OpenPathForCurrentMXD(object):
         import logging
 
         #usage logging
-        user = os.environ.get("USERNAME")
-        logger.info('%s, %s', "Open path for mxd", user)
+        log_use(str(self.__class__.__name__))
 
         mxd = arcpy.mapping.MapDocument("CURRENT")
         mxdpath = mxd.filePath
@@ -58,8 +57,7 @@ class CopyPathToClipboard(object):
         import logging
 
         #usage logging
-        user = os.environ.get("USERNAME")
-        logging.info('%s, %s', "Copy path to clipboard", user)
+        log_use(str(self.__class__.__name__))
 
 
         mxd = arcpy.mapping.MapDocument("CURRENT")
