@@ -80,7 +80,7 @@ class ZipShapes(object):
         def save_zip(filename):
             if not filename:
                 return False
-            if os.path.splittext(filename)[1].lower() == ".zip":
+            if os.path.splitext(filename)[1].lower() == ".zip":
                 return True
             return False
 

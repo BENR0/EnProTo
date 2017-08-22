@@ -215,7 +215,7 @@ class ToGPX(object):
         def save_gpx(filename):
             if not filename:
                 return False
-            if os.path.splittext(filename)[1].lower() == ".gpx":
+            if os.path.splitext(filename)[1].lower() == ".gpx":
                 return True
             return False
 

@@ -73,7 +73,7 @@ class NewShapeFromStandardShape(object):
         def save_shp(filename):
             if not filename:
                 return False
-            if os.path.splittext(filename)[1].lower() == ".shp":
+            if os.path.splitext(filename)[1].lower() == ".shp":
                 return True
             return False
 
