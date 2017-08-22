@@ -13,8 +13,7 @@ class ZipShapes(object):
         import logging
 
         #usage logging
-        user = os.environ.get("USERNAME")
-        logger.info('%s, %s', "Zip shapes", user)
+        log_use(str(self.__class__.__name__))
 
         #local vars
 
@@ -77,7 +76,15 @@ class ZipShapes(object):
         strdate = str(today.year) + "-" + "{:02d}".format(today.month) + "-" + "{:02d}".format(today.day) + "_ .zip"
 
         #get path where to save shp from user
-        zipfilepath = pythonaddins.SaveDialog("Speichern unter", strdate, startpath, "", "Zipfile (*.zip)")
+        # function for "filter" argument in SaveDialog
+        def save_zip(filename):
+            if not filename:
+                return False
+            if os.path.splittext(filename)[1].lower() == ".zip":
+                return True
+            return False
+
+        zipfilepath = pythonaddins.SaveDialog("Speichern unter", strdate, startpath, save_zip, "Zipfile (*.zip)")
         #zipfilepath = saveFileDialog("zip", strdate, "Speichern unter")
         #catch if save dialog is exited with cancel
         if zipfilepath != None:

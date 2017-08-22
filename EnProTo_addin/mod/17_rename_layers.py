@@ -10,8 +10,7 @@ class RenameLayers(object):
         import logging
 
         # usage logging
-        user = os.environ.get("USERNAME")
-        logging.info('%s, %s', "Open path for layer", user)
+        log_use(str(self.__class__.__name__))
 
         mxd = arcpy.mapping.MapDocument("CURRENT")
         layers = arcpy.mapping.ListLayers(mxd)

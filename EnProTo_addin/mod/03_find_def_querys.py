@@ -7,8 +7,7 @@ class FindDefinitionQuerys(object):
         import logging
 
         #usage logging
-        user = os.environ.get("USERNAME")
-        logger.info('%s, %s', "Find definition queries", user)
+        log_use(str(self.__class__.__name__))
 
 
         mxd = arcpy.mapping.MapDocument("CURRENT")

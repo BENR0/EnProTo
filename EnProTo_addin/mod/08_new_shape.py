@@ -9,8 +9,7 @@ class NewShapeFromStandardShape(object):
         import logging
 
         #usage logging
-        user = os.environ.get("USERNAME")
-        logger.info('%s, %s', "New Shape", user)
+        log_use(str(self.__class__.__name__))
 
 
         #standard shapefile path
@@ -66,9 +65,19 @@ class NewShapeFromStandardShape(object):
             #templatepath = ""            #present option to create new shape with specified fields?
 
         templatepath = templatepath # + ".shp"
+        #append shp extension to filename
+        constr = constr + ".shp"
 
         #get path where to save shp from user
-        savepath = pythonaddins.SaveDialog("Speichern unter", contstr, startpath, "", "Shapefile (*.shp)")
+        #function for "filter" argument in SaveDialog
+        def save_shp(filename):
+            if not filename:
+                return False
+            if os.path.splittext(filename)[1].lower() == ".shp":
+                return True
+            return False
+
+        savepath = pythonaddins.SaveDialog("Speichern unter", contstr, startpath, save_shp, "Shapefile (*.shp)")
         print(savepath)
         #catch if save dialog is exited with cancel
         if savepath != None:

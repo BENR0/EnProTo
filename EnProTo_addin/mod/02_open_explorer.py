@@ -8,8 +8,7 @@ class OpenPathForSelectedLayer(object):
         import logging
 
         #usage logging
-        user = os.environ.get("USERNAME")
-        logging.info('%s, %s', "Open path for layer", user)
+        log_use(str(self.__class__.__name__))
 
         def get_geodatabase_path(input_table, toclayer):
             '''Return the Geodatabase path from the input table or feature class.

@@ -9,8 +9,7 @@ class DynBirdTab(object):
         import logging
 
         #usage logging
-        user = os.environ.get("USERNAME")
-        logger.info('%s, %s', "Dynamic Vogel table", user)
+        log_use(str(self.__class__.__name__))
 
         #init vars
         #positioncounter

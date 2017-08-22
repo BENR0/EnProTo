@@ -4,6 +4,9 @@ class BatchReproject(object):
         self.enabled = True
         self.checked = False
     def onClick(self):
+        #logging
+        log_use(str(self.__class__.__name__))
+
 
         mxd = arcpy.mapping.MapDocument("current")
         df = arcpy.mapping.ListDataFrames(mxd)[0]

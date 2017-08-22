@@ -7,8 +7,7 @@ class RepairBrokenLayers(object):
         import logging
 
         #usage logging
-        user = os.environ.get("USERNAME")
-        logging.info('%s, %s', "Repair broken layers", user)
+        log_use(str(self.__class__.__name__))
 
         #function to split given path up to gis folder of project
         def pathuptogisdir(path):

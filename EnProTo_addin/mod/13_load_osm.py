@@ -17,8 +17,7 @@ class OSM(object):
         import logging
 
         #usage logging
-        user = os.environ.get("USERNAME")
-        logger.info('%s, %s', "OSM", user)
+        log_use(str(self.__class__.__name__))
 
 
         #maybe a security risk but solves the issue with

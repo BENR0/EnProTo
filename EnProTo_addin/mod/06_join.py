@@ -7,8 +7,7 @@ class Join(object):
         import logging
 
         #usage logging
-        user = os.environ.get("USERNAME")
-        logger.info('%s, %s', "Join", user)
+        log_use(str(self.__class__.__name__))
           
         def create_field_name(fc, new_field):  
             '''Return a valid field name that does not exist in fc and  

@@ -7,8 +7,7 @@ class WritePathOfLayersToFile(object):
         import logging
 
         #usage logging
-        user = os.environ.get("USERNAME")
-        logger.info('%s, %s', "Layer paths to file", user)
+        log_use(str(self.__class__.__name__))
 
 
         mxd = arcpy.mapping.MapDocument("CURRENT")

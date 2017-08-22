@@ -7,8 +7,7 @@ class ToGPX(object):
         import logging
 
         #usage logging
-        user = os.environ.get("USERNAME")
-        logger.info('%s, %s', "To GPX", user)
+        log_use(str(self.__class__.__name__))
 
 
         '''
@@ -211,8 +210,17 @@ class ToGPX(object):
         startpath = base + "05_GIS/av_daten"
 
         inputFC = pythonaddins.GetSelectedTOCLayerOrDataFrame()
-        #outGPX = pythonaddins.SaveDialog("Speichere GPX", "GPS.gpx", startpath, "", "GPX (*.gpx)")
-        outGPX = pythonaddins.SaveDialog("Speichere GPX", "GPS.gpx", startpath, "", "")
+
+        # function for "filter" argument in SaveDialog
+        def save_gpx(filename):
+            if not filename:
+                return False
+            if os.path.splittext(filename)[1].lower() == ".gpx":
+                return True
+            return False
+
+        outGPX = pythonaddins.SaveDialog("Speichere GPX", "GPS.gpx", startpath, save_gpx, "GPX (*.gpx)")
+        #outGPX = pythonaddins.SaveDialog("Speichere GPX", "GPS.gpx", startpath, "", "")
         zerodate = False
         pretty = False
 

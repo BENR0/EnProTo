@@ -8,8 +8,7 @@ class TB(object):
         import logging
 
         #usage logging
-        user = os.environ.get("USERNAME")
-        logger.info('%s, %s', "Legend", user)
+        log_use(str(self.__class__.__name__))
 
 
         #positioncounter

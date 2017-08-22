@@ -67,6 +67,15 @@ def ListLocks(shp_path):
 
     return locks, lockslist
 
+
+#logging helper
+def log_use(tool):
+    user = os.environ.get("USERNAME")
+    node_name = os.environ["COMPUTERNAME"]
+    logger.info('%s, %s', tool, user, node_name)
+
+
+
 # Snippets.py
 # ************************************************
 # Updated for ArcGIS 10.3
