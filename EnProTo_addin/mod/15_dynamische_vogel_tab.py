@@ -9,7 +9,7 @@ class DynBirdTab(object):
         import logging
 
         #usage logging
-        log_use(str(self.__class__.__name__)
+        log_use(str(self.__class__.__name__))
 
         #init vars
         #positioncounter
