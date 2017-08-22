@@ -31,5 +31,6 @@ class Toolbox(object):
         self.alias = "EnProTo"
 
         #List of tool classes associated with this toolbox
-        self.tools = [AddDescriptionToFeatures,KartenserieToPng,BatchConvertPDFToTif,MultiPurposeBufferTool,BatchAddFieldMerge,DefinitionQueryPolygons,WEAangebot,RNAanalyse,UpdateMXDswithLayer,POIS4TomTom,CreateBttLegend,TableFromAttributes,BlattschnittFuerFeatures,split_lines_by_points,JoinASK]
+        #self.tools = [AddDescriptionToFeatures,KartenserieToPng,BatchConvertPDFToTif,MultiPurposeBufferTool,BatchAddFieldMerge,DefinitionQueryPolygons,WEAangebot,RNAanalyse,UpdateMXDswithLayer,POIS4TomTom,CreateBttLegend,TableFromAttributes,BlattschnittFuerFeatures,split_lines_by_points,JoinASK]
+        self.tools = [AddDescriptionToFeatures,KartenserieToPng,BatchConvertPDFToTif,MultiPurposeBufferTool,BatchAddFieldMerge,DefinitionQueryPolygons,WEAangebot,RNAanalyse,UpdateMXDswithLayer,POIS4TomTom,CreateBttLegend,TableFromAttributes,BlattschnittFuerFeatures,JoinASK]
 
