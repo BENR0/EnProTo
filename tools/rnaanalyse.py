@@ -236,28 +236,45 @@ def rna_main(layer, flugLayer, outputLayer, hessenbool):
     arcpy.env.outputCoordinateSystem = arcpy.SpatialReference(layerPCS)
 
     arcpy.AddMessage("Intersecting fishnet with data...")
-    fishIntersect = arcpy.Intersect_analysis([fishnet, flugLayer], "in_memory\intersect", "ALL", "", "LINE")
 
-
-    #arcpy.AddMessage("Exploding multipart features...")
-    #fishIntersect2 = arcpy.MultipartToSinglepart_management(fishIntersect, "in_memory\intersect2")
-    arcpy.AddMessage("Calculating statistics for fishnet cells...")
-
-    #create field name to be dissolved by (depends on name of output feature class)
-    dissField = "FID_" + arcpy.Describe(outputLayer).baseName
-    dissField2 = "FID_" + arcpy.Describe(flugLayer).baseName
-    #arcpy.AddMessage(dissField)
 
     if hessenbool == "true":
-        distmp = arcpy.Dissolve_management(fishIntersect, "in_memory\distmp", [dissField,dissField2] , [["Exemplare", "FIRST"]], "SINGLE_PART", "UNSPLIT_LINES")
-        #distmp = arcpy.Dissolve_management(fishIntersect, r"L:\Ablage_Mitarbeiter\Benjamin\z_tmp\delete\first_diss.shp", [dissField,dissField2] , [["Exemplare", "FIRST"]], "SINGLE_PART", "UNSPLIT_LINES")
-        distmpin = distmp
+        #fishIntersect = arcpy.Intersect_analysis([fishnet, flugLayer], "in_memory\intersect", "ALL", "", "POINT")
+        fishIntersect = arcpy.Intersect_analysis([fishnet, flugLayer], os.path.join(arcpy.env.workspace,"intersect"), "ALL", "", "POINT")
 
-        dissolve = arcpy.Dissolve_management(distmpin, "in_memory\dissolve", dissField, [["FIRST_Exemplare", "SUM"]], "MULTI_PART", "DISSOLVE_LINES")
+        # arcpy.AddMessage("Exploding multipart features...")
+        # fishIntersect2 = arcpy.MultipartToSinglepart_management(fishIntersect, "in_memory\intersect2")
+        fishIntersect2 = arcpy.MultipartToSinglepart_management(fishIntersect, os.path.join(arcpy.env.workspace,"intersect2"))
+
+        arcpy.AddMessage("Calculating statistics for fishnet cells...")
+
+        # create field name to be dissolved by (depends on name of output feature class)
+        dissField = "FID_" + arcpy.Describe(outputLayer).baseName
+
+        #dissolvetmp = arcpy.Dissolve_management(fishIntersect2, "in_memory\dissolve", dissField, [["Exemplare", "SUM"]], "MULTI_PART", "DISSOLVE_LINES")
+        dissolvetmp = arcpy.Dissolve_management(fishIntersect2, os.path.join(arcpy.env.workspace,"dissolve"), dissField, [["Exemplare", "SUM"]],
+                                                "MULTI_PART", "DISSOLVE_LINES")
         #dissolve = arcpy.Dissolve_management(distmpin, r"L:\Ablage_Mitarbeiter\Benjamin\z_tmp\delete\sec_diss.shp", dissField, [["FIRST_Exemplare", "SUM"]], "MULTI_PART", "DISSOLVE_LINES")
-        sumfield = "SUM_FIRST_Exemplare"
+        sumfield = "SUM_Exemplare"
+
+        codeblock = """def calcRNA(infield):
+            return math.ceil(infield/2)"""
+
+        expression = "calcRNA(!" + sumfield + "!)"
+        dissolve = arcpy.CalculateField_management(dissolvetmp, sumfield, expression, "PYTHON", codeblock)
 
     else:
+        fishIntersect = arcpy.Intersect_analysis([fishnet, flugLayer], "in_memory\intersect", "ALL", "", "LINE")
+
+        # arcpy.AddMessage("Exploding multipart features...")
+        # fishIntersect2 = arcpy.MultipartToSinglepart_management(fishIntersect, "in_memory\intersect2")
+        arcpy.AddMessage("Calculating statistics for fishnet cells...")
+
+        # create field name to be dissolved by (depends on name of output feature class)
+        dissField = "FID_" + arcpy.Describe(outputLayer).baseName
+        dissField2 = "FID_" + arcpy.Describe(flugLayer).baseName
+        # arcpy.AddMessage(dissField)
+
         dissolve = arcpy.Dissolve_management(fishIntersect, "in_memory\dissolve", dissField, [["Exemplare", "SUM"]], "MULTI_PART", "DISSOLVE_LINES")
         sumfield = "SUM_Exemplare"
 

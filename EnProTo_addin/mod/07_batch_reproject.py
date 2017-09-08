@@ -12,8 +12,8 @@ class BatchReproject(object):
         df = arcpy.mapping.ListDataFrames(mxd)[0]
 
         #pop up message box to query for archiving of old layers
-        archive = pythonaddins.MessageBox('Move old layers to archive after reprojecting?', 'INFO', 4)
-        print(archive)
+        #archive = pythonaddins.MessageBox('Move old layers to archive after reprojecting?', 'INFO', 4)
+        #print(archive)
 
         #data frame projection
         try:
