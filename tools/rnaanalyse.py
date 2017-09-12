@@ -344,9 +344,15 @@ def rna_main(layer, flugLayer, outputLayer, hessenbool):
 
     #Update Cursor
     update_fields = ["EXEMPLARE", "KAT2", "KAT3"]
-    in_field = "FID"
+    #in_field = "FID"
+    in_field = "OBJECTID"
 
-    update_fields.insert(0, in_field)
+    update_fields.insert(0,in_field)
+    #arcpy.AddField_management(fishnet,in_field,"LONG")
+    #arcpy.CalculateField_management(fishnet, in_field, "!SHAPE.AREA@HECTARES!", "PYTHON")
+
+    arcpy.AddMessage(update_fields)
+    arcpy.AddMessage([f.name for f in arcpy.ListFields(fishnet)])
     with arcpy.da.UpdateCursor(fishnet, update_fields) as urows:
         for row in urows:
             if row[0] in path_dict:
