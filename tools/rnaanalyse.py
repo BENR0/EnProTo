@@ -1,6 +1,7 @@
 import arcpy
 import numpy as np
 import os
+import sys
 
 
 class RNAanalyse(object):
@@ -171,15 +172,16 @@ def rna_main(layer, flugLayer, outputLayer, hessenbool):
     if str(df_coord) == "5651" or str(df_coord) == "25831":
         projection = 31466
         templateExtent = templateExtent.projectAs("31466", gt)
-    if str(df_coord) == "5652" or str(df_coord) == "25832":
+    elif str(df_coord) == "5652" or str(df_coord) == "25832":
         projection = 31467
         templateExtent = templateExtent.projectAs("31467", gt)
-    if str(df_coord) == "5653" or str(df_coord) == "25833":
+    elif str(df_coord) == "5653" or str(df_coord) == "25833":
         projection = 31468
         templateExtent = templateExtent.projectAs("31468", gt)
     else:
         arcpy.AddMessage("""Please choose one of the 25*** UTM or 31*** GK Coordinatesystems for the Data
                           Frame and the WEA Points file. The current coordinate system is: {}""". format(str(df_coord)))
+        sys.exit()
 
 
     extentXMin = templateExtent.XMin - uraum
