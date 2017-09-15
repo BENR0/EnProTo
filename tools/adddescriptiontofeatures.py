@@ -96,7 +96,8 @@ class AddDescriptionToFeatures(object):
 
         mxd = arcpy.mapping.MapDocument("current")
         arcpy.AddMessage(arcpy.mapping.ListLayers(mxd, features))
-        lyr = arcpy.mapping.ListLayers(mxd, features)[0]
+        arcpy.AddMessage(features.split("\\")[-1]) #Polygonfeatures\Biotopfkt_PolygonKopie
+        lyr = arcpy.mapping.ListLayers(mxd, features.split("\\")[-1])[0]
         
         #function to read attribute table to dictionary based on a key field
         def make_attribute_dict(fc, key_field, attr_list=['*']):
@@ -147,13 +148,13 @@ class AddDescriptionToFeatures(object):
                     ctag = "</UND>" + ctag
 
                 if cols:
-                    txt = otag + attrdict[i][f][0] + ctag
+                    txt = otag + attrdict[i][f][0].encode("utf-8") + ctag
                     shift = str(maxlen[colcounter] + 10)
                     tmpformat = "{:{shift}}".format(txt, shift=shift)
                     tmp = tmp + tmpformat
                     colcounter += 1
                 else:
-                    tmp = tmp + otag + attrdict[i][f][0] + ctag + " "
+                    tmp = tmp + otag + attrdict[i][f][0].encode("utf-8") + ctag + " "
             class_descriptions.append(tmp)
 
         lyr.symbology.classDescriptions = class_descriptions
