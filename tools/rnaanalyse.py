@@ -347,7 +347,7 @@ def rna_main(layer, flugLayer, outputLayer, hessenbool):
     #Update Cursor
     update_fields = ["EXEMPLARE", "KAT2", "KAT3"]
     #in_field = "FID"
-    in_field = "OBJECTID"
+    in_field = "FID"
 
     update_fields.insert(0,in_field)
     #arcpy.AddField_management(fishnet,in_field,"LONG")
