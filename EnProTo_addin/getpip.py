@@ -32,15 +32,18 @@ except ImportError, e:
 try:
     import pyperclip
 except ImportError, e:
-    pip.main(["install", "pyperclip"])
+    subprocess.call(["python", "-m", "pip", "install", "pyperclib"])
+    #pip.main(["install", "pyperclip"])
     pass
 
 try:
     import pyodbc
 except ImportError, e:
-    pip.main(["install", "pyodbc"])
+    #subprocess.call(["python", "-m", "pip", "install", "pyodbc"])
+    #subprocess.call(["pip", "install", "L:\Ablage_Mitarbeiter\Benjamin\pyodbc-4.0.17-cp27-cp27m-win_amd64.whl"])    
+    #pip.main(["install", "L:\Ablage_Mitarbeiter\Benjamin\pyodbc-4.0.17-cp27-cp27m-win_amd64.whl"]) #"pyodbc"])
     pass
     
-subprocess.call([r"V:\Vorlagen_Software\toolbox_modules\ArcGIS_Editor_OSM_10_3Desktop\ArcGISEditor10_4\setup.exe"])
+#subprocess.call([r"V:\Vorlagen_Software\toolbox_modules\ArcGIS_Editor_OSM_10_3Desktop\ArcGISEditor10_4\setup.exe"])
 
 raw_input("Press Enter to close")
