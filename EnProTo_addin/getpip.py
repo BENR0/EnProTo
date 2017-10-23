@@ -40,7 +40,7 @@ try:
     import pyodbc
 except ImportError, e:
     #subprocess.call(["python", "-m", "pip", "install", "pyodbc"])
-    #subprocess.call(["pip", "install", "L:\Ablage_Mitarbeiter\Benjamin\pyodbc-4.0.17-cp27-cp27m-win_amd64.whl"])    
+    subprocess.call(["pip", "install", r"V:\Vorlagen_CAD_GIS\GIS\Toolboxes\pyodbc-4.0.17-cp27-cp27m-win_amd64.whl"])    
     #pip.main(["install", "L:\Ablage_Mitarbeiter\Benjamin\pyodbc-4.0.17-cp27-cp27m-win_amd64.whl"]) #"pyodbc"])
     pass
     
