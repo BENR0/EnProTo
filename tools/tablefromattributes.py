@@ -136,6 +136,8 @@ class TableFromAttributes(object):
         fieldNames = [abkfield, namedtfield, namewissfield]
         colWidth = 4.0
         smallColWidth = 1.5
+        col1width = 0
+        col2width = 0
 
 
         #Add initial text element
@@ -154,6 +156,11 @@ class TableFromAttributes(object):
         tabledata = []
         with arcpy.da.SearchCursor(features, fieldNames) as cursor:
             for row in cursor:
+               # if len(row[0]) > col1width:
+                #    col1width = len(row[0])
+               #if len(row[1]) > col2width:
+                #    col2width = len(row[1])
+
                 rowtuple = tuple(row)
                 if rowtuple not in tabledata:
                     tabledata.append(rowtuple)
