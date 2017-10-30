@@ -5,6 +5,7 @@ class Join(object):
         self.checked = False
     def onClick(self):
         import logging
+        import numpy as np
 
         #usage logging
         log_use(str(self.__class__.__name__))
@@ -86,10 +87,11 @@ class Join(object):
                 #if field name exists create new name
                 if f in fieldlist:  
                     #newname = create_field_name(source_table, fldb)  
-                    newname = "J" + f
-                    arcpy.AddField_management(source_table,newname,ftype,length)  
+                    #newname = "J" + f
+                    #arcpy.AddField_management(source_table,newname,ftype,length)
                     #Message("Added '%s' field to \"%s\"" %(name, os.path.basename(source_table)))  
-                    update_fields.insert(join_values.index(f), newname.encode('utf-8'))  
+                    #update_fields.insert(join_values.index(f), newname.encode('utf-8'))
+                    update_fields.insert(join_values.index(f), f)
                 else:
                     newname = f
                     arcpy.AddField_management(source_table,newname,ftype,length)  
@@ -142,6 +144,9 @@ class Join(object):
         #btt
         ########
         tables = [birds, btt_hessen, btt_bayern, btt_nieder]
+        tables = {"btt_nieder": [["CODE", "CODE_TXT", "CODE_NAME"], btt_nieder], "btt_bayern": [["CODE", "CODE_TEXT"], btt_bayern],
+                  "btt_hessen": [["CODE_NAME", "CODE_NR"], btt_hessen], "birds": [["ABK", "NAME_DT", "NAME_WISS"], birds]}
+
 
         mxd = arcpy.mapping.MapDocument("current")
         toclayer = pythonaddins.GetSelectedTOCLayerOrDataFrame()
@@ -150,60 +155,60 @@ class Join(object):
 
         #init row number
         r = 0
-        #check first two rows of attribute table
-        with arcpy.da.SearchCursor(toclayer, fieldlist) as cursor:
-            for row in cursor:
-                #search tables until a match between any field of the first row of
-                #the toclayer and table columns is found
-                match = False
-                for table in tables:
-                    #read from excel file using pandas
-                    #try:
-                        #df = pd.read_excel(table)
-                    #except:
-                        #arcpy.AddMessage("No Excel file found at: {}".format(table))
-                    #convert pandas dataframe to dictionary
-                    #get first sheet of excel file -> 0
-                    tabledf = pd.read_excel(table, 0)
-                    tabledf = tabledf.fillna("0")
-                    tabledict = tabledf.to_dict()
+        featuretable = arcpy.da.TableToNumPyArray(toclayer, fieldlist)
+        featuretable_colnames = featuretable.dtype.names
+        for ftcol in featuretable_colnames:
+            ftcolvals = np.unique(featuretable[ftcol])
+            #search tables until a match between any field of the first row of
+            #the toclayer and table columns is found
+            match = False
+            for table in tables.keys():
+                #read from excel file using pandas
+                #try:
+                    #df = pd.read_excel(table)
+                #except:
+                    #arcpy.AddMessage("No Excel file found at: {}".format(table))
+                #convert pandas dataframe to dictionary
+                #get first sheet of excel file -> 0
+                tabledf = pd.read_excel(tables[table][1], 0)
+                tabledf = tabledf.fillna("0")
+                tabledict = tabledf.to_dict()
 
-                    #init field list for update cursor 
-                    updatefields = []
-                    for key in tabledict.keys():
-                        updatefields = tabledict.keys()
-                        #intersect value list with column to find joinkey and join field
-                        intersection = set(row) & set(tabledict[key].values())
-                        if len(intersection) == 1:
-                            match = True
-                            #set join key to column name (key) where value was found as well as join field
-                            joinkey = key
-                            intersection = list(intersection)[0]
-                            joinfield = fieldlist[row.index(intersection)]
-                            #remove key from update fields list and insert joinfield at beginning
-                            updatefields.remove(key)
-                            #updatefields.insert(0, joinfield)
-                            #create dictionary with found key
-                            trtabledict = tabledf.transpose().to_dict()
-                            joindict = {trtabledict[r][joinkey]: delkey(v, joinkey) for r, v in trtabledict.items()}
-                            print("created join dict")
-                            print(joinkey,joinfield)
-                            #print(joindict)
-                            #stop iterating keys
-                            break
-                    #if a match was found stop iterating tables
-                    if match:
+                #init field list for update cursor
+                updatefields = []
+                #check only selected keys of tabledicts
+                for key in list(set(tabledict.keys()) & set(tables[table][0])):
+                    updatefields = tabledict.keys()
+                    #intersect value list with column to find joinkey and join field
+                    intersection = list(set(ftcolvals) & set(tabledict[key].values()))
+                    if len(intersection) >= 5:
+                        match = True
+                        #set join key to column name (key) where value was found as well as join field
+                        joinkey = key
+                        joinfield = ftcol #fieldlist[row.index(intersection[0])]
+                        #remove key from update fields list and insert joinfield at beginning
+                        updatefields.remove(key)
+                        #updatefields.insert(0, joinfield)
+                        #create dictionary with found key
+                        trtabledict = tabledf.transpose().to_dict()
+                        joindict = {trtabledict[r][joinkey]: delkey(v, joinkey) for r, v in trtabledict.items()}
+                        #print("created join dict")
+                        #print(joinkey,joinfield)
+                        #print(joindict)
+                        #stop iterating keys
                         break
-                #count rows of cursor stop comparing if row > two or when match is found
-                r += 1
+                #if a match was found stop iterating tables
                 if match:
                     break
-                elif r >= 2:
-                    arcpy.AddMessage("Join failed. No matching values found in tables.")
-                    break
+            #count rows of cursor stop comparing if row > two or when match is found
+            r += 1
+            if match:
+                break
+            elif r >= 3:
+                arcpy.AddMessage("Join failed. No matching values found in tables.")
+                break
 
-
-        CopyFields(toclayer, joinfield, joindict, updatefields)  
+        CopyFields(toclayer, joinfield, joindict, updatefields)
         #validate join => check if there are rows without match and list unmatched joinfield values
         pass
         
