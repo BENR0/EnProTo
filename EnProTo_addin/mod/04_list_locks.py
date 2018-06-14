@@ -33,17 +33,19 @@ class ListAllLocksForLayers(object):
                 #         strlocks, listlocks = ListLocks(lyr_path)
                 #         out_msg += strlocks + "\n"
            # else:
-                out_msg += str(lyr) + " is locked by user(s):\n"
                 #get lyr path
                 try:
                     desc = arcpy.Describe(lyr)
                     lyr_path = desc.path + "\\" + str(lyr) +  ".shp"
                     #get all locks for this layer and append to msg string
                     strlocks, listlocks = ListLocks(lyr_path)
+                    if not strlocks == "":
+                        out_msg += str(lyr) + " is locked by user(s):\n"
+                        out_msg += strlocks + "\n"
                 except:
                     pass
+                
 
-                out_msg += strlocks + "\n"
         
         if out_msg == "":
             out_msg = "No lock on any layer found."

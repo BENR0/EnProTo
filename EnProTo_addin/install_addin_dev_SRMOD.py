@@ -7,7 +7,7 @@ import traceback
 try:
     user = os.environ.get("USERNAME")
 
-    addindir = os.path.join("C:\Users", user, "Documents\ArcGIS\AddIns\Desktop10.4\{de2881e9-b5ef-4dd1-bd2b-8c2cbe8b49a7}\enproto_addin.esriaddin")
+    addindir = os.path.join("C:\Users", user, "Documents\ArcGIS\AddIns\Desktop10.5\{de2881e9-b5ef-4dd1-bd2b-8c2cbe8b49a7}\enproto_addin.esriaddin")
     desktop = r"C:\Users\ro\Desktop\EnProTo_addin"
     shareddir = r"E:\toolboxes\EnProTo\EnProTo_addin"
     addinsourcedir = r"L:\Ablage_Mitarbeiter\Benjamin\dev\EnProTo_dev\EnProTo_addin\EnProTo_addin.esriaddin"

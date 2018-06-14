@@ -6,26 +6,22 @@ import os
 
 if not os.path.exists(r"C:\Python27\ArcGIS10.5\Scripts\get_pip.py"):
     #get pip install script
-    #urllib.urlretrieve(r"https://bootstrap.pypa.io/get-pip.py", r"C:\Python27\ArcGIS10.4\Scripts\get_pip.py")
+    #urllib.urlretrieve(r"https://bootstrap.pypa.io/get-pip.py", r"C:\Python27\ArcGIS10.5\Scripts\get_pip.py")
     urllib.urlretrieve(r"https://bootstrap.pypa.io/get-pip.py", r"L:\Ablage_Mitarbeiter\Benjamin\dev\EnProTo_dev\EnProTo_addin\get_pip.py")
     #install pip
     subprocess.call(["python", r"L:\Ablage_Mitarbeiter\Benjamin\dev\EnProTo_dev\EnProTo_addin\get_pip.py"])
 
-try:
-    from pip import main as pipmain
-except:
-    from pip._internal import main as pipmain
-    
+import pip
 try:
     import comtypes
 except ImportError, e:
-    pipmain(["install", "comtypes"])
+    pip.main(["install", "comtypes"])
     
     pass
 #get setup tools
-#urllib.urlretrieve(r"https://bootstrap.pypa.io/ez_setup.py", r"C:\Python27\ArcGIS10.4\Scripts\ez_setup.py")
+#urllib.urlretrieve(r"https://bootstrap.pypa.io/ez_setup.py", r"C:\Python27\ArcGIS10.5\Scripts\ez_setup.py")
 #install setuptools
-#subprocess.call([pythonpath, r"C:\Python27\ArcGIS10.4\Scripts\ez_setup.py"])
+#subprocess.call([pythonpath, r"C:\Python27\ArcGIS10.5\Scripts\ez_setup.py"])
 
 #try:
 #    import pandas
@@ -44,8 +40,8 @@ try:
     import pyodbc
 except ImportError, e:
     #subprocess.call(["python", "-m", "pip", "install", "pyodbc"])
-    pipmain(["install", "pyodbc"])
-    subprocess.call(["pip", "install", r"V:\Vorlagen_CAD_GIS\GIS\Toolboxes\pyodbc-4.0.23-cp27-cp27m-win_amd64.whl"])    
+    subprocess.call(["pip", "install", r"V:\Vorlagen_CAD_GIS\GIS\Toolboxes\pyodbc-4.0.17-cp27-cp27m-win_amd64.whl"])    
+    #pip.main(["install", "L:\Ablage_Mitarbeiter\Benjamin\pyodbc-4.0.17-cp27-cp27m-win_amd64.whl"]) #"pyodbc"])
     pass
     
 #subprocess.call([r"V:\Vorlagen_Software\toolbox_modules\ArcGIS_Editor_OSM_10_3Desktop\ArcGISEditor10_4\setup.exe"])
